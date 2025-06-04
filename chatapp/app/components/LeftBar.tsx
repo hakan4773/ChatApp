@@ -11,7 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 function LeftBar() {
   return (
-     <div className="flex flex-col lg:w-1/5 w-full h-screen bg-indigo-800 text-white shadow-xl">
+     <div className="flex flex-col  h-screen bg-indigo-800 text-white shadow-xl fixed ">
       {/* Kullanıcı Bilgileri */}
       <div className="flex items-center justify-between p-4 border-b border-indigo-600">
         <div className="flex items-center space-x-3">
