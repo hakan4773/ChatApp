@@ -271,7 +271,7 @@ function Main() {
                 className="w-12 h-12 rounded-full object-cover border-2 border-indigo-400"
               />
               <div>
-                <p className="text-lg font-medium text-gray-800">Ayşe Yılmaz</p>
+                <p className="text-lg font-medium text-gray-800">Yakup Bulduk</p>
                 <p className="text-sm text-gray-500 flex items-center gap-1">
                   <ChatBubbleLeftIcon className="w-4 h-4" />
                   Nasılsın?
@@ -285,131 +285,7 @@ function Main() {
               </span>
             </div>
           </div>
-  {/* Sohbet Öğesi 2 */}
-          <div className="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm hover:bg-indigo-50 transition cursor-pointer">
-            <div className="flex items-center space-x-3">
-              <Image
-                src="/5.jpg"
-                alt="Profile"
-                width={48}
-                height={48}
-                className="w-12 h-12 rounded-full object-cover border-2 border-indigo-400"
-              />
-              <div>
-                <p className="text-lg font-medium text-gray-800">Ayşe Yılmaz</p>
-                <p className="text-sm text-gray-500 flex items-center gap-1">
-                  <ChatBubbleLeftIcon className="w-4 h-4" />
-                  Nasılsın?
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col items-end">
-              <span className="text-xs text-gray-400">5 dakika önce</span>
-              <span className="bg-indigo-500 text-white text-xs font-semibold px-2 py-1 rounded-full mt-1">
-                1
-              </span>
-            </div>
-          </div>
-            {/* Sohbet Öğesi 2 */}
-          <div className="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm hover:bg-indigo-50 transition cursor-pointer">
-            <div className="flex items-center space-x-3">
-              <Image
-                src="/5.jpg"
-                alt="Profile"
-                width={48}
-                height={48}
-                className="w-12 h-12 rounded-full object-cover border-2 border-indigo-400"
-              />
-              <div>
-                <p className="text-lg font-medium text-gray-800">Ayşe Yılmaz</p>
-                <p className="text-sm text-gray-500 flex items-center gap-1">
-                  <ChatBubbleLeftIcon className="w-4 h-4" />
-                  Nasılsın?
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col items-end">
-              <span className="text-xs text-gray-400">5 dakika önce</span>
-              <span className="bg-indigo-500 text-white text-xs font-semibold px-2 py-1 rounded-full mt-1">
-                1
-              </span>
-            </div>
-          </div>
-            {/* Sohbet Öğesi 2 */}
-          <div className="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm hover:bg-indigo-50 transition cursor-pointer">
-            <div className="flex items-center space-x-3">
-              <Image
-                src="/5.jpg"
-                alt="Profile"
-                width={48}
-                height={48}
-                className="w-12 h-12 rounded-full object-cover border-2 border-indigo-400"
-              />
-              <div>
-                <p className="text-lg font-medium text-gray-800">Ayşe Yılmaz</p>
-                <p className="text-sm text-gray-500 flex items-center gap-1">
-                  <ChatBubbleLeftIcon className="w-4 h-4" />
-                  Nasılsın?
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col items-end">
-              <span className="text-xs text-gray-400">5 dakika önce</span>
-              <span className="bg-indigo-500 text-white text-xs font-semibold px-2 py-1 rounded-full mt-1">
-                1
-              </span>
-            </div>
-          </div>
-            {/* Sohbet Öğesi 2 */}
-          <div className="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm hover:bg-indigo-50 transition cursor-pointer">
-            <div className="flex items-center space-x-3">
-              <Image
-                src="/5.jpg"
-                alt="Profile"
-                width={48}
-                height={48}
-                className="w-12 h-12 rounded-full object-cover border-2 border-indigo-400"
-              />
-              <div>
-                <p className="text-lg font-medium text-gray-800">Ayşe Yılmaz</p>
-                <p className="text-sm text-gray-500 flex items-center gap-1">
-                  <ChatBubbleLeftIcon className="w-4 h-4" />
-                  Nasılsın?
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col items-end">
-              <span className="text-xs text-gray-400">5 dakika önce</span>
-              <span className="bg-indigo-500 text-white text-xs font-semibold px-2 py-1 rounded-full mt-1">
-                1
-              </span>
-            </div>
-          </div>
-            {/* Sohbet Öğesi 2 */}
-          <div className="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm hover:bg-indigo-50 transition cursor-pointer">
-            <div className="flex items-center space-x-3">
-              <Image
-                src="/5.jpg"
-                alt="Profile"
-                width={48}
-                height={48}
-                className="w-12 h-12 rounded-full object-cover border-2 border-indigo-400"
-              />
-              <div>
-                <p className="text-lg font-medium text-gray-800">Ayşe Yılmaz</p>
-                <p className="text-sm text-gray-500 flex items-center gap-1">
-                  <ChatBubbleLeftIcon className="w-4 h-4" />
-                  Nasılsın?
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-col items-end">
-              <span className="text-xs text-gray-400">5 dakika önce</span>
-              <span className="bg-indigo-500 text-white text-xs font-semibold px-2 py-1 rounded-full mt-1">
-                1
-              </span>
-            </div>
-          </div>
+
           {/* Daha fazla sohbet öğesi eklenebilir */}
         </div>
       </div>
