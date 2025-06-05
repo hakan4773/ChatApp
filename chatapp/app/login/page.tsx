@@ -1,9 +1,54 @@
 "use client";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { ChatBubbleLeftIcon, LanguageIcon } from "@heroicons/react/24/outline";
+import * as yup from "yup";
+import { useFormik } from "formik";
 
+import { useRouter } from "next/navigation";
+import { supabase } from "../lib/supabaseClient";
+import { User } from "@supabase/supabase-js";
 function Page() {
+     const router = useRouter();
+const [loading, setLoading] = useState(false);
+ const [user, setUser] = useState<User | null>(null);
+  const formik=useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+     validationSchema: yup.object({
+      email: yup.string().email("Geçerli bir e-posta girin").required("E-posta zorunlu"),
+      password: yup.string().required("Şifre zorunlu"),
+    }),
+
+onSubmit: async (values, { setSubmitting }) => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: values.email,
+          password: values.password,
+        });
+
+        if (error) {
+          alert("Giriş hatası: " + error.message);
+          console.error("Supabase Auth Hatası:", error);
+          return;
+        }
+
+        if (data.user) {
+          setUser(data.user);
+          router.push("/"); 
+        }
+      } catch (err) {
+        console.error("Beklenmedik hata:", err);
+        alert("Beklenmedik bir hata oluştu, lütfen tekrar deneyin.");
+      } finally {
+        setLoading(false);
+        setSubmitting(false);
+      }
+    },
+  });
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-200 via-blue-400 to-indigo-900 flex flex-col lg:flex-row items-center justify-center p-4">
       {/* Header: Logo ve Dil Seçimi */}
@@ -30,7 +75,7 @@ function Page() {
 
       {/* Giriş Formu */}
       <div className="lg:w-1/2 max-w-md w-full mt-8 lg:mt-0">
-        <form className="bg-white rounded-2xl shadow-xl p-8">
+        <form className="bg-white rounded-2xl shadow-xl p-8" onSubmit={formik.handleSubmit}>
           <div className="mb-6">
             <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
               Email
@@ -39,11 +84,17 @@ function Page() {
               <input
                 type="email"
                 id="email"
+                name="email"
+                value={formik.values.email}
+                onChange={formik.handleChange}
                 required
                 className="mt-1 block w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 placeholder="ornek@ornek.com"
               />
             </div>
+            {formik.touched.email && formik.errors.email && (
+              <p className="text-red-500 text-sm mt-1">{formik.errors.email}</p>
+            )}
           </div>
           <div className="mb-6">
             <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
@@ -53,17 +104,23 @@ function Page() {
               <input
                 type="password"
                 id="password"
+                name="password"
+                value={formik.values.password}
+                onChange={formik.handleChange}
                 required
                 className="mt-1 block w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 placeholder="••••••••"
               />
             </div>
+            {formik.touched.password && formik.errors.password && (
+              <p className="text-red-500 text-sm mt-1">{formik.errors.password}</p>
+            )}
           </div>
-          <button
+          <button disabled={loading}
             type="submit"
             className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition shadow-md"
           >
-            Log In
+           {loading ? "Loading..." : "Log In"}
           </button>
           <p className="text-center text-sm text-gray-500 mt-4">
             Don’t have an account?{" "}
