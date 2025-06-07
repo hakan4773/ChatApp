@@ -3,7 +3,7 @@ import { ChatBubbleLeftIcon, LanguageIcon, EnvelopeIcon } from '@heroicons/react
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { useFormik } from "formik";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../../lib/supabaseClient";
 import type { User } from '@supabase/supabase-js';
 import * as yup from 'yup';
 function page() {

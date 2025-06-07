@@ -6,7 +6,7 @@ import * as yup from "yup";
 import { useFormik } from "formik";
 
 import { useRouter } from "next/navigation";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../../lib/supabaseClient";
 import { User } from "@supabase/supabase-js";
 function Page() {
      const router = useRouter();
@@ -16,7 +16,7 @@ const [loading, setLoading] = useState(false);
     initialValues: {
       email: "",
       password: "",
-    },
+    },  
      validationSchema: yup.object({
       email: yup.string().email("Geçerli bir e-posta girin").required("E-posta zorunlu"),
       password: yup.string().required("Şifre zorunlu"),
@@ -38,7 +38,7 @@ onSubmit: async (values, { setSubmitting }) => {
 
         if (data.user) {
           setUser(data.user);
-          router.push("/Dashboard"); 
+          router.push("/"); 
         }
       } catch (err) {
         console.error("Beklenmedik hata:", err);
