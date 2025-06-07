@@ -1,5 +1,6 @@
+"use client"
 import Link from 'next/link'
-import React from 'react'
+import React, { use } from 'react'
 import {
   UserCircleIcon,
   CogIcon,
@@ -9,9 +10,11 @@ import {
   ArrowLeftOnRectangleIcon,
   PuzzlePieceIcon
 } from '@heroicons/react/24/outline';
+import { useUser } from '../context/UserContext';
 function LeftBar() {
+  const {user}=useUser();
   return (
-     <div className="flex flex-col  h-screen bg-indigo-800 text-white shadow-xl fixed ">
+     <div className="w-62 flex flex-col h-screen bg-indigo-800 text-white shadow-xl fixed">
       {/* Kullanıcı Bilgileri */}
       <div className="flex items-center justify-between p-4 border-b border-indigo-600">
         <div className="flex items-center space-x-3">
@@ -22,10 +25,10 @@ function LeftBar() {
           />
           <div>
             <p className="text-lg font-semibold">
-              Ahmet Yılmaz
+       Hakan Bulduk
             </p>
             <p className="text-sm text-indigo-200">
-              ahmet.yilmaz@example.com
+              {user?.email }
             </p>
           </div>
         </div>
@@ -48,11 +51,11 @@ function LeftBar() {
           <span className="font-medium">Ayarlar</span>
         </Link>
         <Link
-          href="/users"
+          href="/chats"
           className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-700 transition-colors"
         >
           <UsersIcon className="w-6 h-6" />
-          <span className="font-medium">Kullanıcılar</span>
+          <span className="font-medium">Sohbetler</span>
         </Link>
         <Link
           href="/games"

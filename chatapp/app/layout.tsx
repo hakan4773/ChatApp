@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { UserProvider } from "./context/UserContext";
+import LeftBar from "./components/LeftBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +27,21 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="bg-white text-black dark:bg-black dark:text-white">
-          {children}
+
+      <UserProvider>
+
+     <div className="flex min-h-screen">
+            {/* Sol Sabit Sidebar */}
+            <aside className=" w-1/5  bg-white  border-gray-200 hidden md:block">
+              <LeftBar />
+            </aside>
+
+            {/* Sayfa içeriği */}
+            <main className="flex-1  bg-gray-100 overflow-auto p-4">
+              {children}
+            </main>
+          </div>
+  </UserProvider>
       </body>
     </html>
   );

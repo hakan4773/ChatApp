@@ -38,7 +38,7 @@ onSubmit: async (values, { setSubmitting }) => {
 
         if (data.user) {
           setUser(data.user);
-          router.push("/"); 
+          router.push("/Dashboard"); 
         }
       } catch (err) {
         console.error("Beklenmedik hata:", err);

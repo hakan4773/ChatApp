@@ -5,12 +5,11 @@ import Image from "next/image";
 import { MagnifyingGlassIcon, ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
 
 
-function Main() {
- 
+function Page() {
 
  return (
   
-    <div className="bg-gray-100 min-h-screen  flex flex-col rounded-xl shadow-lg overflow-hidden">
+    <div className="bg-gray-100   rounded-xl shadow-lg overflow-hidden ">
       {/* Arama Çubuğu */}
       <div className="p-4 bg-white border-b border-gray-200">
         <div className="relative">
@@ -84,4 +83,4 @@ function Main() {
     </div>
   );
 }
-export default Main;
+export default Page;
