@@ -14,7 +14,7 @@ import { useUser } from '../context/UserContext';
 function LeftBar() {
   const {user}=useUser();
   return (
-     <div className="w-62 flex flex-col h-screen bg-indigo-800 text-white shadow-xl fixed">
+     <div className="w-full max-w-xs bg-indigo-800 text-white h-screen flex flex-col">
       {/* Kullanıcı Bilgileri */}
       <div className="flex items-center justify-between p-4 border-b border-indigo-600">
         <div className="flex items-center space-x-3">
@@ -29,6 +29,7 @@ function LeftBar() {
             </p>
             <p className="text-sm text-indigo-200">
               {user?.email }
+              deneme123@gmail.com
             </p>
           </div>
         </div>

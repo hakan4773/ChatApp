@@ -20,7 +20,7 @@ export default function RootLayout({
 
      <div className="flex min-h-screen">
             {/* Sol Sabit Sidebar */}
-            <aside className=" w-1/5  bg-white  border-gray-200 hidden md:block">
+            <aside className=" w-64 bg-indigo-800 text-white h-screen flex-shrink-0">
               <LeftBar />
             </aside>
 

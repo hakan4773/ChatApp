@@ -6,7 +6,7 @@ import React from "react";
  const {user}=useUser();
  console.log(user)
   return (
-     <div className="">
+     <div className="w-full  p-6 bg-white shadow-md rounded-lg ">
       <h1 className="text-2xl font-bold">Dashboard</h1>
       <p>Hoş geldin, {user?.email}!</p>
       <p>Bu, kullanıcı panelinizdiraaaaaaaaaaaaaaaaa.</p>
