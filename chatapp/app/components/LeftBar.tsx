@@ -21,7 +21,7 @@ function LeftBar() {
     window.location.href = '/login'; 
   };
   return (
-     <div className="w-full max-w-xs bg-indigo-800 text-white h-screen flex flex-col">
+     <div className="w-full max-w-xs bg-indigo-800 text-white h-screen flex flex-col shadow-lg ">
       {/* Kullanıcı Bilgileri */}
       <div className="flex items-center justify-between p-4 border-b border-indigo-600">
         <div className="flex items-center space-x-3">
@@ -51,13 +51,7 @@ function LeftBar() {
           <UserCircleIcon className="w-6 h-6" />
           <span className="font-medium">Profil</span>
         </Link>
-        <Link
-          href="/settings"
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <CogIcon className="w-6 h-6" />
-          <span className="font-medium">Ayarlar</span>
-        </Link>
+       
         <Link
           href="/chats"
           className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-700 transition-colors"
@@ -71,6 +65,13 @@ function LeftBar() {
         >
           <PuzzlePieceIcon className="w-6 h-6" />
           <span className="font-medium">Oyunlar</span>
+        </Link> 
+        <Link
+          href="/settings"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-700 transition-colors"
+        >
+          <CogIcon className="w-6 h-6" />
+          <span className="font-medium">Ayarlar</span>
         </Link>
         <Link
           href="/help"

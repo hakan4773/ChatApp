@@ -8,7 +8,7 @@ import { MagnifyingGlassIcon, ChatBubbleLeftIcon } from "@heroicons/react/24/out
 function Page() {
 
  return (
-    <div className="bg-gray-100   overflow-hidden ">
+    <div className="bg-gray-100    overflow-hidden ">
       {/* Arama Çubuğu */}
       <div className="p-4 bg-white border-b border-gray-200">
         <div className="relative">
