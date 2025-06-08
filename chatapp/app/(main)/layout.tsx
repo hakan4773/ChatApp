@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import  "../globals.css"
-import { UserProvider } from "../context/UserContext";
 import LeftBar from  "../components/LeftBar";
 
 export const metadata: Metadata = {
@@ -16,7 +15,7 @@ export default function RootLayout({
   return (
 
 
-      <UserProvider>
+      
 
      <div className="flex min-h-screen">
             {/* Sol Sabit Sidebar */}
@@ -25,11 +24,10 @@ export default function RootLayout({
             </aside>
 
             {/* Sayfa içeriği */}
-            <main className="flex-1  bg-gray-100 overflow-auto p-4">
+            <main className="flex-1  bg-gray-100 overflow-auto ">
               {children}
             </main>
           </div>
-  </UserProvider>
    
   );
 }

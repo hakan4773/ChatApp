@@ -11,8 +11,15 @@ import {
   PuzzlePieceIcon
 } from '@heroicons/react/24/outline';
 import { useUser } from '../context/UserContext';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 function LeftBar() {
   const {user}=useUser();
+
+  const handleSignOut = async () => {
+    const supabase = createClientComponentClient();
+    await supabase.auth.signOut();
+    window.location.href = '/login'; 
+  };
   return (
      <div className="w-full max-w-xs bg-indigo-800 text-white h-screen flex flex-col">
       {/* Kullanıcı Bilgileri */}
@@ -25,11 +32,11 @@ function LeftBar() {
           />
           <div>
             <p className="text-lg font-semibold">
-       Hakan Bulduk
+              {user?.user_metadata?.name || 'Kullanıcı Adı'}
+              
             </p>
             <p className="text-sm text-indigo-200">
-              {user?.email }
-              deneme123@gmail.com
+              {user?.email || 'deneme123@gmail.com'}
             </p>
           </div>
         </div>
@@ -38,7 +45,7 @@ function LeftBar() {
       {/* Menü Öğeleri */}
       <div className="flex flex-col gap-2 p-4">
         <Link
-          href="/profile"
+          href="/"
           className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-700 transition-colors"
         >
           <UserCircleIcon className="w-6 h-6" />
@@ -80,7 +87,7 @@ function LeftBar() {
           <span className="font-medium">Bildirimler</span>
         </Link>
         <button
-        //   onClick={handleSignOut}
+          onClick={handleSignOut}
           className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-600 transition-colors text-left"
         >
           <ArrowLeftOnRectangleIcon className="w-6 h-6" />

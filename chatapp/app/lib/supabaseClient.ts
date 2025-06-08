@@ -1,10 +1,6 @@
-import {createClient} from '@supabase/supabase-js';
+'use client';
+
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Database } from '../types/supabase';
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Supabase URL ve Anon Key environment variables tanımlı değil!'
-  )
-}
-export const supabase =createClient<Database>(supabaseUrl,supabaseAnonKey);
+
+export const supabase = createClientComponentClient<Database>();

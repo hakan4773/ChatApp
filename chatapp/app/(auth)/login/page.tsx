@@ -8,10 +8,11 @@ import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
 import { User } from "@supabase/supabase-js";
+import { useUser } from "@/app/context/UserContext";
 function Page() {
      const router = useRouter();
+     const {user,setUser}=useUser();
 const [loading, setLoading] = useState(false);
- const [user, setUser] = useState<User | null>(null);
   const formik=useFormik({
     initialValues: {
       email: "",
