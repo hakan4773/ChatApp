@@ -20,29 +20,43 @@ function page() {
     },
       enableReinitialize: true,
     onSubmit: async (values) => {
-       if (!user?.email) {
+      if (!user?.email) {
         console.error("Kullanıcı e-posta adresi bulunamadı.");
         return;
-           }
-      const { data, error } = await supabase.from("users").update({
-        name: values.name,
-      }).eq("email",user?.email);
-      if (error) {
-        console.error("Error updating profile:", error);
+      }
+      //users tabllosunu güncelle
+      const { error:updateError } = await supabase
+        .from("users")
+        .update({
+          name: values.name,
+        })
+        .eq("email", user?.email);
+       
+         if (updateError) {
+        console.error("Veritabanı güncelleme hatası:", updateError);
         alert("Profil güncellenemedi.");
         return;
       }
-      if (data) {
-        const updatedUser = {
-          ...user,
-          user_metadata: {
-            ...user?.user_metadata,
-            name: values.name,
-          },
-        };
-        setUser(updatedUser as User);
-        alert("Profil başarıyla güncellendi!");
+      // 2. 'auth.users' tablosunu  güncelle
+       const { error: authError } = await supabase.auth.updateUser({
+        data: {
+          name: values.name,
+        },
+      });
+      if (authError) {
+        console.error("Auth güncelleme hatası:", authError);
+        alert("Profil güncellenemedi (auth).");
+        return;
       }
+      const updatedUser = {
+        ...user,
+        user_metadata: {
+          ...user?.user_metadata,
+          name: values.name,
+        },
+      };
+      setUser(updatedUser as User);
+      alert("Profil başarıyla güncellendi!");
     },
   
 
