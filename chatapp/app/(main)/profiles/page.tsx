@@ -1,10 +1,10 @@
 "use client";
 import { useUser } from "@/app/context/UserContext";
-import { supabase } from "@/app/lib/supabaseClient";
+import { supabase } from "@/app/lib/supabaseClient"; 
 import { CameraIcon, EnvelopeIcon, UserIcon } from "@heroicons/react/24/outline";
 import { User } from "@supabase/supabase-js";
 import { useFormik } from "formik";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { handleUpload } from "../../utils/UpdateAvatar"
 
 function page() {
@@ -15,7 +15,15 @@ function page() {
     email:string,
     avatar:string
  };
-
+useEffect(() => {
+  const fetchUser = async () => {
+   const {data} =await supabase.auth.getUser();
+   if(data){
+    setUser(data.user)
+   }
+  };
+  fetchUser();
+});
   
  const formik = useFormik<ProfileFormValues>({
     initialValues: {
@@ -84,7 +92,13 @@ function page() {
         </div>
       </div>
       <input type="file"
-      onChange={(e) => { if (user) handleUpload(e, user, setUser, supabase); }}
+     onChange={(e) => {
+  if (user) {
+    handleUpload(e, user, setUser, supabase).then((newAvatarUrl) => {
+      formik.setFieldValue("avatar", newAvatarUrl);
+    });
+  }
+}}
       className="hidden" id="profile-pic-upload" />
       <label
         htmlFor="profile-pic-upload"

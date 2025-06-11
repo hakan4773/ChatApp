@@ -14,8 +14,14 @@ export const handleUpload = async (  event: React.ChangeEvent<HTMLInputElement>,
   const fileName = `avatar.${fileExt}`;
 const filePath = `${user.id}/${fileName}`;
 
-      await supabase.storage.from('avatars').remove([filePath])
-
+//eski resmi sil
+const { error: removeError } = await supabase.storage
+    .from("avatars")
+    .remove([filePath]);
+  if (removeError) {
+    console.error("Remove error:", removeError.message);
+    alert("Mevcut dosya silinirken hata oluştu: " + removeError.message);
+  }
  //Supabase deposuna yükle
     const {error:uploadError}=await supabase.storage.from("avatars").upload(filePath,file,{
         upsert: true,
@@ -45,5 +51,6 @@ const {data:{publicUrl}}=supabase.storage.from("avatars").getPublicUrl(filePath)
 
         }
     });
+    
 
 };

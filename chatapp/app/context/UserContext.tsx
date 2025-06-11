@@ -19,26 +19,32 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const getSessionUser = async () => {
       setLoading(true);
-      const { data, error } = await supabase.auth.getUser();
+      const { data, error } = await supabase.auth.getSession();
       if (error) {
         setUser(null);
       } else {
-        setUser(data.user ?? null);
+        setUser(data.session?.user ?? null);
       }
       setLoading(false);
     };
 
     getSessionUser();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-        setLoading(false);
+   const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        setUser(newSession?.user ?? null);
+        
+        // Kullanıcı güncellendiğinde verileri yenile
+        if (event === 'USER_UPDATED') {
+          const { data: { user } } = await supabase.auth.getUser();
+          setUser(user ?? null);
+        }
       }
     );
 
+
     return () => {
-      authListener.subscription.unsubscribe();
+      subscription?.unsubscribe?.();
     };
   }, []);
 
