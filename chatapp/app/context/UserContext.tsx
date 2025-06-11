@@ -19,12 +19,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const getSessionUser = async () => {
       setLoading(true);
-      const { data, error } = await supabase.auth.getSession();
+      const { data, error } = await supabase.auth.getUser();
       if (error) {
-        console.error("Session alınırken hata:", error.message);
         setUser(null);
       } else {
-        setUser(data.session?.user ?? null);
+        setUser(data.user ?? null);
       }
       setLoading(false);
     };

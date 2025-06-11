@@ -19,7 +19,7 @@ import React from "react";
           <div className="max-w-4xl mx-auto">
             {/* Hoş Geldin Mesajı */}
             <div className="mb-8 text-center">
-              <h2 className="text-3xl font-semibold text-gray-800">Merhaba, Ahmet!</h2>
+              <h2 className="text-3xl font-semibold text-gray-800">Merhaba, {user?.user_metadata.name}!</h2>
               <p className="text-gray-500 mt-2">
                 ChatApp'e hoş geldiniz! Yeni bir sohbete başlayın veya dosyalarınızı paylaşın.
               </p>

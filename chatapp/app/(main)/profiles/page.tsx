@@ -4,19 +4,24 @@ import { supabase } from "@/app/lib/supabaseClient";
 import { CameraIcon, EnvelopeIcon, UserIcon } from "@heroicons/react/24/outline";
 import { User } from "@supabase/supabase-js";
 import { useFormik } from "formik";
-import React from "react";
+import React, { useState } from "react";
+import { handleUpload } from "../../utils/UpdateAvatar"
 
 function page() {
-  const { user,setUser } = useUser();
+    
+    const { user,setUser } = useUser();
  type ProfileFormValues = {
     name: string;
-    email:string
+    email:string,
+    avatar:string
  };
 
+  
  const formik = useFormik<ProfileFormValues>({
     initialValues: {
       name: user?.user_metadata.name || "",
-      email:user?.email || ""
+      email:user?.email || "",
+      avatar:user?.user_metadata.avatar_url
     },
       enableReinitialize: true,
     onSubmit: async (values) => {
@@ -29,6 +34,7 @@ function page() {
         .from("users")
         .update({
           name: values.name,
+          avatar:values.avatar
         })
         .eq("email", user?.email);
        
@@ -61,6 +67,7 @@ function page() {
   
 
  })
+ console.log(user?.user_metadata)
   return (
     <div className="flex min-h-screen bg-gray-50 p-4 md:p-8 justify-center items-start">
   <form onSubmit={formik.handleSubmit} className="w-full max-w-4xl bg-white rounded-xl shadow-sm p-6 md:p-8 flex flex-col md:flex-row gap-8">
@@ -68,7 +75,7 @@ function page() {
     <div className="flex flex-col items-center md:items-start space-y-4">
       <div className="relative group">
         <img
-          src="/5.jpg"
+          src={user?.user_metadata.avatar_url || "/default-avatar.png"}
           alt="Profile"
           className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-indigo-100 shadow-sm"
         />
@@ -76,7 +83,9 @@ function page() {
          <CameraIcon className="h-8 w-8 text-white" />
         </div>
       </div>
-      <input type="file" className="hidden" id="profile-pic-upload" />
+      <input type="file"
+      onChange={(e) => { if (user) handleUpload(e, user, setUser, supabase); }}
+      className="hidden" id="profile-pic-upload" />
       <label
         htmlFor="profile-pic-upload"
         className="cursor-pointer px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm font-medium"

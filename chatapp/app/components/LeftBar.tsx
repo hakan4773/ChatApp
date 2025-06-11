@@ -26,7 +26,7 @@ function LeftBar() {
       <div className="flex items-center justify-between p-4 border-b border-indigo-600">
         <div className="flex items-center space-x-3">
           <img
-            src={ '/5.jpg'} 
+          src={user?.user_metadata.avatar_url || "/default-avatar.png"}
             alt="Profile"
             className="w-12 h-12 rounded-full object-cover border-2 border-indigo-500"
           />
