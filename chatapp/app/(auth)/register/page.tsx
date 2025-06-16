@@ -17,40 +17,37 @@ const [formData, setFormData] = useState({
 const formik = useFormik({
   initialValues: formData,
   onSubmit: async (values) => {
+    if(user?.email){
+      alert("bu email zaten kayıtlı")
+    }
     const { data, error } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
       options: {
-        emailRedirectTo: "http://localhost:3000/login",
+        emailRedirectTo: "http://localhost:3000/email-verified",
         data: {
           name: values.name,
         },
       },
     });
-    if (error) {
-      console.error("Error signing up:", error);
+ if (error) {
+    if (error.message.includes("already registered")) {
+      alert("Bu e-posta zaten kayıtlı. Lütfen giriş yapın.");
     } else {
-      setIsRegistered(true);
-      setUser(data.user);
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-      });
+      console.error("Sign-up error:", error.message);
+      alert(error.message);
     }
+    return;
+  }
 
-    if (data.user) {
-      const { error } = await supabase.from("users").insert({
-        name: values.name,
-        email: values.email,
-        password: values.password,
-      });
-    
-    if (error) {
-      console.error("Error inserting user to table:", error);
-    } else {
-      console.log("User added to users table");
-    }}
+  if (data?.user?.identities?.length === 0) {
+    // Kullanıcı zaten kayıtlı ama doğrulanmamış: e-posta tekrar gönderildi
+    alert("Bu e-posta adresine daha önce kayıt olunmuş ama henüz doğrulanmamış. Yeni doğrulama e-postası gönderildi.");
+  } else {
+    alert("Kayıt başarılı! Lütfen e-postanı kontrol et ve hesabını doğrula.");
+  }
+
+  
   },
   validationSchema: yup.object({
     name: yup.string().required("Name is required"),
@@ -64,15 +61,9 @@ const formik = useFormik({
       .required("Password is required"),
   }),
 });
+
   return (
-<>
-    {isRegistered ? (
-      <div className="min-h-screen bg-gradient-to-br from-sky-200 via-blue-400 to-indigo-900 flex flex-col items-center justify-center p-4 text-white text-xl">
-        <EnvelopeIcon className="h-16 w-16 mb-4" />
-        <h2>Kayıt başarılı!</h2>
-        <p>Lütfen e-postanıza gelen doğrulama linkine tıklayarak hesabınızı doğrulayın.</p>
-      </div>
-    ) : (
+
     <div className="min-h-screen bg-gradient-to-br from-sky-200 via-blue-400 to-indigo-900 flex flex-col lg:flex-row items-center justify-center p-4">
 <div className="w-full flex justify-between items-center px-4 lg:px-12 py-4 absolute top-0 left-0 right-0">
         <Link href="/" className="flex items-center text-white text-3xl font-bold tracking-tight">
@@ -171,7 +162,7 @@ const formik = useFormik({
             </form>
         </div>
     </div>
-    )} </>
+    
 )
 }
 

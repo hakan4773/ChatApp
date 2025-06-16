@@ -1,6 +1,6 @@
 "use client"
 import Link from 'next/link'
-import React, { use } from 'react'
+import React from 'react'
 import {
   UserCircleIcon,
   CogIcon,
@@ -11,13 +11,11 @@ import {
   PuzzlePieceIcon
 } from '@heroicons/react/24/outline';
 import { useUser } from '../context/UserContext';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 function LeftBar() {
-  const {user}=useUser();
+  const {user,signOut}=useUser();
 
   const handleSignOut = async () => {
-    const supabase = createClientComponentClient();
-    await supabase.auth.signOut();
+         signOut();
     window.location.href = '/login'; 
   };
   return (

@@ -1,5 +1,5 @@
 "use client";
-import { User } from "@supabase/supabase-js";
+import { User, Session } from "@supabase/supabase-js";
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
@@ -7,49 +7,71 @@ type UserContextType = {
   user: User | null;
   loading: boolean;
   setUser: (user: User | null) => void;
+  signOut: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+export const UserProvider = ({
+  children,
+  serverSession = null,
+}: {
+  children: ReactNode;
+  serverSession?: Session | null;
+}) => {
   const supabase = createClientComponentClient();
 
+  const [user, setUser] = useState<User | null>(serverSession?.user ?? null);
+  const [loading, setLoading] = useState(!serverSession);
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  const refreshUser = async () => {
+    const { data, error } = await supabase.auth.getUser();
+    if (!error && data?.user) {
+      setUser(data.user);
+    }
+  };
+
   useEffect(() => {
-    const getSessionUser = async () => {
+    const init = async () => {
+      if (serverSession) return;
+
       setLoading(true);
       const { data, error } = await supabase.auth.getSession();
-      if (error) {
-        setUser(null);
+      if (!error && data?.session?.user) {
+        setUser(data.session.user);
       } else {
-        setUser(data.session?.user ?? null);
+        setUser(null);
       }
       setLoading(false);
     };
 
-    getSessionUser();
+    init();
 
-   const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        setUser(newSession?.user ?? null);
-        
-        // Kullanıcı güncellendiğinde verileri yenile
-        if (event === 'USER_UPDATED') {
-          const { data: { user } } = await supabase.auth.getUser();
-          setUser(user ?? null);
-        }
-      }
-    );
-
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
 
     return () => {
-      subscription?.unsubscribe?.();
+      authListener?.subscription?.unsubscribe();
     };
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, setUser, loading }}>
+    <UserContext.Provider
+      value={{
+        user,
+        loading,
+        setUser,
+        signOut,
+        refreshUser,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );
@@ -57,6 +79,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
 export const useUser = () => {
   const context = useContext(UserContext);
-  if (!context) throw new Error("useUser must be used within a UserProvider");
+  if (!context) {
+    throw new Error("useUser must be used within a UserProvider");
+  }
   return context;
 };

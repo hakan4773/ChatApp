@@ -1,56 +1,56 @@
-    "use client"
-import { useState } from "react";
 import { SupabaseClient, User } from "@supabase/supabase-js";
 
-    
-export const handleUpload = async (  event: React.ChangeEvent<HTMLInputElement>,
+export const handleUpload = async (
+  event: React.ChangeEvent<HTMLInputElement>,
   user: User,
   setUser: Function,
   supabase: SupabaseClient
-) => {
- const file=event.target.files?.[0];
-   if (!file || !user) return;
-    const fileExt = file.name.split('.').pop();
+): Promise<string | null> => {
+  const file = event.target.files?.[0];
+  if (!file || !user) return null;
+
+  const fileExt = file.name.split('.').pop();
   const fileName = `avatar.${fileExt}`;
-const filePath = `${user.id}/${fileName}`;
+  const filePath = `${user.id}/${fileName}`;
 
-//eski resmi sil
-const { error: removeError } = await supabase.storage
+  const { error: uploadError } = await supabase.storage
     .from("avatars")
-    .remove([filePath]);
-  if (removeError) {
-    console.error("Remove error:", removeError.message);
-    alert("Mevcut dosya silinirken hata oluştu: " + removeError.message);
+    .upload(filePath, file, {
+      upsert: true,
+      contentType: file.type,
+    });
+
+  if (uploadError) {
+    console.error("Yükleme hatası:", uploadError.message);
+    alert("Resim yüklenemedi.");
+    return null;
   }
- //Supabase deposuna yükle
-    const {error:uploadError}=await supabase.storage.from("avatars").upload(filePath,file,{
-        upsert: true,
-        contentType: file.type,
-    });
-    if(uploadError){
-        console.error("Upload error:", uploadError.message);
-      alert("Yükleme başarısız");
-      return;
-    }
-     // Public URL oluştur
-const {data:{publicUrl}}=supabase.storage.from("avatars").getPublicUrl(filePath)
 
-    // 3. Auth metadata güncelle
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: { avatar_url: publicUrl },
-    });
-    if (updateError) {
-      console.error("Metadata güncellenemedi:", updateError.message);
-    }
+  const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+  const publicUrl = data?.publicUrl;
 
-    setUser({
-        ...user,
-        user_metadata:{
-        ...user.user_metadata,
-       avatar_url: publicUrl,
+  if (!publicUrl) {
+    alert("Public URL alınamadı.");
+    return null;
+  }
 
-        }
-    });
-    
+  const { error: updateError } = await supabase.auth.updateUser({
+    data: { avatar_url: publicUrl },
+  });
 
+  if (updateError) {
+    console.error("Metadata güncellenemedi:", updateError.message);
+  } else {
+    alert("Profil resmi başarıyla güncellendi!");
+  }
+
+  setUser((prev: User) => ({
+    ...prev,
+    user_metadata: {
+      ...(prev.user_metadata || {}),
+      avatar_url: publicUrl,
+    },
+  }));
+
+  return publicUrl;
 };
