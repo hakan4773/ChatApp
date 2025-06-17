@@ -3,13 +3,18 @@ import { useUser } from "@/app/context/UserContext";
 import { ArrowLeftOnRectangleIcon, BellIcon, ChatBubbleLeftIcon, DocumentArrowUpIcon, QuestionMarkCircleIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
+import Users from "../components/Users"
 
  function dashboard() {
  const {user}=useUser();
+const [openUsers,setOpenUsers]=useState<boolean>(false)
+const handleOpen=()=>{
+  setOpenUsers(!openUsers)
+}
   return (
    
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="min-h-screen bg-gray-100 flex relative">
 
       <div className="flex-1 flex flex-col">
     
@@ -28,17 +33,22 @@ import React from "react";
             {/* Hızlı Erişim Kartları */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {/* Kart 1: Yeni Sohbet */}
-              <Link
-                href="/chat"
+              <button
                 className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition hover:bg-indigo-50"
+                onClick={handleOpen}
               >
+                
                 <ChatBubbleLeftIcon className="w-10 h-10 text-indigo-600 mb-4" />
                 <h3 className="text-lg font-medium text-gray-800">Yeni Sohbet</h3>
                 <p className="text-sm text-gray-500 mt-1">
                   Arkadaşlarınızla anında sohbete başlayın.
                 </p>
-              </Link>
-
+              </button>
+{
+  openUsers && 
+<Users setOpenUsers={setOpenUsers} />
+  
+}
               {/* Kart 2: Dosya Paylaşımı */}
               <Link
                 href="/files"
