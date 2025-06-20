@@ -6,6 +6,7 @@ import { supabase } from "../lib/supabaseClient";
 
 interface OpenProps {
   setOpenUsers: (open: boolean) => void;
+  onCreateChat: (selectedUsers: string[]) => void;
 }
 interface UserProps {
   id: string;
@@ -14,7 +15,7 @@ interface UserProps {
   avatar_url: string;
 }
 
-const Users = ({ setOpenUsers }: OpenProps) => {
+const Users = ({ setOpenUsers,onCreateChat }: OpenProps) => {
   const [users, setUsers] = useState<UserProps[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
@@ -53,8 +54,7 @@ const Users = ({ setOpenUsers }: OpenProps) => {
   };
   const handleCreateGroupChat = () => {
     if (selectedUsers.length > 0) {
-      console.log("Seçilen kullanıcılar:", selectedUsers); // Üst bileşene aktarılabilir
-      setOpenUsers(false); // Modalı kapat
+      onCreateChat(selectedUsers); // Seçilen kullanıcıları üst bileşene ilet
     } else {
       console.log("Lütfen en az bir kullanıcı seçin.");
     }

@@ -1,23 +1,101 @@
 "use client";
 import { useUser } from "@/app/context/UserContext";
-import { ArrowLeftOnRectangleIcon, BellIcon, ChatBubbleLeftIcon, DocumentArrowUpIcon, QuestionMarkCircleIcon, UserCircleIcon } from "@heroicons/react/24/outline";
-import Image from "next/image";
+import {  ChatBubbleLeftIcon, DocumentArrowUpIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import React, { useState } from "react";
 import Users from "../components/Users"
+import { supabase } from "../lib/supabaseClient";
+import { useRouter } from "next/navigation";
+
 
  function dashboard() {
  const {user}=useUser();
+ const router=useRouter();
 const [openUsers,setOpenUsers]=useState<boolean>(false)
+
+const handleCreateChat=async(selectedUsers:string [])=>{
+  if(!user?.id){
+    console.error("Kullanıcı kimliği bulunamadı.");
+      return;
+  }
+const currentUserId = user.id; //mevcut kullanıcı id'si 
+const allUserIds = [currentUserId, ...selectedUsers];//eklenecek kullanıcıların listesi
+
+try {
+      // Mevcut sohbet kontrolü
+      const { data: chatMembers, error: fetchError } = await supabase
+        .from("chat_members")
+        .select("chat_id, user_id");
+
+      if (fetchError) throw fetchError;
+
+      // Aynı üyelerden oluşan bir sohbet var mı kontrol et
+      let chatId: string | undefined;
+      if (chatMembers && chatMembers.length > 0) {
+        // chat_id'ye göre grupla
+        const chatGroups: { [key: string]: string[] } = {};
+        chatMembers.forEach((member: any) => {
+          if (!chatGroups[member.chat_id]) {
+            chatGroups[member.chat_id] = [];
+          }
+          chatGroups[member.chat_id].push(member.user_id);
+        });
+
+        // Tüm kullanıcıları içeren sohbeti bul
+        const foundChat = Object.entries(chatGroups).find(
+          ([, members]) =>
+            members.length === allUserIds.length &&
+            allUserIds.every((id) => members.includes(id))
+        );
+        if (foundChat) {
+          chatId = foundChat[0];
+        }
+      }
+
+      if (!chatId) {
+        // Yeni sohbet oluştur
+        const { data: newChat, error: insertChatError } = await supabase
+          .from("chats")
+          .insert({ created_at: new Date().toISOString() })
+          .select("id")
+          .single();
+
+        if (insertChatError) throw insertChatError;
+
+        chatId = newChat.id;
+
+        // chat_members'a kayıtlar ekle
+        const membersToInsert = allUserIds.map((userId) => ({
+          chat_id: chatId,
+          user_id: userId,
+          joined_at: new Date().toISOString(),
+        }));
+
+        const { error: insertMembersError } = await supabase
+          .from("chat_members")
+          .insert(membersToInsert);
+
+        if (insertMembersError) throw insertMembersError;
+      }
+
+      // Sohbet sayfasına yönlendir
+      if (chatId) {
+        router.push(`/chats/${chatId}`);
+      }
+    } catch (error) {
+      console.error("Sohbet oluşturma hatası:", error);
+      alert("Sohbet oluşturulamadı, lütfen tekrar deneyin.");
+    }
+  };
+
+
 const handleOpen=()=>{
   setOpenUsers(!openUsers)
 }
   return (
    
     <div className="min-h-screen bg-gray-100 flex relative">
-
       <div className="flex-1 flex flex-col">
-    
 
         {/* Dashboard İçeriği */}
         <div className="flex-1 p-6 bg-gray-100">
@@ -46,7 +124,7 @@ const handleOpen=()=>{
               </button>
 {
   openUsers && 
-<Users setOpenUsers={setOpenUsers} />
+<Users setOpenUsers={setOpenUsers} onCreateChat={handleCreateChat}/>
   
 }
               {/* Kart 2: Dosya Paylaşımı */}
