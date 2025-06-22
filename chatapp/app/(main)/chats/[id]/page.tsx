@@ -1,21 +1,77 @@
+"use client"
+import { useUser } from '@/app/context/UserContext'
+import { supabase } from '@/app/lib/supabaseClient'
 import Image from 'next/image'
-import React from 'react'
+import { useParams,usePathname } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
 
 const Page = () => {
+  const { user } = useUser();
+  const params = useParams();
+  const chatId = params?.id as string;
+  const [newMessage, setNewMessage] = useState('');
+  const [chatInfo, setChatInfo] = useState<{
+    name: string | null;
+    users: Array<{
+      id: string;
+      name: string | null;
+      avatar_url: string | null;
+    }>;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(()=>{
+const getMessages=async()=>{
+  if (!user) return;
+
+    try {
+        // 1. Sohbet bilgilerini al
+        const { data: chatData } = await supabase
+          .from('chats')
+          .select('name')
+          .eq('id', chatId)
+          .single();
+
+        // 2. Sohbetteki kullanıcıları al (mevcut kullanıcı hariç)
+        const { data: usersData } = await supabase
+          .from('chat_members')
+          .select('users(id, name, avatar_url)')
+          .eq('chat_id', chatId)
+          .neq('user_id', user.id);
+
+        setChatInfo({
+          name: chatData?.name || null,
+          users: usersData?.map(({ users }) => users) || []
+        });
+       } catch (error) {
+        console.error('Sohbet verileri alınamadı:', error);
+      } finally {
+        setLoading(false);
+      }
+
+}
+
+getMessages();
+
+  },[chatId])
+console.log(chatInfo)
+console.log(chatId)
+
+
+
   return (
     <div className='min-h-screen flex flex-col bg-blue-100'>
       {/* Header */}
       <div className='bg-blue-500 text-white p-4 flex items-center justify-between shadow-md'>
         <div className='flex items-center space-x-3'>
           <Image 
-            src="/5.jpg" 
+            src={chatInfo?.users[0]?.avatar_url || "/5.jpg"}
             width={40} 
             height={40} 
             alt="avatar" 
             className='rounded-full object-cover border-2 border-white'
           />
           <div>
-            <h1 className='font-bold'>John Doe</h1>
+            <h1 className='font-bold'>{chatInfo?.name}</h1>
             <p className='text-xs text-blue-100'>Online</p>
           </div>
         </div>
