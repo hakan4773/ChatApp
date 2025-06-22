@@ -56,7 +56,9 @@ try {
         // Yeni sohbet oluştur
         const { data: newChat, error: insertChatError } = await supabase
           .from("chats")
-          .insert({ created_at: new Date().toISOString() })
+          .insert({ created_at: new Date().toISOString(),
+            name: `Grup Sohbeti ${new Date().toLocaleDateString()}`, 
+           })
           .select("id")
           .single();
 
