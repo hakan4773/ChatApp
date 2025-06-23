@@ -47,7 +47,12 @@ function LeftBar({ setIsOpen, isOpen }: LeftBarProps) {
 
         {/* Menü Elemanları */}
         <nav className="flex flex-col gap-2 px-2">
-          <MenuLink href="/" icon={<UserCircleIcon className="w-6 h-6" />} label="Profil" isOpen={isOpen} />
+           <MenuLink
+  href="/"
+  icon={
+    <img
+      src={user?.user_metadata.avatar_url || "/default-avatar.png"} alt="Profile" className="w-6 h-6 rounded-full border-2 border-indigo-500" />} label="Profil" isOpen={isOpen}
+/>
           <MenuLink href="/chats" icon={<UsersIcon className="w-6 h-6" />} label="Sohbetler" isOpen={isOpen} />
           <MenuLink href="/games" icon={<PuzzlePieceIcon className="w-6 h-6" />} label="Oyunlar" isOpen={isOpen} />
           <MenuLink href="/settings" icon={<CogIcon className="w-6 h-6" />} label="Ayarlar" isOpen={isOpen} />
@@ -57,7 +62,8 @@ function LeftBar({ setIsOpen, isOpen }: LeftBarProps) {
       </div>
 
       {/* Alt Çıkış Butonu */}
-      <div className="px-2 mb-4">
+      <div className="px-2 mb-4 space-y-2">
+    
         <button
           onClick={handleSignOut}
           className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-100 text-red-600 transition-colors w-full"
@@ -65,7 +71,7 @@ function LeftBar({ setIsOpen, isOpen }: LeftBarProps) {
           <ArrowLeftOnRectangleIcon className="w-6 h-6" />
           {isOpen && <span className="font-medium">Çıkış Yap</span>}
         </button>
-      </div>
+        </div>
     </div>
   );
 }
