@@ -1,6 +1,6 @@
-"use client"
-import Link from 'next/link'
-import React from 'react'
+"use client";
+import Link from "next/link";
+import React, { useState } from "react";
 import {
   UserCircleIcon,
   CogIcon,
@@ -8,93 +8,84 @@ import {
   QuestionMarkCircleIcon,
   BellIcon,
   ArrowLeftOnRectangleIcon,
-  PuzzlePieceIcon
-} from '@heroicons/react/24/outline';
-import { useUser } from '../context/UserContext';
-function LeftBar() {
-  const {user,signOut}=useUser();
+  PuzzlePieceIcon,
+  Bars3Icon,
+} from "@heroicons/react/24/outline";
+import { useUser } from "../context/UserContext";
+import { useRouter } from "next/navigation";
 
-  const handleSignOut = async () => {
-         signOut();
-    window.location.href = '/login'; 
+type LeftBarProps = {
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isOpen: boolean;
+};
+
+function LeftBar({ setIsOpen, isOpen }: LeftBarProps) {
+  const { user, signOut } = useUser();
+  const router = useRouter();
+
+  const handleSignOut = () => {
+    signOut();
+    router.push("/login");
   };
+
+  const toggleMenu = () => setIsOpen(!isOpen);
+
   return (
-     <div className="w-full max-w-xs bg-indigo-800 text-white h-screen flex flex-col shadow-lg ">
-      {/* Kullanıcı Bilgileri */}
-      <div className="flex items-center justify-between p-4 border-b border-indigo-600">
-        <div className="flex items-center space-x-3">
-          <img
-          src={user?.user_metadata.avatar_url || "/default-avatar.png"}
-            alt="Profile"
-            className="w-12 h-12 rounded-full object-cover border-2 border-indigo-500"
-          />
-          <div>
-            <p className="text-lg font-semibold">
-              {user?.user_metadata?.name || 'Kullanıcı Adı'}
-              
-            </p>
-            <p className="text-sm text-indigo-200">
-              {user?.email || 'deneme123@gmail.com'}
-            </p>
-          </div>
+    <div
+      className={`fixed top-0 left-0 h-screen ${
+        isOpen ? "w-64" : "w-16"
+      } bg-white border-r shadow transition-all duration-300 flex flex-col justify-between z-50`}
+    >
+      {/* Üst Kısım */}
+      <div>
+        {/* Toggle Butonu */}
+        <div className="flex justify-end p-4">
+          <button onClick={toggleMenu}>
+            <Bars3Icon className="w-6 h-6 text-gray-700" />
+          </button>
         </div>
+
+        {/* Menü Elemanları */}
+        <nav className="flex flex-col gap-2 px-2">
+          <MenuLink href="/" icon={<UserCircleIcon className="w-6 h-6" />} label="Profil" isOpen={isOpen} />
+          <MenuLink href="/chats" icon={<UsersIcon className="w-6 h-6" />} label="Sohbetler" isOpen={isOpen} />
+          <MenuLink href="/games" icon={<PuzzlePieceIcon className="w-6 h-6" />} label="Oyunlar" isOpen={isOpen} />
+          <MenuLink href="/settings" icon={<CogIcon className="w-6 h-6" />} label="Ayarlar" isOpen={isOpen} />
+          <MenuLink href="/help" icon={<QuestionMarkCircleIcon className="w-6 h-6" />} label="Yardım" isOpen={isOpen} />
+          <MenuLink href="/notifications" icon={<BellIcon className="w-6 h-6" />} label="Bildirimler" isOpen={isOpen} />
+        </nav>
       </div>
 
-      {/* Menü Öğeleri */}
-      <div className="flex flex-col gap-2 p-4">
-        <Link
-          href="/"
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <UserCircleIcon className="w-6 h-6" />
-          <span className="font-medium">Profil</span>
-        </Link>
-       
-        <Link
-          href="/chats"
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <UsersIcon className="w-6 h-6" />
-          <span className="font-medium">Sohbetler</span>
-        </Link>
-        <Link
-          href="/games"
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <PuzzlePieceIcon className="w-6 h-6" />
-          <span className="font-medium">Oyunlar</span>
-        </Link> 
-        <Link
-          href="/settings"
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <CogIcon className="w-6 h-6" />
-          <span className="font-medium">Ayarlar</span>
-        </Link>
-        <Link
-          href="/help"
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <QuestionMarkCircleIcon className="w-6 h-6" />
-          <span className="font-medium">Yardım</span>
-        </Link>
-        <Link
-          href="/notifications"
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <BellIcon className="w-6 h-6" />
-          <span className="font-medium">Bildirimler</span>
-        </Link>
+      {/* Alt Çıkış Butonu */}
+      <div className="px-2 mb-4">
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-600 transition-colors text-left"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-100 text-red-600 transition-colors w-full"
         >
           <ArrowLeftOnRectangleIcon className="w-6 h-6" />
-          <span className="font-medium">Çıkış Yap</span>
+          {isOpen && <span className="font-medium">Çıkış Yap</span>}
         </button>
       </div>
     </div>
-  )
+  );
 }
 
-export default LeftBar
+// Menü Link Bileşeni
+type MenuLinkProps = {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  isOpen: boolean;
+};
+
+const MenuLink: React.FC<MenuLinkProps> = ({ href, icon, label, isOpen }) => (
+  <Link
+    href={href}
+    className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-100 text-gray-700 transition-colors"
+  >
+    {icon}
+    {isOpen && <span className="font-medium">{label}</span>}
+  </Link>
+);
+
+export default LeftBar;
