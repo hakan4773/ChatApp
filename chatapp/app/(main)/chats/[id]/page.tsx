@@ -9,7 +9,15 @@ const Page = () => {
   const { user } = useUser();
   const params = useParams();
   const chatId = params?.id as string;
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState(''); 
+const [messages, setMessages] = useState<
+  {
+    id: string;
+    content: string;
+    user_id: string;
+    created_at: string;
+  }[]
+>([]);  const [loading, setLoading] = useState(true);
   const [chatInfo, setChatInfo] = useState<{
     name: string | null;
     users: Array<{
@@ -18,7 +26,7 @@ const Page = () => {
       avatar_url: string | null;
     }>;
   } | null>(null);
-  const [loading, setLoading] = useState(true);
+ 
   useEffect(()=>{
 const getMessages=async()=>{
   if (!user) return;
@@ -37,7 +45,21 @@ const getMessages=async()=>{
           .select('users(id, name, avatar_url)')
           .eq('chat_id', chatId)
           .neq('user_id', user.id);
+//mesajları getirme
+       const { data, error } = await supabase
+       .from("messages")
+       .select("*")
+      .eq("chat_id", chatId)
+      .order("created_at", { ascending: true });
 
+    if (error) {
+      console.error("Mesajlar alınamadı:", error.message);
+      return;
+    }
+
+    setMessages(data || []);
+
+          
         setChatInfo({
           name: chatData?.name || null,
           users: usersData?.map(({ users }) => users) || []
@@ -53,8 +75,24 @@ const getMessages=async()=>{
 getMessages();
 
   },[chatId])
-console.log(chatInfo)
-console.log(chatId)
+
+ const sendMessage = async () => {
+  if (!newMessage.trim() || !user) return;
+ //mesajı kaydet
+  const { data, error } = await supabase.from("messages").insert({
+    chat_id: chatId,
+    user_id: user?.id,
+    content: newMessage.trim(),
+  }).select().single();
+
+  if (error) {
+    console.error("Mesaj gönderilemedi:", error.message);
+  } else if (data) {
+    //yeni mesajı ekle
+    setMessages(prev => [...prev, data]); 
+    setNewMessage("");
+  }
+};
 
 
 
@@ -83,30 +121,25 @@ console.log(chatId)
       </div>
 
       {/* Messages Area */}
-      <div className='flex-1 p-4 overflow-y-auto space-y-4'>
-        {/* Received message */}
-        <div className='flex items-start space-x-2'>
-          <Image 
-            src="/5.jpg" 
-            width={32} 
-            height={32} 
-            alt="avatar" 
-            className='rounded-full object-cover'
-          />
-          <div className='bg-white p-3 rounded-lg rounded-tl-none max-w-xs shadow'>
-            <p>Hey there! How are you doing?</p>
-            <p className='text-xs text-gray-500 mt-1'>10:30 AM</p>
-          </div>
-        </div>
-
-        {/* Sent message */}
-        <div className='flex justify-end'>
-          <div className='bg-blue-500 text-white p-3 rounded-lg rounded-tr-none max-w-xs shadow'>
-            <p>I'm good, thanks for asking! How about you?</p>
-            <p className='text-xs text-blue-100 mt-1'>10:32 AM</p>
-          </div>
-        </div>
+     <div className='flex-1 p-4 overflow-y-auto space-y-4'>
+  {messages.map((msg, index) => (
+    <div key={msg.id || index} className={`flex ${msg.user_id === user?.id ? 'justify-end' : 'items-start space-x-2'}`}>
+      {msg.user_id !== user?.id && (
+        <Image 
+          src={"/5.jpg"} 
+          width={32} 
+          height={32} 
+          alt="avatar" 
+          className='rounded-full object-cover'
+        />
+      )}
+      <div className={`${msg.user_id === user?.id ? 'bg-blue-500 text-white rounded-tr-none' : 'bg-white text-gray-900 rounded-tl-none'} p-3 rounded-lg max-w-xs shadow`}>
+        <p>{msg.content}</p>
+        <p className='text-xs text-gray-400 mt-1'>{new Date(msg.created_at).toLocaleTimeString()}</p>
       </div>
+    </div>
+  ))}
+</div>
 
       {/* Input Area */}
       <div className='p-4 border-t bg-white'>
@@ -117,11 +150,14 @@ console.log(chatId)
             </svg>
           </button>
           <input 
-            type="text" 
-            placeholder='Type a message...' 
-            className='flex-1 border rounded-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500'
+             type="text" 
+             value={newMessage}
+             onChange={(e) => setNewMessage(e.target.value)}
+             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+             placeholder='Type a message...' 
+             className='flex-1 border rounded-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500'
           />
-          <button className='p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600'>
+          <button onClick={sendMessage} className='p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600'>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
             </svg>
