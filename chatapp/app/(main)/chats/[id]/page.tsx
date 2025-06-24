@@ -22,7 +22,8 @@ const [messages, setMessages] = useState<
     user_id: string;
     created_at: string;
   }[]
->([]);  const [loading, setLoading] = useState(true);
+>([]); 
+ const [loading, setLoading] = useState(true);
   const [chatInfo, setChatInfo] = useState<{
     name: string | null;
     users: Array<{
@@ -34,6 +35,7 @@ const [messages, setMessages] = useState<
   const [openSettings,setOpenSettings]=useState(false);
   useEffect(()=>{
 const getChatInfo=async()=>{
+  setLoading(true)
   if (!user) return;
 
     try {
@@ -69,6 +71,7 @@ const getChatInfo=async()=>{
           name: chatData?.name || null,
           users: usersData?.map(({ users }) => users) || []
         });
+        setLoading(false);
        } catch (error) {
         console.error('Sohbet verileri alınamadı:', error);
       } finally {
@@ -108,13 +111,21 @@ const handleLeaveGroup = async () => {
 
   const success = await leaveChat({ chatId, userId: user.id });
   if (success) {
-      toast.success('Mesaj başarıyla gönderildi!');
+      toast.success('Gruptan başarıyla çıkıldı.!');
     router.push("/"); 
   } else {
     alert("Gruptan çıkılamadı, lütfen tekrar deneyin.");
   }
 };
-
+//yüklenme durumu
+ if (loading) {
+    return (
+      <div className="p-4 flex flex-col items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+        <p className="mt-3 text-gray-600">Sohbetler yükleniyor...</p>
+      </div>
+    );
+  }
   return (
     <div className='min-h-screen flex flex-col bg-blue-100'>
       {/* Header */}
