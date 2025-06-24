@@ -15,6 +15,14 @@ const Page = () => {
   const params = useParams();
   const chatId = params?.id as string;
   const [newMessage, setNewMessage] = useState(''); 
+  const [members,setMembers]=useState<
+  {
+    id: string;
+    name: string;
+    avatar_url: string;
+    created_at: string;
+  }[]
+>([]);
 const [messages, setMessages] = useState<
   {
     id: string;
@@ -49,9 +57,15 @@ const getChatInfo=async()=>{
         // 2. Sohbetteki kullanıcıları al (mevcut kullanıcı hariç)
         const { data: usersData } = await supabase
           .from('chat_members')
-          .select('users(id, name, avatar_url)')
+          .select('users(id, name, avatar_url,created_at)') 
           .eq('chat_id', chatId)
           .neq('user_id', user.id);
+        console.log(usersData)
+          if (usersData) {
+         setMembers(usersData.map(({ users }) => users) || []);
+          } else {
+       setMembers([]);
+          }
 //mesajları getirme
        const { data, error } = await supabase
        .from("messages")
@@ -83,7 +97,7 @@ const getChatInfo=async()=>{
 getChatInfo();
 
   },[chatId])
-
+console.log(members)
  const sendMessage = async () => {
   if (!newMessage.trim() || !user) return;
  //mesajı kaydet
@@ -140,7 +154,12 @@ const handleLeaveGroup = async () => {
           />
           <div>
             <h1 className='font-bold'>{chatInfo?.name}</h1>
-            <p className='text-xs text-blue-100'>Online</p>
+            <div className='flex'>
+            <p  className='text-xs text-blue-100'>siz,</p>
+            {members.map((member,index)=>(
+            <p key={index} className='text-xs text-blue-100'>{member.name}</p>
+            ))}
+            </div>
           </div>
         </div>
         <button onClick={handleSettings} className='p-2 rounded-full hover:bg-blue-600'>
