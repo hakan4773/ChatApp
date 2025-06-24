@@ -7,6 +7,7 @@ import { useParams,usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { leaveChat } from "../../../utils/leaveChat";
 import { useRouter } from "next/navigation";
+import { toast } from 'react-toastify'
 
 const Page = () => {
   const router = useRouter();
@@ -107,6 +108,7 @@ const handleLeaveGroup = async () => {
 
   const success = await leaveChat({ chatId, userId: user.id });
   if (success) {
+      toast.success('Mesaj başarıyla gönderildi!');
     router.push("/"); 
   } else {
     alert("Gruptan çıkılamadı, lütfen tekrar deneyin.");
