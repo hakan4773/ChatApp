@@ -28,7 +28,7 @@ const [messages, setMessages] = useState<
   } | null>(null);
  
   useEffect(()=>{
-const getMessages=async()=>{
+const getChatInfo=async()=>{
   if (!user) return;
 
     try {
@@ -72,7 +72,7 @@ const getMessages=async()=>{
 
 }
 
-getMessages();
+getChatInfo();
 
   },[chatId])
 
