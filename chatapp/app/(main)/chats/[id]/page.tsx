@@ -1,11 +1,15 @@
 "use client"
 import { useUser } from '@/app/context/UserContext'
 import { supabase } from '@/app/lib/supabaseClient'
+import { ArrowLeftIcon, BellSlashIcon, InformationCircleIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import { useParams,usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
+import { leaveChat } from "../../../utils/leaveChat";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
+  const router = useRouter();
   const { user } = useUser();
   const params = useParams();
   const chatId = params?.id as string;
@@ -26,7 +30,7 @@ const [messages, setMessages] = useState<
       avatar_url: string | null;
     }>;
   } | null>(null);
- 
+  const [openSettings,setOpenSettings]=useState(false);
   useEffect(()=>{
 const getChatInfo=async()=>{
   if (!user) return;
@@ -93,13 +97,26 @@ getChatInfo();
     setNewMessage("");
   }
 };
+//Ayarları göster
+const handleSettings=()=>{
+  setOpenSettings(!openSettings);
+}
+//Gruptan çık
+const handleLeaveGroup = async () => {
+  if (!user || !chatId) return;
 
-
+  const success = await leaveChat({ chatId, userId: user.id });
+  if (success) {
+    router.push("/"); 
+  } else {
+    alert("Gruptan çıkılamadı, lütfen tekrar deneyin.");
+  }
+};
 
   return (
     <div className='min-h-screen flex flex-col bg-blue-100'>
       {/* Header */}
-      <div className='bg-blue-500 text-white p-4 flex items-center justify-between shadow-md'>
+      <div className='bg-blue-500 text-white p-4 flex items-center justify-between shadow-md relative'>
         <div className='flex items-center space-x-3'>
           <Image 
             src={chatInfo?.users[0]?.avatar_url || "/5.jpg"}
@@ -113,11 +130,27 @@ getChatInfo();
             <p className='text-xs text-blue-100'>Online</p>
           </div>
         </div>
-        <button className='p-2 rounded-full hover:bg-blue-600'>
+        <button onClick={handleSettings} className='p-2 rounded-full hover:bg-blue-600'>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
           </svg>
         </button>
+        {
+          openSettings && (
+            <div className='absolute flex flex-col  border p-2 space-y-3 z-50  top-9 bg-gray-50 border-gray-50 text-gray-500 right-8 rounded-md '>
+<button className='hover:bg-gray-100 flex space-x-2 items-center' >
+  <InformationCircleIcon className="h-4 w-4 text-gray-500 " />  <span>Bilgi</span> 
+</button>
+  <button className='hover:bg-gray-100 flex space-x-2 items-center'>
+   <BellSlashIcon className="h-4 w-4 text-gray-500"/> <span>Sessize Al</span> 
+  </button>
+  <button onClick={handleLeaveGroup} className='hover:bg-gray-100 flex space-x-2 items-center'>
+   <ArrowLeftIcon className="h-4 w-4 text-gray-500" />
+ <span>Gruptan Çık</span>
+  </button>
+              </div>
+          )
+        }
       </div>
 
       {/* Messages Area */}
