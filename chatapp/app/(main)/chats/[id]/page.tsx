@@ -34,6 +34,7 @@ const [messages, setMessages] = useState<
     content: string;
     user_id: string;
     avatar_url:string;
+    image_url:string;
     created_at: string;
   }[]
 >([]); 
@@ -77,7 +78,7 @@ const getChatInfo=async()=>{
 //mesajları getirme
       const { data, error } = await supabase
   .from("messages")
-    .select("id, content, user_id, created_at, users(id, name, avatar_url)")
+    .select("id, content, user_id, created_at,image_url, users(id, name, avatar_url)")
   .eq("chat_id", chatId)
   .order("created_at", { ascending: true });
 
@@ -289,7 +290,15 @@ const handleLeaveGroup = async () => {
                   : "bg-white text-gray-900 rounded-tl-none"
               } p-3 rounded-lg max-w-xs shadow`}
             >
-              <p>{msg.content}</p>
+             {msg.image_url ? (
+    <img
+      src={`https://kpdoboupcsggbkjhfacv.supabase.co/storage/v1/object/public/chat-images/${msg.image_url}`}
+      alt="Resim"
+      className="rounded-md mb-2 max-h-60 object-contain"
+    />
+  ) : (
+    <p>{msg.content}</p>
+  )}
               <p className="text-xs text-gray-600 mt-1">
                 {format(msg.created_at)}
               </p>
