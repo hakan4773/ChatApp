@@ -144,6 +144,12 @@ const handleLeaveGroup = async () => {
       </div>
     );
   }
+  // Dışa tıklama ile kapanma için handler
+   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (e.target === e.currentTarget) {
+        setOpenSettings(false);
+      }
+    };
   return (
     <div className="min-h-screen flex flex-col bg-blue-100">
       {/* Header */}
@@ -153,7 +159,7 @@ const handleLeaveGroup = async () => {
         chatName={chatInfo?.name || null}
         members={members}
       />
-      <div className="bg-blue-500 text-white p-4 flex items-center justify-between shadow-md relative">
+      <div className="bg-blue-500 text-white p-4 flex items-center justify-between shadow-md relative" onClick={handleOverlayClick}>
         <div className="flex items-center space-x-3">
           <Image
             src={chatInfo?.users[0]?.avatar_url || "/5.jpg"}
