@@ -1,20 +1,94 @@
 "use client"
-import { CameraIcon, DocumentIcon, MapPinIcon, MicrophoneIcon, PaperAirplaneIcon, PlusCircleIcon } from '@heroicons/react/24/outline';
-import React, { useState } from 'react'
+import { CameraIcon, DocumentIcon, MapPinIcon, MicrophoneIcon, PaperAirplaneIcon, PlusCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import React, { useRef, useState,ChangeEvent  } from 'react'
 
 interface MessageInputProps {
   newMessage: string;
   setNewMessage: (value: string) => void;
   sendMessage: () => void;
+  onSendImage: (file: File) => void;
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage, sendMessage }) => {
+const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage, sendMessage ,onSendImage }) => {
     const [openMethods,setOpenMethods]=useState(false);
+     const [imagePreview, setImagePreview] = useState<string | null>(null);
+     const fileInputRef = useRef<HTMLInputElement>(null);
+    //Mesaj türünü seçin
     const handleOpenMethods=()=>{
         setOpenMethods(!openMethods);
     }
+  //resim gösterme 
+  
+ const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    //sadece resimler
+   if (!file.type.match('image.*')) {
+      alert('Sadece resim dosyaları seçebilirsiniz');
+      return;
+    }
+   //resim boyutu 
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Resim boyutu 5MB\'dan büyük olamaz');
+      return;
+    }
+    // Önizleme oluştur
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleSend = () => {
+    if (newMessage.trim()) {
+      sendMessage();
+      setNewMessage('');
+    }
+  };
+
+  const removePreview = () => {
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+
+
   return (
      <div className="p-4 border-t bg-white relative">
+              {/* Resim önizleme */}
+      {imagePreview && (
+        <div className="absolute bottom-16 left-4 bg-white p-2 rounded-lg shadow-lg border z-50">
+          <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover" />
+        <div className='absolute  bottom-3 right-1 '> 
+          <button
+            onClick={() => {
+              if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
+                onSendImage(fileInputRef.current.files[0]);
+                removePreview();
+              }
+            }}
+            className="p-1  bg-blue-500 text-white rounded-full hover:bg-blue-600"
+            title="Gönder"
+          >
+            <PaperAirplaneIcon className="w-4 h-4" />
+          </button>
+</div>
+          <button 
+            onClick={removePreview}
+            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+          >
+            <XMarkIcon className="w-3 h-3" />
+          </button>
+    
+        </div>
+      )}
+
   <div className="flex items-center space-x-2 relative">
     {/* Mikrofon butonu */}
     <button 
@@ -38,15 +112,15 @@ const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage, 
       type="text"
       value={newMessage}
       onChange={(e) => setNewMessage(e.target.value)}
-      onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+      onKeyDown={(e) => e.key === "Enter" &&  handleSend()}
       placeholder="Bir mesaj yazın..."
       className="flex-1 border rounded-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
     />
 
     {/* Gönder butonu */}
     <button
-      onClick={sendMessage}
-      disabled={!newMessage.trim()}
+    onClick={handleSend}
+       disabled={!newMessage.trim()}
       className={`p-2 rounded-full transition-colors ${
         newMessage.trim() 
           ? "bg-blue-500 text-white hover:bg-blue-600"
@@ -65,18 +139,25 @@ const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage, 
       <div className="absolute -bottom-2 left-5 w-4 h-4 bg-white transform rotate-45 border-b border-r border-gray-200"></div>
       
       <div className="flex flex-col space-y-1">
-        <button 
-          className="flex items-center space-x-3 p-3 rounded-md hover:bg-blue-50 transition-colors text-left"
-          onClick={() => {/* Fotoğraf ekleme fonksiyonu */}}
-        >
-          <div className="p-2 bg-blue-100 rounded-full">
-            <CameraIcon className="w-5 h-5 text-blue-600" />
-          </div>
-          <div>
-            <p className="font-medium text-gray-900">Fotoğraf/Video</p>
-            <p className="text-xs text-gray-500">Galeriden seç veya çek</p>
-          </div>
-        </button>
+    <button 
+  className="flex items-center space-x-3 p-3 rounded-md hover:bg-blue-50 transition-colors text-left w-full"
+  onClick={triggerFileInput} 
+>
+  <div className="p-2 bg-blue-100 rounded-full">
+    <CameraIcon className="w-5 h-5 text-blue-600" />
+  </div>
+  <div>
+    <p className="font-medium text-gray-900">Fotoğraf/Video</p>
+    <p className="text-xs text-gray-500">Galeriden seç veya çek</p>
+  </div>
+  <input 
+    ref={fileInputRef}
+    type="file" 
+    accept="image/*" 
+    onChange={handleImageChange}
+    className="hidden" 
+  />
+</button>
 
         <button 
           className="flex items-center space-x-3 p-3 rounded-md hover:bg-blue-50 transition-colors text-left"

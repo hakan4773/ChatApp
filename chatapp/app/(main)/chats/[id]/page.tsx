@@ -126,6 +126,44 @@ getChatInfo();
     playMessageSound();
   }
 };
+//resim 
+const handleImageUpload = async (file: File) => {
+    try {
+      // 1. Resmi Supabase'e yükle
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('chat-images')
+        .upload(`public/${fileName}`, file);
+
+      if (uploadError) throw uploadError;
+
+      // 2. Mesaj olarak gönder
+      const { data: messageData, error: messageError } = await supabase
+        .from('messages')
+        .insert({
+          chat_id: chatId,
+          user_id: user?.id,
+          image_url: uploadData.path,
+          content: "Bir resim gönderdi"
+        })
+        .select()
+        .single();
+
+      if (messageError) throw messageError;
+
+      // 3. Mesaj listesini güncelle
+      setMessages(prev => [...prev, messageData]);
+      
+    } catch (error) {
+      console.error("Resim yükleme hatası:", error);
+      toast.error("Resim yüklenirken hata oluştu");
+    }
+  };
+
+
+
 //Ayarları göster
 const handleSettings=()=>{
   setOpenSettings(!openSettings);
@@ -262,7 +300,8 @@ const handleLeaveGroup = async () => {
 
       </div>
       {/* Input Area */}
-    <MessageInput newMessage={newMessage} setNewMessage={setNewMessage} sendMessage={sendMessage}/>
+    <MessageInput newMessage={newMessage}  onSendImage={handleImageUpload}
+ setNewMessage={setNewMessage} sendMessage={sendMessage}/>
     </div>
   );
 }
