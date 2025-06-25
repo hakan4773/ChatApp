@@ -4,13 +4,14 @@ import { supabase } from '@/app/lib/supabaseClient'
 import { TrashIcon, BellSlashIcon, InformationCircleIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import { useParams,usePathname } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { leaveChat } from "../../../utils/leaveChat";
 import { useRouter } from "next/navigation";
 import { toast } from 'react-toastify'
 import { format } from "timeago.js";
 import InformationModal from '../../../components/InformationModal'
 import { playMessageSound } from '@/app/utils/sound'
+import { useScrollToBottom } from '@/app/hooks/useScrollToBottom'
 
 const Page = () => {
   const router = useRouter();
@@ -46,6 +47,8 @@ const [messages, setMessages] = useState<
   } | null>(null);
   const [openSettings,setOpenSettings]=useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false); 
+  const messagesContainerRef = useScrollToBottom(messages);
+
   useEffect(()=>{
 const getChatInfo=async()=>{
   setLoading(true)
@@ -101,6 +104,7 @@ const getChatInfo=async()=>{
 getChatInfo();
 
   },[chatId]);
+ 
 
 //mesaj gönderme
   const sendMessage = async () => {
@@ -152,8 +156,9 @@ const handleLeaveGroup = async () => {
         setOpenSettings(false);
       }
     };
+
   return (
-    <div className="min-h-screen flex flex-col bg-blue-100">
+    <div className=" h-screen flex flex-col bg-blue-100 ">
       {/* Header */}
       <InformationModal
         isOpen={showInfoModal}
@@ -161,7 +166,9 @@ const handleLeaveGroup = async () => {
         chatName={chatInfo?.name || null}
         members={members}
       />
-      <div className="bg-blue-500 text-white p-4 flex items-center justify-between shadow-md relative" onClick={handleOverlayClick}>
+      
+      <div className="bg-blue-500 text-white p-4 flex items-center justify-between shadow-md relative "
+       onClick={handleOverlayClick} >
         <div className="flex items-center space-x-3">
           <Image
             src={chatInfo?.users[0]?.avatar_url || "/5.jpg"}
@@ -194,6 +201,7 @@ const handleLeaveGroup = async () => {
             <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
           </svg>
         </button>
+        {/* ayarlar bölümü */}
         {openSettings && (
           <div className="absolute flex flex-col  border p-2 space-y-3 z-50  top-9 bg-gray-50 border-gray-50 text-gray-500 right-8 rounded-md ">
             <button className="hover:bg-gray-100 flex space-x-2 items-center"  onClick={()=>setShowInfoModal(true)}>
@@ -218,7 +226,7 @@ const handleLeaveGroup = async () => {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-4">
+      <div ref={messagesContainerRef} className="flex-1 p-4 overflow-y-auto space-y-4">
         {messages.map((msg, index) => (
           <div
             key={msg.id || index}
@@ -249,10 +257,11 @@ const handleLeaveGroup = async () => {
             </div>
           </div>
         ))}
-      </div>
 
+
+      </div>
       {/* Input Area */}
-      <div className="p-4 border-t bg-white">
+      <div className="p-4 border-t bg-white  ">
         <div className="flex items-center space-x-2">
           <button className="p-2 rounded-full hover:bg-gray-100">
             <svg
