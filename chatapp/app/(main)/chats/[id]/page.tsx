@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react'
 import { leaveChat } from "../../../utils/leaveChat";
 import { useRouter } from "next/navigation";
 import { toast } from 'react-toastify'
+import { format } from "timeago.js";
 
 const Page = () => {
   const router = useRouter();
@@ -28,6 +29,7 @@ const [messages, setMessages] = useState<
     id: string;
     content: string;
     user_id: string;
+    avatar_url:string;
     created_at: string;
   }[]
 >([]); 
@@ -57,21 +59,21 @@ const getChatInfo=async()=>{
         // 2. Sohbetteki kullanıcıları al (mevcut kullanıcı hariç)
         const { data: usersData } = await supabase
           .from('chat_members')
-          .select('users(id, name, avatar_url,created_at)') 
+          .select('users(id, name, avatar_url, created_at)') 
           .eq('chat_id', chatId)
           .neq('user_id', user.id);
-        console.log(usersData)
+ 
           if (usersData) {
          setMembers(usersData.map(({ users }) => users) || []);
           } else {
        setMembers([]);
           }
 //mesajları getirme
-       const { data, error } = await supabase
-       .from("messages")
-       .select("*")
-      .eq("chat_id", chatId)
-      .order("created_at", { ascending: true });
+      const { data, error } = await supabase
+  .from("messages")
+    .select("id, content, user_id, created_at, users(id, name, avatar_url)")
+  .eq("chat_id", chatId)
+  .order("created_at", { ascending: true });
 
     if (error) {
       console.error("Mesajlar alınamadı:", error.message);
@@ -96,9 +98,10 @@ const getChatInfo=async()=>{
 
 getChatInfo();
 
-  },[chatId])
-console.log(members)
- const sendMessage = async () => {
+  },[chatId]);
+
+//mesaj gönderme
+  const sendMessage = async () => {
   if (!newMessage.trim() || !user) return;
  //mesajı kaydet
   const { data, error } = await supabase.from("messages").insert({
@@ -189,19 +192,21 @@ const handleLeaveGroup = async () => {
      <div className='flex-1 p-4 overflow-y-auto space-y-4'>
   {messages.map((msg, index) => (
     <div key={msg.id || index} className={`flex ${msg.user_id === user?.id ? 'justify-end' : 'items-start space-x-2'}`}>
+ 
       {msg.user_id !== user?.id && (
         <Image 
-          src={"/5.jpg"} 
-          width={32} 
-          height={32} 
-          alt="avatar" 
-          className='rounded-full object-cover'
+          src={msg.avatar_url || "/5.jpg"}
+          width={32}
+          height={32}
+          alt="avatar"
+          className='rounded-full h-8 w-8 object-cover mr-2'
         />
       )}
-      <div className={`${msg.user_id === user?.id ? 'bg-blue-500 text-white rounded-tr-none' : 'bg-white text-gray-900 rounded-tl-none'} p-3 rounded-lg max-w-xs shadow`}>
+      <div className={`${msg.user_id === user?.id ? 'bg-blue-500 my-1 text-white rounded-tr-none' : 'bg-white text-gray-900 rounded-tl-none'} p-3 rounded-lg max-w-xs shadow`}>
         <p>{msg.content}</p>
-        <p className='text-xs text-gray-400 mt-1'>{new Date(msg.created_at).toLocaleTimeString()}</p>
+        <p className='text-xs text-gray-600 mt-1'>{format(msg.created_at)}</p>
       </div>
+        
     </div>
   ))}
 </div>
