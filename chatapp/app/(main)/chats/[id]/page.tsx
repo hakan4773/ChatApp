@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { toast } from 'react-toastify'
 import { format } from "timeago.js";
 import InformationModal from '../../../components/InformationModal'
+import { playMessageSound } from '@/app/utils/sound'
 
 const Page = () => {
   const router = useRouter();
@@ -117,6 +118,7 @@ getChatInfo();
     //yeni mesajı ekle
     setMessages(prev => [...prev, data]); 
     setNewMessage("");
+    playMessageSound();
   }
 };
 //Ayarları göster
