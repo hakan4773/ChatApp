@@ -120,11 +120,20 @@ getChatInfo();
 
   if (error) {
     console.error("Mesaj gönderilemedi:", error.message);
-  } else if (data) {
+  } 
     //yeni mesajı ekle
     setMessages(prev => [...prev, data]); 
     setNewMessage("");
     playMessageSound();
+  
+  //chats tablosunda last_message_id alanını güncelle
+  const { error: updateError } = await supabase
+    .from("chats")
+    .update({ last_message_id: data.id })
+    .eq("id", chatId);
+
+ if (updateError) {
+    console.error("last_message_id güncellenemedi:", updateError.message);
   }
 };
 //resim 
@@ -294,7 +303,7 @@ const handleLeaveGroup = async () => {
     <img
       src={`https://kpdoboupcsggbkjhfacv.supabase.co/storage/v1/object/public/chat-images/${msg.image_url}`}
       alt="Resim"
-      className="rounded-md mb-2 max-h-60 object-contain"
+      className="rounded-md mb-2 max-h-60 max-w-60 object-contain"
     />
   ) : (
     <p>{msg.content}</p>
