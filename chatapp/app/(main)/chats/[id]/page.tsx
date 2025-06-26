@@ -285,7 +285,7 @@ const handleLeaveGroup = async () => {
           >
             {msg.user_id !== user?.id && (
               <Image
-                src={msg.avatar_url || "/5.jpg"}
+                src={chatInfo?.users.find((user) => user.id === msg.user_id)?.avatar_url || "/5.jpg"}
                 width={32}
                 height={32}
                 alt="avatar"
