@@ -1,11 +1,11 @@
 "use client";
 import { useUser } from "@/app/context/UserContext";
 import { CameraIcon, EnvelopeIcon, UserIcon } from "@heroicons/react/24/outline";
-import { User } from "@supabase/supabase-js";
 import { useFormik } from "formik";
 import React, { useEffect } from "react";
 import { handleUpload } from "../../utils/UpdateAvatar"
 import { supabase } from "@/app/lib/supabaseClient";
+import { toast } from "react-toastify";
 type ProfileFormValues = {
     name: string;
     avatar_url:string
@@ -20,60 +20,77 @@ function page() {
     },
     enableReinitialize: true,
     onSubmit: async (values) => {
-      if (!user?.email) {
-        alert("Kullanıcı e-posta adresi bulunamadı.");
-        return;
-      }
-try {
-  
-      const { error: authError } = await supabase.auth.updateUser({
-        data: {
-          name: values.name,
-          avatar_url: values.avatar_url,
-        },
-      });
-
-      const { data,error: dbError } = await supabase
-        .from("users")
-        .update({
-          name: values.name,
-          avatar_url: values.avatar_url,
-        })
-        .eq("id",user.id)
-console.log("Update result:", { data, dbError, status });
-
-      if (authError || dbError) {
-        console.error("Profil güncelleme hatası:", authError || dbError);
-        alert("Profil güncellenemedi.");
-        return;
-      }
-await refreshUser();
-
-const { data: updatedProfiles } = await supabase
-  .from("users")
-  .select("*")
-  .eq("id", user.id);
-
-if (updatedProfiles && updatedProfiles.length > 0) {
-  setUser({
-    ...user,
-    user_metadata: {
-      ...user.user_metadata,
-      name: updatedProfiles[0].name,
-      avatar_url: updatedProfiles[0].avatar_url,
-    }
-  });
-    }    alert("Profil başarıyla güncellendi!");
-}
-       catch (error) {
-   alert("Profil güncellenemedi.");
-
-}
-    },
-    
+  if (!user?.email) {
+    toast.error("Kullanıcı e-posta adresi bulunamadı.");
+    return;
   }
-);
 
+  try {
+    // 1. Supabase auth metadata güncelle
+    const { error: authError } = await supabase.auth.updateUser({
+      data: {
+        name: values.name,
+        avatar_url: values.avatar_url,
+      },
+    });
+
+    if (authError) throw authError;
+
+    // 2. users tablosunu güncelle
+    const { error: tableError } = await supabase
+      .from('users')
+      .update({
+        name: values.name,
+        avatar_url: values.avatar_url,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id);
+
+    if (tableError) {
+      console.error("Users tablosu güncelleme hatası:", tableError);
+    }
+
+    // 3. En güncel kullanıcı bilgilerini çek
+    const { data: refreshedUser, error: getUserError } = await supabase.auth.getUser();
+    if (getUserError || !refreshedUser?.user) {
+      throw getUserError || new Error("Kullanıcı bilgisi alınamadı.");
+    }
+if (typeof window !== 'undefined') {
+      localStorage.removeItem('sb-auth-state');
+    }
+    // 4. Context güncelle
+    setUser(refreshedUser.user);
+    toast.success("Profil başarıyla güncellendi!");
+  } catch (error) {
+    console.error("Profil güncellenemedi:", error);
+    toast.error("Profil güncellenemedi.");
+  }
+}
+
+     
+  },
+  
+);
+  useEffect(() => {
+      if (!user?.id) return; 
+ const getusers = async () => {
+  const { data, error } = await supabase
+    .from('users').select('*')
+    .eq('id', user?.id);
+  if (error) {
+    console.error("Kullanıcı bilgileri alınamadı:", error);
+    return;
+  }
+  if (data) {
+   formik.setFieldValue("name", data?.[0]?.name || user.user_metadata?.name || "");
+    formik.setFieldValue(
+      "avatar_url",
+      data?.[0]?.avatar_url || user.user_metadata?.avatar_url || ""
+    );
+  }
+};
+  getusers();
+}, [user]);
 
   return (
     <div className="flex min-h-screen bg-gray-50 p-4 md:p-8 justify-center items-start">
@@ -85,7 +102,7 @@ if (updatedProfiles && updatedProfiles.length > 0) {
         <div className="flex flex-col items-center md:items-start space-y-4">
           <div className="relative group">
             <img
-              src={user?.user_metadata?.avatar_url}
+              src={user?.user_metadata?.avatar_url || "/5.jpg"}
               alt="Profile"
               className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-indigo-100 shadow-sm"
             />
@@ -128,7 +145,7 @@ if (updatedProfiles && updatedProfiles.length > 0) {
                 <input
                   type="text"
                   className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-gray-50"
-                  value={formik.values.name }
+                  value={formik.values.name}
                   onChange={formik.handleChange}
                   name="name"
                   placeholder="Kullanıcı Adı"

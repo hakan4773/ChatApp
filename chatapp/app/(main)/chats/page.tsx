@@ -163,7 +163,7 @@ const ChatList = () => {
               <div className="relative mr-3">
                 {chat.other_users.length > 0 ? (
                   <Image
-                    src={chat.other_users[0]?.avatar_url || "/default-avatar.jpg"}
+                    src={chat.other_users[0]?.avatar_url || "/5.jpg"}
                     alt="Avatar"
                     width={48}
                     height={48}

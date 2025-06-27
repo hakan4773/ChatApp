@@ -51,7 +51,7 @@ function LeftBar({ setIsOpen, isOpen }: LeftBarProps) {
   href="/"
   icon={
     <img
-      src={user?.user_metadata.avatar_url || "/default-avatar.png"} alt="Profile" className="w-6 h-6 rounded-full border-2 border-indigo-500" />} label="Profil" isOpen={isOpen}
+      src={user?.user_metadata.avatar_url || "/5.jpg"} alt="Profile" className="w-6 h-6 rounded-full border-2 border-indigo-500" />} label="Profil" isOpen={isOpen}
 />
           <MenuLink href="/chats" icon={<UsersIcon className="w-6 h-6" />} label="Sohbetler" isOpen={isOpen} />
           <MenuLink href="/games" icon={<PuzzlePieceIcon className="w-6 h-6" />} label="Oyunlar" isOpen={isOpen} />

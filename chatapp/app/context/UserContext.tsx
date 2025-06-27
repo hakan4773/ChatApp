@@ -33,7 +33,7 @@ export const UserProvider = ({
   const refreshUser = async () => {
     const { data, error } = await supabase.auth.getUser();
     if (!error && data?.user) {
-      setUser(data.user);
+      setUser({ ...data.user });
     }
   };
 
