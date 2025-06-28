@@ -2,7 +2,6 @@
 import { CameraIcon, DocumentIcon, MapPinIcon, MicrophoneIcon, PaperAirplaneIcon, PlusCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import React, { useRef, useState,ChangeEvent  } from 'react'
 import {isValidFileType } from '../utils/FileUtils'
-import { PreviewFile } from './PrewievFile';
 interface MessageInputProps {
   newMessage: string;
   setNewMessage: (value: string) => void;
@@ -17,7 +16,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage, 
      const [filePreview, setFilePreview] = useState<File | null>(null);
      //referanslar
     const imageInputRef = useRef<HTMLInputElement>(null);
-      const fileInputRef = useRef<HTMLInputElement>(null);     
+    const fileInputRef = useRef<HTMLInputElement>(null);     
     const handleOpenMethods=()=>{
         setOpenMethods(!openMethods);
     }
@@ -104,7 +103,6 @@ const triggerImageInput = () => {
         </div>
       )}
       {/* Dosya önizleme */}
-       <PreviewFile filePreview={filePreview} setFilePreview={setFilePreview}  onSendFile={onSendFile}/>
 
   <div className="flex items-center space-x-2 relative">
     {/* Mikrofon butonu */}
