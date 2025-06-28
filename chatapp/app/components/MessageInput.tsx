@@ -2,6 +2,7 @@
 import { CameraIcon, DocumentIcon, MapPinIcon, MicrophoneIcon, PaperAirplaneIcon, PlusCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import React, { useRef, useState,ChangeEvent  } from 'react'
 import {isValidFileType } from '../utils/FileUtils'
+import İmagePreview from './İmagePreview';
 interface MessageInputProps {
   newMessage: string;
   setNewMessage: (value: string) => void;
@@ -13,7 +14,6 @@ interface MessageInputProps {
 const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage, sendMessage ,onSendImage,onSendFile }) => {
     const [openMethods,setOpenMethods]=useState(false);
      const [imagePreview, setImagePreview] = useState<string | null>(null);
-     const [filePreview, setFilePreview] = useState<File | null>(null);
      //referanslar
     const imageInputRef = useRef<HTMLInputElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);     
@@ -75,34 +75,19 @@ const triggerImageInput = () => {
   return (
      <div className="p-4 border-t bg-white relative">
               {/* Resim önizleme */}
-      {imagePreview && (
-        <div className="absolute bottom-16 left-4 bg-white p-2 rounded-lg shadow-lg border z-50">
-          <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover" />
-        <div className='absolute  bottom-3 right-1 '> 
-          <button
-          onClick={() => {
+    {imagePreview && (
+  <İmagePreview
+    previewUrl={imagePreview}
+    onSend={() => {
       const file = imageInputRef.current?.files?.[0];
       if (file) {
         onSendImage(file);
         removePreview();
       }
     }}
-            className="p-1  bg-blue-500 text-white rounded-full hover:bg-blue-600"
-            title="Gönder"
-          >
-            <PaperAirplaneIcon className="w-4 h-4" />
-          </button>
-</div>
-          <button 
-            onClick={removePreview}
-            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
-          >
-            <XMarkIcon className="w-3 h-3" />
-          </button>
-    
-        </div>
-      )}
-      {/* Dosya önizleme */}
+    onRemove={removePreview}
+  />
+)}
 
   <div className="flex items-center space-x-2 relative">
     {/* Mikrofon butonu */}
