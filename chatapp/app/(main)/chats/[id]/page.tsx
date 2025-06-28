@@ -3,8 +3,8 @@ import { useUser } from '@/app/context/UserContext'
 import { supabase } from '@/app/lib/supabaseClient'
 import { TrashIcon, BellSlashIcon, InformationCircleIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
-import { useParams,usePathname } from 'next/navigation'
-import React, { useEffect, useRef, useState } from 'react'
+import { useParams } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
 import { leaveChat } from "../../../utils/leaveChat";
 import { useRouter } from "next/navigation";
 import { toast } from 'react-toastify'
@@ -34,6 +34,7 @@ const [messages, setMessages] = useState<
     content: string;
     user_id: string;
     avatar_url:string;
+    file_url:string | null;
     image_url:string;
     created_at: string;
   }[]
@@ -78,7 +79,7 @@ const getChatInfo=async()=>{
 //mesajları getirme
       const { data, error } = await supabase
   .from("messages")
-    .select("id, content, user_id, created_at,image_url, users(id, name, avatar_url)")
+    .select("id, content, user_id, created_at,image_url,file_url, users(id, name, avatar_url)")
   .eq("chat_id", chatId)
   .order("created_at", { ascending: true });
 
@@ -171,6 +172,36 @@ const handleImageUpload = async (file: File) => {
       toast.error("Resim yüklenirken hata oluştu");
     }
   };
+ const handleFileUpload = async (file: File) => {
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('chat-files')
+      .upload(`public/${fileName}`, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data: messageData, error: messageError } = await supabase
+      .from('messages')
+      .insert({
+        chat_id: chatId,
+        user_id: user?.id,
+        content: file.name, 
+        file_url: uploadData.path, 
+      })
+      .select()
+      .single();
+
+    if (messageError) throw messageError;
+
+    setMessages(prev => [...prev, messageData]);
+  } catch (error) {
+    console.error("Dosya yükleme hatası:", error);
+    toast.error("Dosya yüklenirken hata oluştu");
+  }
+};
 
 
 
@@ -299,15 +330,24 @@ const handleLeaveGroup = async () => {
                   : "bg-white text-gray-900 rounded-tl-none"
               } p-3 rounded-lg max-w-xs shadow`}
             >
-             {msg.image_url ? (
-    <img
-      src={`https://kpdoboupcsggbkjhfacv.supabase.co/storage/v1/object/public/chat-images/${msg.image_url}`}
-      alt="Resim"
-      className="rounded-md mb-2 max-h-60 max-w-60 object-contain"
-    />
-  ) : (
-    <p>{msg.content}</p>
-  )}
+            {msg.image_url ? (
+  <img
+    src={`https://kpdoboupcsggbkjhfacv.supabase.co/storage/v1/object/public/chat-images/${msg.image_url}`}
+    alt="Resim"
+    className="rounded-md max-h-60 max-w-60 object-contain"
+  />
+) : msg.file_url ? (
+  <a
+    href={`https://kpdoboupcsggbkjhfacv.supabase.co/storage/v1/object/public/chat-files/${msg.file_url}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-blue-600 underline"
+  >
+    {msg.content}
+  </a>
+) : (
+  <p>{msg.content}</p>
+)}
               <p className="text-xs text-gray-600 mt-1">
                 {format(msg.created_at)}
               </p>
@@ -319,7 +359,7 @@ const handleLeaveGroup = async () => {
       </div>
       {/* Input Area */}
     <MessageInput newMessage={newMessage}  onSendImage={handleImageUpload}
- setNewMessage={setNewMessage} sendMessage={sendMessage}/>
+ setNewMessage={setNewMessage} sendMessage={sendMessage} onSendFile={handleFileUpload}  />
     </div>
   );
 }
