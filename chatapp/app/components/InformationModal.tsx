@@ -48,7 +48,7 @@ const InformationModal = ({ isOpen, onClose, chatName, members }: ChatInfoModalP
                 <div key={member.id} className="flex items-center space-x-3">
                   <div className="relative h-10 w-10">
                     <Image
-                      src={member.avatar_url || "/default-avatar.jpg"}
+                      src={member.avatar_url || "/5.jpg"}
                       fill
                       alt={member.name}
                       className="rounded-full object-cover"
