@@ -3,20 +3,32 @@ import { CameraIcon, DocumentIcon, MapPinIcon, MicrophoneIcon, PaperAirplaneIcon
 import React, { useRef, useState,ChangeEvent  } from 'react'
 import {isValidFileType } from '../utils/FileUtils'
 import İmagePreview from './İmagePreview';
+import { useLocation } from '../hooks/useLocation';
 interface MessageInputProps {
   newMessage: string;
   setNewMessage: (value: string) => void;
   sendMessage: () => void;
   onSendImage: (file: File) => void;
   onSendFile: (file: File) => void;
+  onSendLocation: (location: { lat: number; lng: number }) => void;
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage, sendMessage ,onSendImage,onSendFile }) => {
+const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage, sendMessage ,onSendImage,onSendFile,onSendLocation }) => {
     const [openMethods,setOpenMethods]=useState(false);
      const [imagePreview, setImagePreview] = useState<string | null>(null);
      //referanslar
     const imageInputRef = useRef<HTMLInputElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);     
+   //konum gönderme fonksiyonu
+     const { location,getLocation,setLocation } = useLocation();
+
+  const sendCurrentLocation = () => {
+    if (location) {
+      onSendLocation(location);
+    }
+  };
+    
+
     const handleOpenMethods=()=>{
         setOpenMethods(!openMethods);
     }
@@ -88,6 +100,26 @@ const triggerImageInput = () => {
     onRemove={removePreview}
   />
 )}
+{location && (
+        <div className="absolute bottom-16 left-4 bg-white p-2 rounded-lg shadow-lg border flex items-center space-x-2 z-50">
+          <MapPinIcon className="w-6 h-6 text-red-500" />
+          <span className="text-sm">Konumunuz</span>
+          <button 
+            onClick={sendCurrentLocation}
+            className="p-1 bg-blue-500 text-white rounded-full"
+          >
+            <PaperAirplaneIcon className="w-4 h-4" />
+          </button>
+          <button 
+            onClick={() => setLocation(null)}
+            className="p-1 bg-gray-200 rounded-full"
+          >
+            <XMarkIcon className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+
 
   <div className="flex items-center space-x-2 relative">
     {/* Mikrofon butonu */}
@@ -184,7 +216,7 @@ const triggerImageInput = () => {
  {/* Konum gönderme fonksiyonu */}
         <button 
           className="flex items-center space-x-3 p-3 rounded-md hover:bg-blue-50 transition-colors text-left"
-          onClick={() => {/* Konum gönderme fonksiyonu */}}
+       onClick={getLocation}
         >
           <div className="p-2 bg-green-100 rounded-full">
             <MapPinIcon className="w-5 h-5 text-green-600" />

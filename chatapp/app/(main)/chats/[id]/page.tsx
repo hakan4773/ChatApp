@@ -172,6 +172,7 @@ const Page = () => {
       toast.error("Resim yüklenirken hata oluştu");
     }
   };
+  //dosya yükleme
   const handleFileUpload = async (file: File) => {
     try {
       const fileExt = file.name.split(".").pop();
@@ -201,6 +202,27 @@ const Page = () => {
       console.error("Dosya yükleme hatası:", error);
       toast.error("Dosya yüklenirken hata oluştu");
     }
+  };
+  //konum gönderme
+  const handleSendLocation = async(location: { lat: number; lng: number }) => {
+    if (!user || !chatId) return;
+
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
+        chat_id: chatId,
+        user_id: user?.id,
+        content: "Bir konum gönderdi",
+        location: location,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Konum gönderilemedi:", error.message);
+    }
+    //yeni mesajı ekle
+    setMessages((prev) => [...prev, data]);
   };
 
   //Ayarları göster
@@ -264,6 +286,7 @@ const Page = () => {
 
       {/* Input Area */}
       <MessageInput
+        onSendLocation={handleSendLocation}
         newMessage={newMessage}
         onSendImage={handleImageUpload}
         setNewMessage={setNewMessage}
