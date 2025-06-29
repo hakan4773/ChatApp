@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import InformationModal from "../../../components/InformationModal";
 import { playMessageSound } from "@/app/utils/sound";
-import { useScrollToBottom } from "@/app/hooks/useScrollToBottom";
 import MessageInput from "@/app/components/MessageInput";
 import ChatHeader from "@/app/components/ChatHeader";
 import MessagesList from "@/app/components/MessagesList";
@@ -50,7 +49,6 @@ const Page = () => {
   } | null>(null);
   const [openSettings, setOpenSettings] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
-  const messagesContainerRef = useScrollToBottom(messages);
 
   useEffect(() => {
     const getChatInfo = async () => {
@@ -107,6 +105,26 @@ const Page = () => {
     getChatInfo();
   }, [chatId]);
 
+    //Mesajı okundu olarak işaretleme
+useEffect(() => {
+  if (!user?.id || !chatId) return;
+
+  const markMessagesAsRead = async () => {
+    const { error } = await supabase
+      .from("user_message_status")
+      .update({ is_read: true })
+      .eq("user_id", user.id)
+      .eq("chat_id", chatId)
+      .eq("is_read", false); 
+
+    if (error) {
+      console.error("Mesajlar okunmuş olarak işaretlenemedi:", error.message);
+    }
+  };
+
+  markMessagesAsRead();
+}, [chatId, user?.id]);
+
   //mesaj gönderme
   const sendMessage = async () => {
     if (!newMessage.trim() || !user) return;
@@ -124,6 +142,23 @@ const Page = () => {
     if (error) {
       console.error("Mesaj gönderilemedi:", error.message);
     }
+  
+    // 2. Tüm üyeler için okunmamış status kaydı oluştur
+  const { error: statusError } = await supabase
+    .from('user_message_status')
+    .insert(
+      members
+        .filter(member => member.id !== user.id)
+        .map(member => ({
+          user_id: member.id,
+          message_id: messages[messages.length - 1].id,
+          chat_id: chatId,
+          is_read: false
+        }))
+    );
+
+  if (statusError) throw statusError;
+
     //yeni mesajı ekle
     setMessages((prev) => [...prev, data]);
     setNewMessage("");

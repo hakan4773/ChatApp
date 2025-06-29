@@ -71,19 +71,34 @@ const ChatList = () => {
               name: chats.name,
               created_at: chats.created_at,
               last_message: chats.messages,
-              other_users: otherUsers?.map(({ users }) => users) || []
+              other_users: otherUsers?.map(({ users }) => users) || [],
+              unread_count: 0
             };
           })
         );
 
-        // 3. Okunmamış mesaj sayılarını al
-        const { data: unreadCounts } = await supabase
-          .rpc("get_unread_message_counts", { current_user_id: user.id });
+         // 3. Okunmamış mesaj sayılarını al
+    
+        const { data: unreadCounts, error: unreadError } = await supabase
+          .from("user_message_status")
+          .select("chat_id") 
+          .eq("user_id", user.id)
+          .eq("is_read", false);
+
+           if (unreadError) {
+            console.error("Okunmamış mesajlar alınamadı:", unreadError.message);
+             }
+
+        // Okunmamış mesaj sayısını hesapla
+         const unreadCountMap: Record<string, number> = {};
+       unreadCounts?.forEach(({ chat_id }) => {
+         unreadCountMap[chat_id] = (unreadCountMap[chat_id] || 0) + 1;
+      });
 
         // 4. Verileri birleştir
-        const finalChats = chatsWithUsers.map(chat => ({
-          ...chat,
-          unread_count: unreadCounts?.find((c:any) => c.chat_id === chat.id)?.count || 0
+      const finalChats = chatsWithUsers.map(chat => ({
+       ...chat,
+     unread_count: unreadCountMap[chat.id] || 0,
         }));
 
         // Tarihe göre sırala (en yeni en üstte)
@@ -120,7 +135,7 @@ const ChatList = () => {
     };
   }, [user?.id]);
 
-
+  // Yükleniyor durumu
   if (loading) {
     return (
       <div className="p-4 flex flex-col items-center justify-center h-64">

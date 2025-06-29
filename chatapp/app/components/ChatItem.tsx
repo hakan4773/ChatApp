@@ -56,9 +56,10 @@ const ChatItem = ({ chat, onClick }: ChatItemProps) => {
         )}
         {(chat.unread_count ?? 0) > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-            {chat.unread_count ?? 0}
+            {chat.unread_count ?? 0} <span className="sr-only">okunmamış mesaj</span>
           </span>
         )}
+       
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-baseline">
