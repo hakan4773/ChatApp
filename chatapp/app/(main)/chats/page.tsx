@@ -6,6 +6,7 @@ import { useUser } from "@/app/context/UserContext";
 import { useRouter } from "next/navigation";
 import { FiMessageSquare, FiUsers } from "react-icons/fi";
 import ChatItem from "@/app/components/ChatItem";
+import SearchInput from "@/app/components/SearchInput";
 
 type User = {
   id: string;
@@ -28,6 +29,7 @@ type Chat = {
 const ChatList = () => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = React.useState("");
   const { user } = useUser();
   const router = useRouter();
 
@@ -134,6 +136,12 @@ const ChatList = () => {
       supabase.removeChannel(subscription);
     };
   }, [user?.id]);
+   
+// Arama çubuğu için filtreleme
+const filteredChats = chats.filter(chat =>
+  chat.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  chat.last_message?.content?.toLowerCase().includes(searchTerm.toLowerCase())
+);
 
   // Yükleniyor durumu
   if (loading) {
@@ -151,6 +159,9 @@ const ChatList = () => {
         <h2 className="text-xl font-semibold text-gray-800 flex items-center">
           <FiMessageSquare className="mr-2" /> Sohbetler
         </h2>
+        {/* Arama çubuğu */}
+      <SearchInput  searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+
       </div>
 
       {chats.length === 0 ? (
@@ -163,7 +174,7 @@ const ChatList = () => {
         </div>
       ) : (
       <div className="divide-y divide-gray-100">
-          {chats.map((chat) => (
+          {filteredChats.map((chat) => (
             <ChatItem key={chat.id} chat={chat} onClick={() => router.push(`/chats/${chat.id}`)} />
           ))}
         </div>
