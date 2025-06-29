@@ -151,7 +151,7 @@ useEffect(() => {
         .filter(member => member.id !== user.id)
         .map(member => ({
           user_id: member.id,
-          message_id: messages[messages.length - 1].id,
+          message_id: data.id,
           chat_id: chatId,
           is_read: false
         }))
