@@ -20,7 +20,7 @@ type LeftBarProps = {
 };
 
 function LeftBar({ setIsOpen, isOpen }: LeftBarProps) {
-  const { user, signOut } = useUser();
+  const { user, signOut, loading } = useUser();
   const router = useRouter();
 
   const handleSignOut = () => {
@@ -29,6 +29,14 @@ function LeftBar({ setIsOpen, isOpen }: LeftBarProps) {
   };
 
   const toggleMenu = () => setIsOpen(!isOpen);
+   
+  if( loading) {
+    return (
+      <div className="fixed top-0 left-0 h-screen w-16 bg-white border-r shadow flex items-center justify-center z-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div

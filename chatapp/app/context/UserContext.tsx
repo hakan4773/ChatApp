@@ -25,10 +25,20 @@ export const UserProvider = ({
   const [user, setUser] = useState<User | null>(serverSession?.user ?? null);
   const [loading, setLoading] = useState(!serverSession);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
+
+ const signOut = async () => {
+  try {
+    setLoading(true);
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
     setUser(null);
-  };
+  } catch (error: any) {
+    console.error('Error signing out:', error.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const refreshUser = async () => {
     const { data, error } = await supabase.auth.getUser();
