@@ -33,6 +33,7 @@ const Page = () => {
       content: string;
       user_id: string;
       avatar_url: string;
+      location?: { lat: number; lng: number } | null;
       file_url: string | null;
       image_url: string;
       created_at: string;
@@ -79,7 +80,7 @@ const Page = () => {
         const { data, error } = await supabase
           .from("messages")
           .select(
-            "id, content, user_id, created_at,image_url,file_url, users(id, name, avatar_url)"
+            "id, content, user_id, created_at,image_url,file_url,location, users(id, name, avatar_url)"
           )
           .eq("chat_id", chatId)
           .order("created_at", { ascending: true });
