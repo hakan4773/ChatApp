@@ -2,7 +2,7 @@
 import { useUser } from "@/app/context/UserContext";
 import {  ChatBubbleLeftIcon, DocumentArrowUpIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Users from "../components/Users"
 import { supabase } from "../lib/supabaseClient";
 import { useRouter } from "next/navigation";
@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation";
  const router=useRouter();
 const [openUsers,setOpenUsers]=useState<boolean>(false)
 const [name, setName] = useState<string>("");
+const [activeChats, setActiveChats] = useState<number>(0);
+const [sharedFiles, setSharedFiles] = useState<number>(0);
 const handleCreateChat=async(selectedUsers:string [])=>{
   if(!user?.id){
     console.error("Kullanıcı kimliği bulunamadı.");
@@ -89,7 +91,46 @@ try {
       alert("Sohbet oluşturulamadı, lütfen tekrar deneyin.");
     }
   };
+  
+  //İstatistiksel verileri almak için gerekli fonksiyon
+useEffect(() => {
+  const fetchChatStats = async () => {
+    if (!user?.id) return;
 
+    try {
+      // Aktif sohbet sayısını al
+      const { data: activeChats, error: activeChatsError } = await supabase
+        .from("chat_members")
+        .select("chat_id")
+        .eq("user_id", user.id);
+
+      if (activeChatsError) throw activeChatsError;
+        setActiveChats(activeChats.length);
+        
+      // Paylaşılan dosya sayısını al
+      const { data: sharedFiles, error: sharedFilesError } = await supabase
+        .from("messages")
+        .select("id", { count: "exact" })
+        .eq("user_id", user.id)
+        .not("file_url", "is", null); 
+
+      if (sharedFilesError) throw sharedFilesError;
+         setSharedFiles(sharedFiles.length);
+
+      // Yeni bildirim sayısını al
+      // const { data: notifications, error: notificationsError } = await supabase
+      //   .from("notifications")
+      //   .select("*")
+      //   .eq("user_id", user.id)
+      //   .eq("is_read", false);
+
+      // if (notificationsError) throw notificationsError;
+    } catch (error) {
+      console.error("İstatistik verileri alınamadı:", error);
+    }
+    }
+    fetchChatStats();
+  }, [user]);
 
 const handleOpen=()=>{
   setOpenUsers(!openUsers)
@@ -159,11 +200,11 @@ const handleOpen=()=>{
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Hızlı Özet</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <p className="text-2xl font-bold text-indigo-600">5</p>
+                  <p className="text-2xl font-bold text-indigo-600">{activeChats}</p>
                   <p className="text-sm text-gray-500">Aktif Sohbet</p>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <p className="text-2xl font-bold text-indigo-600">12</p>
+                  <p className="text-2xl font-bold text-indigo-600">{sharedFiles}</p>
                   <p className="text-sm text-gray-500">Paylaşılan Dosya</p>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
