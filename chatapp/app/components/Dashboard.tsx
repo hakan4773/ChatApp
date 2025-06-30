@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
  const {user}=useUser();
  const router=useRouter();
 const [openUsers,setOpenUsers]=useState<boolean>(false)
-
+const [name, setName] = useState<string>("");
 const handleCreateChat=async(selectedUsers:string [])=>{
   if(!user?.id){
     console.error("Kullanıcı kimliği bulunamadı.");
@@ -57,7 +57,7 @@ try {
         const { data: newChat, error: insertChatError } = await supabase
           .from("chats")
           .insert({ created_at: new Date().toISOString(),
-            name: `Grup Sohbeti ${new Date().toLocaleDateString()}`, 
+            name: name || "Yeni Sohbet", 
            })
           .select("id")
           .single();
@@ -126,8 +126,8 @@ const handleOpen=()=>{
               </button>
 {
   openUsers && 
-<Users setOpenUsers={setOpenUsers} onCreateChat={handleCreateChat}/>
-  
+<Users setOpenUsers={setOpenUsers} onCreateChat={handleCreateChat} name={name} setName={setName} />
+
 }
               {/* Kart 2: Dosya Paylaşımı */}
               <Link

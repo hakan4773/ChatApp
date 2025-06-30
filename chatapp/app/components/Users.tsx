@@ -3,10 +3,13 @@ import React, { useEffect, useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { supabase } from "../lib/supabaseClient";
+import AddChatName from "./AddChatName";
 
 interface OpenProps {
   setOpenUsers: (open: boolean) => void;
   onCreateChat: (selectedUsers: string[]) => void;
+  name: string;
+  setName: (name: string) => void;
 }
 interface UserProps {
   id: string;
@@ -15,10 +18,10 @@ interface UserProps {
   avatar_url: string;
 }
 
-const Users = ({ setOpenUsers,onCreateChat }: OpenProps) => {
+const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
   const [users, setUsers] = useState<UserProps[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-
+  const [openNameState, setOpenNameState] = useState<boolean>(false);
   //Kullanıcıları getir
   useEffect(() => {
     const getUsers = async () => {
@@ -59,7 +62,14 @@ const Users = ({ setOpenUsers,onCreateChat }: OpenProps) => {
       console.log("Lütfen en az bir kullanıcı seçin.");
     }
   };
-
+  //isim belirleme componentini açma
+  const handleOpenName = () => {
+    if (selectedUsers.length > 0) {
+      setOpenNameState(true);
+    } else {
+      console.log("Lütfen en az bir kullanıcı seçin.");
+    }
+  };
   return (
     <div
       className="fixed inset-0  bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-50"
@@ -96,16 +106,13 @@ const Users = ({ setOpenUsers,onCreateChat }: OpenProps) => {
                 {/* Avatar */}
                 <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 overflow-hidden">
                   <Image
-                    src={
-                      user.avatar_url ? user.avatar_url : `/5.jpg`
-                    }
+                    src={user.avatar_url ? user.avatar_url : `/5.jpg`}
                     alt={user.name}
                     width={40}
                     height={40}
                     className="object-cover"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        "/avatars/default.jpg";
+                      (e.target as HTMLImageElement).src = "/5.jpg";
                     }}
                   />
                 </div>
@@ -128,12 +135,21 @@ const Users = ({ setOpenUsers,onCreateChat }: OpenProps) => {
         </ul>
         <div className="mt-4">
           <button
-             onClick={handleCreateGroupChat}
+            onClick={handleOpenName}
             className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-gray-400"
             disabled={selectedUsers.length === 0}
           >
             Grup Sohbeti Oluştur
           </button>
+
+          {openNameState && (
+            <AddChatName
+              setOpenNameState={setOpenNameState}
+              handleCreateGroupChat={handleCreateGroupChat}
+              name={name}
+              setName={setName}
+            />
+          )}
         </div>
       </div>
     </div>
