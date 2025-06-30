@@ -97,7 +97,7 @@ const Users = ({ setOpenUsers,onCreateChat }: OpenProps) => {
                 <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 overflow-hidden">
                   <Image
                     src={
-                      user.avatar_url ? user.avatar_url : `/avatars/default.jpg`
+                      user.avatar_url ? user.avatar_url : `/5.jpg`
                     }
                     alt={user.name}
                     width={40}
