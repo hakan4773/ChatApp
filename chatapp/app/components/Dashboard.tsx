@@ -170,17 +170,18 @@ const handleOpen=()=>{
 <Users setOpenUsers={setOpenUsers} onCreateChat={handleCreateChat} name={name} setName={setName} />
 
 }
-              {/* Kart 2: Dosya Paylaşımı */}
-              <Link
-                href="/files"
-                className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition hover:bg-indigo-50"
-              >
-                <DocumentArrowUpIcon className="w-10 h-10 text-indigo-600 mb-4" />
-                <h3 className="text-lg font-medium text-gray-800">Dosya Paylaş</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Belgelerinizi güvenli bir şekilde paylaşın.
-                </p>
-              </Link>
+     {/* Kart 2: Notlarım */}
+
+        <Link
+          href="/notes"
+          className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition hover:bg-indigo-50"
+           >
+           <DocumentArrowUpIcon className="w-10 h-10 text-indigo-600 mb-4" />
+             <h3 className="text-lg font-medium text-gray-800">Notlarım</h3>
+             <p className="text-sm text-gray-500 mt-1">
+            Kişisel notlarınızı kaydedin ve düzenleyin.
+          </p>
+         </Link>
 
               {/* Kart 3: Profili Görüntüle */}
               <Link
