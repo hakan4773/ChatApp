@@ -154,9 +154,9 @@ const filteredChats = chats.filter(chat =>
   }
 
   return (
-    <div className="p-4 space-y-2">
+    <div className=" p-4 space-y-2">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+        <h2 className="text-xl font-semibold  flex items-center">
           <FiMessageSquare className="mr-2" /> Sohbetler
         </h2>
         {/* Arama çubuğu */}
@@ -173,7 +173,7 @@ const filteredChats = chats.filter(chat =>
           </p>
         </div>
       ) : (
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y ">
           {filteredChats.map((chat) => (
             <ChatItem key={chat.id} chat={chat} onClick={() => router.push(`/chats/${chat.id}`)} />
           ))}

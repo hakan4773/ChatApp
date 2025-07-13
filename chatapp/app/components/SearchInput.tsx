@@ -4,7 +4,7 @@ import React from 'react'
 function SearchInput({ searchTerm, setSearchTerm} : { searchTerm: string, setSearchTerm: React.Dispatch<React.SetStateAction<string>>}) {
 
   return (
-   <div className="flex  bg-gray-100 p-2 rounded-full  relative">
+   <div className="flex p-2 rounded-full  relative">
            <MagnifyingGlassIcon className="w-5 h-5 text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
            <input
              type="text"

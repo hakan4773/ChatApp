@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import  "../globals.css"
 import LeftBar from  "../components/LeftBar";
 import { useState } from "react";
+import { ThemeProvider } from "../context/ThemaContext";
 
 export default function RootLayout({
   children,
@@ -17,8 +18,8 @@ export default function RootLayout({
               <LeftBar isOpen={isOpen} setIsOpen={setIsOpen} />
 
             {/* Sayfa içeriği */}
-<main className={`flex-1 bg-gray-100 overflow-auto transition-all duration-300 ${isOpen ? 'pl-64' : 'pl-16'}`}>
-              {children}
+<main className={`flex-1 overflow-auto transition-all duration-300 ${isOpen ? 'pl-64' : 'pl-16'}`}>
+            <ThemeProvider>{children}</ThemeProvider>  
             </main>
           </div>
    

@@ -36,7 +36,7 @@ const ChatItem = ({ chat, onClick }: ChatItemProps) => {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center p-3 bg-gray-50 hover:bg-gray-50 cursor-pointer transition ${
+      className={`flex items-center p-3  hover:bg-gray-50 cursor-pointer transition ${
         chat.unread_count ? "bg-blue-50" : ""
       }`}
     >
