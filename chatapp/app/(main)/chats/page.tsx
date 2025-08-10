@@ -173,7 +173,7 @@ const filteredChats = chats.filter(chat =>
           </p>
         </div>
       ) : (
-      <div className="divide-y ">
+      <div className="divide-y divide-gray-200">
           {filteredChats.map((chat) => (
             <ChatItem key={chat.id} chat={chat} onClick={() => router.push(`/chats/${chat.id}`)} />
           ))}

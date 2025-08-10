@@ -63,7 +63,7 @@ const ChatItem = ({ chat, onClick }: ChatItemProps) => {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-baseline">
-          <h3 className="text-sm font-semibold text-gray-900 truncate">
+          <h3 className="text-sm font-semibold  truncate">
             {chat.name || chat.other_users.map((u) => u.name).join(", ")}
           </h3>
           {chat.last_message && (
