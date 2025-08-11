@@ -64,16 +64,16 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 
       {openSettings && (
         <div className="absolute flex flex-col border p-2 space-y-3 z-50 top-9 bg-gray-50 border-gray-50 text-gray-500 right-8 rounded-md">
-          <button className="hover:bg-gray-100 flex space-x-2 items-center" onClick={() => setShowInfoModal(true)}>
-            <InformationCircleIcon className="h-4 w-4 text-gray-500" />
+          <button className="primary-button hover:bg-gray-100 flex space-x-2 items-center" onClick={() => setShowInfoModal(true)}>
+            <InformationCircleIcon className="h-4 w-4 " />
             <span>Bilgi</span>
           </button>
-          <button className="hover:bg-gray-100 flex space-x-2 items-center">
-            <BellSlashIcon className="h-4 w-4 text-gray-500" />
+          <button className="primary-button hover:bg-gray-100 flex space-x-2 items-center">
+            <BellSlashIcon className="h-4 w-4" />
             <span>Sessize Al</span>
           </button>
-          <button onClick={handleLeaveGroup} className="hover:bg-gray-100 flex space-x-2 items-center">
-            <TrashIcon className="h-4 w-4 text-gray-500" />
+          <button onClick={handleLeaveGroup} className="primary-button hover:bg-gray-100 flex space-x-2 items-center">
+            <TrashIcon className="h-4 w-4 " />
             <span>Gruptan Çık</span>
           </button>
         </div>

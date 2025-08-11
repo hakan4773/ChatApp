@@ -19,7 +19,7 @@ export default function RootLayout({
 
             {/* Sayfa içeriği */}
 <main className={`flex-1 overflow-auto transition-all duration-300 ${isOpen ? 'pl-64' : 'pl-16'}`}>
-            <ThemeProvider>{children}</ThemeProvider>  
+            {children}
             </main>
           </div>
    
