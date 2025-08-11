@@ -137,48 +137,48 @@ const handleOpen=()=>{
 }
   return (
    
-    <div className="min-h-screen  flex relative">
+    <div className="min-h-screen  flex relative bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
       <div className="flex-1 flex flex-col">
 
         {/* Dashboard İçeriği */}
-        <div className="flex-1 p-6 ">
+        <div className="flex-1 p-6  ">
           <div className="max-w-4xl mx-auto">
             {/* Hoş Geldin Mesajı */}
             <div className="mb-8 text-center">
               <h2 className="text-3xl font-semibold ">Merhaba, {user?.user_metadata.name}!</h2>
-              <p className="text-gray-500 mt-2">
+              <p className="text-gray-500  mt-2">
                 ChatApp'e hoş geldiniz! Yeni bir sohbete başlayın veya dosyalarınızı paylaşın.
               </p>
             </div>
 
             {/* Hızlı Erişim Kartları */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 ">
               {/* Kart 1: Yeni Sohbet */}
               <button
-                className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition hover:bg-indigo-50"
+                className="p-6  bg-white  dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl shadow-sm hover:shadow-md transition "
                 onClick={handleOpen}
               >
                 
                 <ChatBubbleLeftIcon className="w-10 h-10 text-indigo-600 mb-4" />
-                <h3 className="text-lg font-medium text-gray-800">Yeni Sohbet</h3>
-                <p className="text-sm text-gray-500 mt-1">
+                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">Yeni Sohbet</h3>
+                <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
                   Arkadaşlarınızla anında sohbete başlayın.
                 </p>
               </button>
-{
-  openUsers && 
-<Users setOpenUsers={setOpenUsers} onCreateChat={handleCreateChat} name={name} setName={setName} />
+                {
+                  openUsers && 
+                <Users setOpenUsers={setOpenUsers} onCreateChat={handleCreateChat} name={name} setName={setName} />
 
-}
+                }
      {/* Kart 2: Notlarım */}
 
         <Link
           href="/notes"
-          className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition hover:bg-indigo-50"
-           >
-           <DocumentArrowUpIcon className="w-10 h-10 text-indigo-600 mb-4" />
-             <h3 className="text-lg font-medium text-gray-800">Notlarım</h3>
-             <p className="text-sm text-gray-500 mt-1">
+          className="p-6 dark:bg-gray-800 dark:hover:bg-gray-700 bg-white rounded-xl shadow-sm hover:shadow-md transition"
+        >
+          <DocumentArrowUpIcon className="w-10 h-10 text-indigo-600 mb-4" />
+          <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">Notlarım</h3>
+          <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
             Kişisel notlarınızı kaydedin ve düzenleyin.
           </p>
          </Link>
@@ -186,31 +186,31 @@ const handleOpen=()=>{
               {/* Kart 3: Profili Görüntüle */}
               <Link
                 href="/profiles"
-                className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition hover:bg-indigo-50"
+                className="p-6 bg-white rounded-xl dark:bg-gray-800 dark:hover:bg-gray-700 shadow-sm hover:shadow-md transition "
               >
                 <UserCircleIcon className="w-10 h-10 text-indigo-600 mb-4" />
-                <h3 className="text-lg font-medium text-gray-800">Profil</h3>
-                <p className="text-sm text-gray-500 mt-1">
+                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">Profil</h3>
+                <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
                   Profil bilgilerinizi düzenleyin.
                 </p>
               </Link>
             </div>
 
             {/* Özet Alanı */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Hızlı Özet</h3>
+            <div className="bg-white dark:bg-gray-800  rounded-xl shadow-sm p-6">
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">İstatistikler</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <p className="text-2xl font-bold text-indigo-600">{activeChats}</p>
-                  <p className="text-sm text-gray-500">Aktif Sohbet</p>
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700  rounded-lg">
+                  <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{activeChats}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-300">Aktif Sohbet</p>
                 </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <p className="text-2xl font-bold text-indigo-600">{sharedFiles}</p>
-                  <p className="text-sm text-gray-500">Paylaşılan Dosya</p>
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{sharedFiles}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-300">Paylaşılan Dosya</p>
                 </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <p className="text-2xl font-bold text-indigo-600">3</p>
-                  <p className="text-sm text-gray-500">Yeni Bildirim</p>
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">3</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-300">Yeni Bildirim</p>
                 </div>
               </div>
             </div>  
