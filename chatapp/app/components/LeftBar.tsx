@@ -32,7 +32,7 @@ function LeftBar({ setIsOpen, isOpen }: LeftBarProps) {
    
   if( loading) {
     return (
-      <div className="fixed top-0 left-0 h-screen w-16 bg-white border-r shadow flex items-center justify-center z-50">
+      <div className="fixed top-0 left-0 h-screen w-16 bg-white dark:bg-gray-800 border-r shadow flex items-center justify-center z-50">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
       </div>
     );
@@ -42,24 +42,24 @@ function LeftBar({ setIsOpen, isOpen }: LeftBarProps) {
     <div
       className={`fixed top-0 left-0 h-screen ${
         isOpen ? "w-64" : "w-16"
-      } bg-white border-r shadow transition-all duration-300 flex flex-col justify-between z-50`}
+      } bg-white dark:bg-gray-800 border-r shadow transition-all duration-300 flex flex-col justify-between z-50`}
     >
       {/* Üst Kısım */}
       <div>
         {/* Toggle Butonu */}
         <div className="flex justify-end p-4">
           <button onClick={toggleMenu}>
-            <Bars3Icon className="w-6 h-6 text-gray-700" />
+            <Bars3Icon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
           </button>
         </div>
 
         {/* Menü Elemanları */}
-        <nav className="flex flex-col gap-2 px-2">
+        <nav className="flex flex-col gap-2 px-2 ">
            <MenuLink
   href="/"
   icon={
     <img
-      src={user?.user_metadata.avatar_url || "/5.jpg"} alt="Profile" className="w-6 h-6 rounded-full border-2 border-indigo-500" />} label="Profil" isOpen={isOpen}
+      src={user?.user_metadata.avatar_url || "/5.jpg"} alt="Profile" className="w-6 h-6 rounded-full border-2 border-indigo-500 dark:border-indigo-600" />} label="Profil" isOpen={isOpen}
 />
           <MenuLink href="/chats" icon={<UsersIcon className="w-6 h-6" />} label="Sohbetler" isOpen={isOpen} />
           <MenuLink href="/games" icon={<PuzzlePieceIcon className="w-6 h-6" />} label="Oyunlar" isOpen={isOpen} />
@@ -74,7 +74,7 @@ function LeftBar({ setIsOpen, isOpen }: LeftBarProps) {
     
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-100 text-red-600 transition-colors w-full"
+          className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-100 dark:hover:bg-red-600 dark:hover:text-red-200 text-red-600 dark:text-red-400 transition-colors w-full"
         >
           <ArrowLeftOnRectangleIcon className="w-6 h-6" />
           {isOpen && <span className="font-medium">Çıkış Yap</span>}
@@ -95,7 +95,7 @@ type MenuLinkProps = {
 const MenuLink: React.FC<MenuLinkProps> = ({ href, icon, label, isOpen }) => (
   <Link
     href={href}
-    className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-100 text-gray-700 transition-colors"
+    className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-600 text-gray-700 dark:text-gray-200 transition-colors"
   >
     {icon}
     {isOpen && <span className="font-medium">{label}</span>}
