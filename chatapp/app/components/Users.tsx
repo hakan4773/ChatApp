@@ -75,17 +75,17 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
       className="fixed inset-0  bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-50"
       onClick={handleOverlayClick}
     >
-      <div className="relative bg-white rounded-xl shadow-lg p-4 md:p-6 w-full max-w-md mx-auto transform translate-y-[-10%] md:translate-y-0">
+      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6 w-full max-w-md mx-auto transform translate-y-[-10%] md:translate-y-0">
         {/* Kapatma Butonu */}
         <button
           onClick={() => setOpenUsers(false)}
-          className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors"
+          className="absolute top-3 right-3 text-gray-400  hover:text-red-500 transition-colors"
         >
           <XMarkIcon className="h-6 w-6" />
         </button>
 
         {/* Başlık ve Ayırıcı */}
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
           Kullanıcı Seç
         </h3>
         <div className="border-b border-gray-200 mb-4"></div>
@@ -96,7 +96,7 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
             <li
               key={user.id}
               onClick={() => handleUserSelect(user.id)}
-              className={`p-4 bg-gray-50 rounded-lg hover:bg-indigo-50 transition cursor-pointer flex items-center justify-between ${
+              className={`p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-700 transition cursor-pointer flex items-center justify-between ${
                 selectedUsers.includes(user.id)
                   ? "border-2 border-indigo-500"
                   : ""
@@ -117,8 +117,8 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
                   />
                 </div>
                 <div>
-                  <p className="text-gray-800 font-medium">{user.name}</p>
-                  <p className="text-sm text-gray-500">{user.email}</p>
+                  <p className="text-gray-800 font-medium dark:text-gray-200">{user.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
                 </div>
               </div>
               <span
