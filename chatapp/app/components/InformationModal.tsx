@@ -22,13 +22,13 @@ const InformationModal = ({ isOpen, onClose, chatName, members }: ChatInfoModalP
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-gray-200 dark:bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold">Sohbet Bilgileri</h3>
+          <h3 className="text-lg font-bold dark:text-gray-200">Sohbet Bilgileri</h3>
           <button 
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition"
             aria-label="Kapat"
           >
             <XMarkIcon className="h-6 w-6" />
@@ -37,12 +37,12 @@ const InformationModal = ({ isOpen, onClose, chatName, members }: ChatInfoModalP
         
         <div className="space-y-4">
           <div>
-            <h4 className="font-semibold text-gray-700">Grup Adı</h4>
-            <p className="text-gray-900 mt-1">{chatName || "Belirtilmemiş"}</p>
+            <h4 className="font-semibold text-gray-700 dark:text-gray-300">Grup Adı</h4>
+            <p className="text-gray-900 dark:text-gray-300 mt-1">{chatName || "Belirtilmemiş"}</p>
           </div>
           
           <div>
-            <h4 className="font-semibold text-gray-700">Üyeler ({members.length})</h4>
+            <h4 className="font-semibold text-gray-700 dark:text-gray-300">Üyeler ({members.length})</h4>
             <div className="space-y-3 mt-2">
               {members.map((member) => (
                 <div key={member.id} className="flex items-center space-x-3">
@@ -55,8 +55,8 @@ const InformationModal = ({ isOpen, onClose, chatName, members }: ChatInfoModalP
                     />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{member.name}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="font-medium text-gray-900 dark:text-gray-300">{member.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       {new Date(member.created_at).toLocaleDateString('tr-TR')}
                     </p>
                   </div>
@@ -66,8 +66,8 @@ const InformationModal = ({ isOpen, onClose, chatName, members }: ChatInfoModalP
           </div>
           
           <div>
-            <h4 className="font-semibold text-gray-700">Oluşturulma Tarihi</h4>
-            <p className="text-gray-900 mt-1">
+            <h4 className="font-semibold text-gray-700 dark:text-gray-300">Oluşturulma Tarihi</h4>
+            <p className="text-gray-900 mt-1 dark:text-gray-300">
               {members[0]?.created_at 
                 ? new Date(members[0].created_at).toLocaleDateString('tr-TR', {
                     day: 'numeric',

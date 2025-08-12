@@ -85,7 +85,7 @@ const triggerImageInput = () => {
 
 
   return (
-     <div className="p-4 border-t bg-white relative">
+     <div className="p-4 border-t bg-white dark:bg-gray-600 relative">
               {/* Resim önizleme */}
     {imagePreview && (
   <İmagePreview
@@ -101,7 +101,7 @@ const triggerImageInput = () => {
   />
 )}
 {location && (
-        <div className="absolute bottom-16 left-4 bg-white p-2 rounded-lg shadow-lg border flex items-center space-x-2 z-50">
+        <div className="absolute bottom-16 left-4 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg border flex items-center space-x-2 z-50">
           <MapPinIcon className="w-6 h-6 text-red-500" />
           <span className="text-sm">Konumunuz</span>
           <button 
@@ -124,19 +124,19 @@ const triggerImageInput = () => {
   <div className="flex items-center space-x-2 relative">
     {/* Mikrofon butonu */}
     <button 
-      className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+      className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
       aria-label="Sesli mesaj"
     >
-      <MicrophoneIcon className="w-5 h-5 text-gray-600" />
+      <MicrophoneIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
     </button>
 
     {/* Ekstra seçenekler butonu */}
     <button 
-      className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+      className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
       onClick={handleOpenMethods}
       aria-label="Daha fazla seçenek"
     >
-      <PlusCircleIcon className="w-5 h-5 text-gray-600" />
+      <PlusCircleIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
     </button>
 
     {/* Mesaj input alanı */}
@@ -146,7 +146,7 @@ const triggerImageInput = () => {
       onChange={(e) => setNewMessage(e.target.value)}
       onKeyDown={(e) => e.key === "Enter" &&  handleSend()}
       placeholder="Bir mesaj yazın..."
-      className="flex-1 border rounded-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+      className="flex-1 border rounded-full dark:text-gray-300 py-2 px-4 focus:outline-none focus:ring-2  focus:ring-blue-500 dark:bg-gray-700 transition-all"
     />
 
     {/* Gönder butonu */}

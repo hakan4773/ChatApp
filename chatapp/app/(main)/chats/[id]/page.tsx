@@ -294,7 +294,7 @@ useEffect(() => {
   };
 
   return (
-    <div className=" h-screen flex flex-col bg-blue-100 ">
+    <div className=" h-screen flex flex-col bg-blue-100 dark:bg-blue-800">
       {/* Bilgi Modalı */}
       <InformationModal
         isOpen={showInfoModal}
