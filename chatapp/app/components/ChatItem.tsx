@@ -36,7 +36,7 @@ const ChatItem = ({ chat, onClick }: ChatItemProps) => {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center p-3  hover:bg-gray-50 cursor-pointer transition ${
+      className={`flex items-center p-3  hover:bg-gray-50 hover:dark:bg-gray-700 cursor-pointer transition ${
         chat.unread_count ? "bg-blue-50" : ""
       }`}
     >
@@ -63,11 +63,11 @@ const ChatItem = ({ chat, onClick }: ChatItemProps) => {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-baseline">
-          <h3 className="text-sm font-semibold  truncate">
+          <h3 className="text-sm font-semibold  dark:text-gray-200 truncate">
             {chat.name || chat.other_users.map((u) => u.name).join(", ")}
           </h3>
           {chat.last_message && (
-            <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
+            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 whitespace-nowrap">
               {formatDate(chat.last_message.created_at)}
             </span>
           )}
