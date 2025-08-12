@@ -143,28 +143,17 @@ const filteredChats = chats.filter(chat =>
   chat.last_message?.content?.toLowerCase().includes(searchTerm.toLowerCase())
 );
 
-  // Yükleniyor durumu
-  if (loading) {
-    return (
-      <div className="p-4 flex flex-col items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
-        <p className="mt-3 text-gray-600">Sohbetler yükleniyor...</p>
-      </div>
-    );
-  }
 
   return (
     <div className=" p-4 space-y-2 dark:bg-gray-800 min-h-screen">
-      <div className="flex items-center justify-between mb-4 text-gray-800 dark:text-gray-200">
-        <h2 className="text-xl font-semibold  flex items-center">
-          <FiMessageSquare className="mr-2" /> Sohbetler
-        </h2>
-        {/* Arama çubuğu */}
-      <SearchInput  searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-
+   
+   {loading ? (
+      <div className="p-4 flex flex-col items-center justify-center h-64 dark:bg-gray-800">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+        <p className="mt-3 text-gray-600 dark:text-gray-300">Sohbetler yükleniyor...</p>
       </div>
-
-      {chats.length === 0 ? (
+    ) :
+      chats.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-10 text-center text-gray-500 ">
           <FiUsers className="text-gray-400 text-4xl mb-3" />
           <p className="text-gray-500">Henüz sohbet yok</p>
@@ -173,11 +162,20 @@ const filteredChats = chats.filter(chat =>
           </p>
         </div>
       ) : (
+        <>
+           <div className="flex items-center justify-between mb-4 text-gray-800 dark:text-gray-200">
+        <h2 className="text-xl font-semibold  flex items-center">
+          <FiMessageSquare className="mr-2" /> Sohbetler
+        </h2>
+        {/* Arama çubuğu */}
+      <SearchInput  searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+
+      </div>
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
           {filteredChats.map((chat) => (
             <ChatItem key={chat.id} chat={chat} onClick={() => router.push(`/chats/${chat.id}`)} />
           ))}
-        </div>
+        </div></>
       )}
     </div>
   );
