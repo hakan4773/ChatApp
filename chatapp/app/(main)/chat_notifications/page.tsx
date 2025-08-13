@@ -17,9 +17,9 @@ export default function page() {
 const [readNotifications, setReadNotifications] = useState(0); 
 const [unreadNotifications, setUnreadNotifications] = useState(0);
 const [notifications, setNotifications] = useState<Notification[]>([]);
-    useEffect(() => {
-      getNotifications();
-    }, []);
+ useEffect(() => {
+   if (user?.id) getNotifications();
+ }, [user?.id]);
     const getNotifications = async () => {
     if (!user?.id) return;
       const { data, error } = await supabase.from("notifications").select("*")
@@ -32,6 +32,41 @@ const [notifications, setNotifications] = useState<Notification[]>([]);
         setUnreadNotifications(data.filter((n) => !n.is_read).length);
       }
     };
+
+    const readNotification = (id: number) => {
+      supabase
+        .from("notifications")
+        .update({ is_read: true })
+        .eq("id", id)
+        .then(() => {
+          setNotifications((prev) =>
+            prev.map((n) =>
+              n.id === id ? { ...n, is_read: true } : n
+            )
+          );
+          if (notifications.find((n) => n.id === id)?.is_read) return;
+          setReadNotifications((prev) => prev + 1);
+          setUnreadNotifications((prev) => prev - 1);
+        });
+    };
+   const readAllNotification = async () => {
+  if (!user?.id) return;
+  const { error } = await supabase
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("Bildirimler okundu olarak işaretlenemedi:", error.message);
+    return;
+  }
+  setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  setReadNotifications((prev) => prev + unreadCount);
+  setUnreadNotifications(0);
+};
+
   return (
     <div className="bg-white dark:bg-gray-800 min-h-screen">
       <div className="p-4 justify-between flex">
@@ -64,8 +99,9 @@ const [notifications, setNotifications] = useState<Notification[]>([]);
                   </p>
                 </div>
                 <div>
-                  <button className="mt-2 ml-auto px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors">
-                    Okundu olarak işaretle
+                  <button onClick={() => readNotification(notification.id)} 
+                  className="mt-2 ml-auto px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors">
+                  {notification.is_read ? "Okundu" : "Okundu olarak işaretle"}
                   </button>
                 </div>
               </div>
@@ -77,7 +113,7 @@ const [notifications, setNotifications] = useState<Notification[]>([]);
         )}
 
         <div className="mt-4 space-x-4">
-          <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
+          <button onClick={readAllNotification} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
             Tümünü Oku
           </button>
           <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">
