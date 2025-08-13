@@ -1,29 +1,47 @@
 "use client";
-import React, { useState } from "react";
+import { useUser } from "@/app/context/UserContext";
+import { supabase } from "@/app/lib/supabaseClient";
+import React, { useEffect, useState } from "react";
+
+interface Notification {
+  id: number;
+  title: string;
+  message: string;
+  created_at: string;
+  is_read: boolean;
+}
+
 
 export default function page() {
-  const notifications = [
-    {
-      title: "Yeni mesaj",
-      message: "Ali, sana yeni bir mesaj gönderdi.",
-      date: "2023-10-01T12:00:00Z",
-    },
-    {
-      title: "Güncelleme",
-      message: "Sistem güncellemesi başarıyla tamamlandı.",
-      date: "2023-10-02T14:30:00Z",
-    },
-  ];
+    const { user } = useUser();
+const [readNotifications, setReadNotifications] = useState(0); 
+const [unreadNotifications, setUnreadNotifications] = useState(0);
+const [notifications, setNotifications] = useState<Notification[]>([]);
+    useEffect(() => {
+      getNotifications();
+    }, []);
+    const getNotifications = async () => {
+    if (!user?.id) return;
+      const { data, error } = await supabase.from("notifications").select("*")
+      .eq("user_id", user?.id)
+      .order("created_at", { ascending: false });
+      if (error) console.error("Bildirimler alınamadı:", error.message);
+      if (data) {
+        setNotifications(data as Notification[]);
+        setReadNotifications(data.filter((n) => n.is_read).length);
+        setUnreadNotifications(data.filter((n) => !n.is_read).length);
+      }
+    };
   return (
     <div className="bg-white dark:bg-gray-800 min-h-screen">
       <div className="p-4 justify-between flex">
         <h1 className="text-2xl font-bold dark:text-white">Bildirimler</h1>
         <div className="flex space-x-4">
           <p className="border border-gray-200 dark:text-white rounded-md  bg-green-500 dark:border-gray-700 px-4 py-2">
-            Okunan (0){" "}
+            Okunan ({readNotifications})
           </p>
           <p className="border border-gray-200 dark:text-white rounded-md bg-red-500 dark:border-gray-700 px-4 py-2">
-            Okunmayan (2)
+            Okunmayan ({unreadNotifications})
           </p>
         </div>
       </div>
@@ -52,7 +70,7 @@ export default function page() {
                 </div>
               </div>
               <span className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                {new Date(notification.date).toLocaleString()}
+                {new Date(notification.created_at).toLocaleString()}
               </span>
             </div>
           ))
