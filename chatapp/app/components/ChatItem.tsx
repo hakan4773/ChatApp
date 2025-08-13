@@ -36,9 +36,7 @@ const ChatItem = ({ chat, onClick }: ChatItemProps) => {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center p-3  hover:bg-gray-50 hover:dark:bg-gray-700 cursor-pointer transition ${
-        chat.unread_count ? "bg-blue-50" : ""
-      }`}
+      className={`flex items-center p-3  hover:bg-gray-50 hover:dark:bg-gray-700 cursor-pointer transition`}
     >
       <div className="relative mr-3">
         {chat.other_users.length > 0 ? (
