@@ -91,10 +91,10 @@ if (typeof window !== 'undefined') {
 }, [user]);
 
   return (
-   <div className="flex min-h-screen dark:bg-gray-900 dark:text-white  p-4 md:p-8 justify-center items-center">
+   <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 dark:text-white  p-4 md:p-8 justify-center items-center">
   <form
     onSubmit={formik.handleSubmit}
-    className="w-full max-w-4xl  dark:bg-gray-700 rounded-xl shadow-md p-6 md:p-8 flex flex-col md:flex-row gap-8"
+    className="w-full max-w-4xl bg-white dark:bg-gray-700 rounded-xl shadow-md p-6 md:p-8 flex flex-col md:flex-row gap-8"
   >
     {/* Profil resmi */}
     <div className="flex flex-col items-center md:items-start space-y-4">
@@ -126,7 +126,7 @@ if (typeof window !== 'undefined') {
 
       <label
         htmlFor="profile-pic-upload"
-        className="cursor-pointer px-4 py-2  dark:bg-indigo-600 hover:bg-indigo-700 transition-colors text-sm font-medium rounded-lg"
+        className="cursor-pointer px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white transition-colors text-sm font-medium rounded-lg"
       >
         Profil Resmini Değiştir
       </label>
@@ -145,7 +145,7 @@ if (typeof window !== 'undefined') {
           <div className="relative">
             <input
               type="text"
-              className="w-full p-3 border   rounded-lg focus:outline-none focus:ring-2 focus:ring-input-focus-ring focus:border-transparent bg-input-bg text-text-color"
+              className="w-full p-3 border bg-gray-100 dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-input-focus-ring focus:border-transparent bg-input-bg text-text-color"
               value={formik.values.name}
               onChange={formik.handleChange}
               name="name"
@@ -168,7 +168,7 @@ if (typeof window !== 'undefined') {
               disabled
               onChange={formik.handleChange}
               name="email"
-              className="w-full p-3 border border-input-border rounded-lg  cursor-not-allowed"
+              className="w-full p-3 border border-input-border bg-gray-100 dark:bg-gray-800  rounded-lg  cursor-not-allowed"
               value={user?.email || "email@example.com"}
               readOnly
             />
@@ -182,7 +182,7 @@ if (typeof window !== 'undefined') {
         <div className="pt-4">
           <button
             type="submit"
-            className="w-full dark:bg-indigo-600 cursor:pointer hover:bg-indigo-700 md:w-auto px-6 py-2.5  font-medium rounded-lg  transition-colors"
+            className="w-full bg-indigo-600 text-white cursor:pointer hover:bg-indigo-700 md:w-auto px-6 py-2.5  font-medium rounded-lg  transition-colors"
           >
             Profili Güncelle
           </button>
