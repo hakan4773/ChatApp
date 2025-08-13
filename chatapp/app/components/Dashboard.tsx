@@ -15,6 +15,7 @@ const [openUsers,setOpenUsers]=useState<boolean>(false)
 const [name, setName] = useState<string>("");
 const [activeChats, setActiveChats] = useState<number>(0);
 const [sharedFiles, setSharedFiles] = useState<number>(0);
+const [notifications, setNotifications] = useState<number>(0);
 const handleCreateChat=async(selectedUsers:string [])=>{
   if(!user?.id){
     console.error("Kullanıcı kimliği bulunamadı.");
@@ -117,14 +118,17 @@ useEffect(() => {
       if (sharedFilesError) throw sharedFilesError;
          setSharedFiles(sharedFiles.length);
 
-      // Yeni bildirim sayısını al
-      // const { data: notifications, error: notificationsError } = await supabase
-      //   .from("notifications")
-      //   .select("*")
-      //   .eq("user_id", user.id)
-      //   .eq("is_read", false);
+       // Yeni bildirim sayısını al
+       const { data: notifications, error: notificationsError } = await supabase
+         .from("notifications")
+         .select("*")
+         .eq("user_id", user.id)
+         .eq("is_read", false);
 
-      // if (notificationsError) throw notificationsError;
+        if (notifications) {
+          setNotifications(notifications.length);
+        }
+       if (notificationsError) throw notificationsError;
     } catch (error) {
       console.error("İstatistik verileri alınamadı:", error);
     }
@@ -209,7 +213,7 @@ const handleOpen=()=>{
                   <p className="text-sm text-gray-500 dark:text-gray-300">Paylaşılan Dosya</p>
                 </div>
                 <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">3</p>
+                  <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{notifications}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-300">Yeni Bildirim</p>
                 </div>
               </div>
