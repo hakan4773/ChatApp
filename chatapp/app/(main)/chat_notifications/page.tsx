@@ -67,6 +67,36 @@ const [notifications, setNotifications] = useState<Notification[]>([]);
   setUnreadNotifications(0);
 };
 
+ const RemoveAllNotifications=async()=>{
+   if (!user?.id) return;
+   const { error } = await supabase
+     .from("notifications")
+     .delete()
+     .eq("user_id", user.id);
+
+   if (error) {
+     console.error("Bildirimler silinemedi:", error.message);
+     return;
+   }
+
+   setNotifications([]);
+   setReadNotifications(0);
+   setUnreadNotifications(0);
+ }
+
+ const deleteNotification = (id: number) => {
+       supabase
+         .from("notifications")
+         .delete()
+         .eq("id", id)
+         .then(() => {
+           setNotifications((prev) => prev.filter((n) => n.id !== id));
+           setUnreadNotifications((prev) =>
+             prev - (notifications.find((n) => n.id === id)?.is_read ? 0 : 1)
+           );
+         });
+     };
+
   return (
     <div className="bg-white dark:bg-gray-800 min-h-screen">
       <div className="p-4 justify-between flex">
@@ -98,10 +128,14 @@ const [notifications, setNotifications] = useState<Notification[]>([]);
                     {notification.message}
                   </p>
                 </div>
-                <div>
+                <div className="space-x-4">
                   <button onClick={() => readNotification(notification.id)} 
                   className="mt-2 ml-auto px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors">
                   {notification.is_read ? "Okundu" : "Okundu olarak işaretle"}
+                  </button>
+                   <button onClick={() => deleteNotification(notification.id)}
+                  className="mt-2 ml-auto px-3 py-1 bg-red-500 text-white text-sm rounded-full hover:bg-red-600 transition-colors">
+                  Sil
                   </button>
                 </div>
               </div>
@@ -116,7 +150,7 @@ const [notifications, setNotifications] = useState<Notification[]>([]);
           <button onClick={readAllNotification} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
             Tümünü Oku
           </button>
-          <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">
+          <button  onClick={RemoveAllNotifications} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">
             Tümünü Sil
           </button>
         </div>
