@@ -120,10 +120,40 @@ useEffect(() => {
     if (error) {
       console.error("Mesajlar okunmuş olarak işaretlenemedi:", error.message);
     }
+
+    
   };
 
   markMessagesAsRead();
 }, [chatId, user?.id]);
+
+//Sonradan kontrol edilecek kod
+useEffect(() => {
+  if (!user?.id) return;
+
+const subscription = supabase
+    .channel('public:user_message_status')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'user_message_status', filter: `user_id=eq.${user.id}` },
+      async (payload) => {
+      if (payload.new.user_id !== user.id) {
+        const { data: messageData } = await supabase
+          .from('messages')
+          .select('content')
+          .eq('id', payload.new.message_id)
+          .single();
+
+        toast.info(`Yeni mesaj: ${messageData?.content || 'Yeni mesaj var!'}`);
+        playMessageSound();
+      }
+    })
+    .subscribe();
+
+return () => {
+  subscription.unsubscribe();
+};
+}, [user?.id]);
 
   //mesaj gönderme
   const sendMessage = async () => {
@@ -173,6 +203,29 @@ useEffect(() => {
     if (updateError) {
       console.error("last_message_id güncellenemedi:", updateError.message);
     }
+     
+    //Notifications oluştur
+    if (data) {
+  const { error: notifError } = await supabase
+    .from('notifications')
+    .insert(
+      members
+        .filter(member => member.id !== user.id)
+        .map(member => ({
+          user_id: member.id,
+          type: 'chat',
+          title: `Yeni mesaj from ${user.user_metadata.name || 'Bilinmeyen'}`,
+          message: newMessage.trim(),
+          is_read: false
+        }))
+    );
+
+  if (notifError) console.error("Notification eklenemedi:", notifError.message);
+}
+
+
+
+
   };
   //resim
   const handleImageUpload = async (file: File) => {
