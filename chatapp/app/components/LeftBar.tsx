@@ -65,7 +65,7 @@ function LeftBar({ setIsOpen, isOpen }: LeftBarProps) {
           <MenuLink href="/games" icon={<PuzzlePieceIcon className="w-6 h-6" />} label="Oyunlar" isOpen={isOpen} />
           <MenuLink href="/settingsPage" icon={<CogIcon className="w-6 h-6" />} label="Ayarlar" isOpen={isOpen} />
           {/* <MenuLink href="/help" icon={<QuestionMarkCircleIcon className="w-6 h-6" />} label="Yardım" isOpen={isOpen} /> */}
-          <MenuLink href="/notifications" icon={<BellIcon className="w-6 h-6" />} label="Bildirimler" isOpen={isOpen} />
+          <MenuLink href="/chat_notifications" icon={<BellIcon className="w-6 h-6" />} label="Bildirimler" isOpen={isOpen} />
         </nav>
       </div>
 
