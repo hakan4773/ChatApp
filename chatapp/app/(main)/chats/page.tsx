@@ -39,7 +39,6 @@ const ChatList = () => {
     const fetchChats = async () => {
       setLoading(true);
       try {
-        // 1. Kullanıcının dahil olduğu sohbetleri al
         const { data: userChats, error: chatsError } = await supabase
           .from("chat_members")
           .select(`
@@ -56,10 +55,8 @@ const ChatList = () => {
 
         if (chatsError) throw chatsError;
 
-        // 2. Her sohbet için diğer kullanıcıları al
         const chatsWithUsers = await Promise.all(
           userChats.map(async ({ chat_id, chats }) => {
-            // Sohbetteki diğer kullanıcıları getir (mevcut kullanıcı hariç)
             const { data: otherUsers } = await supabase
               .from("chat_members")
               .select(`
@@ -79,7 +76,6 @@ const ChatList = () => {
           })
         );
 
-         // 3. Okunmamış mesaj sayılarını al
     
         const { data: unreadCounts, error: unreadError } = await supabase
           .from("user_message_status")
@@ -91,19 +87,16 @@ const ChatList = () => {
             console.error("Okunmamış mesajlar alınamadı:", unreadError.message);
              }
 
-        // Okunmamış mesaj sayısını hesapla
          const unreadCountMap: Record<string, number> = {};
        unreadCounts?.forEach(({ chat_id }) => {
          unreadCountMap[chat_id] = (unreadCountMap[chat_id] || 0) + 1;
       });
 
-        // 4. Verileri birleştir
       const finalChats = chatsWithUsers.map(chat => ({
        ...chat,
      unread_count: unreadCountMap[chat.id] || 0,
         }));
 
-        // Tarihe göre sırala (en yeni en üstte)
         finalChats.sort((a, b) => 
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
@@ -118,7 +111,6 @@ const ChatList = () => {
 
     fetchChats();
 
-    // Realtime abonelik
     const subscription = supabase
       .channel("chat_updates")
       .on(
@@ -137,7 +129,6 @@ const ChatList = () => {
     };
   }, [user?.id]);
    
-// Arama çubuğu için filtreleme
 const filteredChats = chats.filter(chat =>
   chat.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
   chat.last_message?.content?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -145,7 +136,7 @@ const filteredChats = chats.filter(chat =>
 
 
   return (
-    <div className=" p-4 space-y-2 dark:bg-gray-800 min-h-screen">
+    <div className=" p-4 space-y-2 bg-gray-100 dark:bg-gray-800 min-h-screen">
    
    {loading ? (
       <div className="p-4 flex flex-col items-center justify-center h-64 dark:bg-gray-800">

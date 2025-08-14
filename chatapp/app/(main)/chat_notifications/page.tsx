@@ -98,7 +98,7 @@ const [notifications, setNotifications] = useState<Notification[]>([]);
      };
 
   return (
-    <div className="bg-white dark:bg-gray-800 min-h-screen">
+    <div className="bg-gray-100 dark:bg-gray-800 min-h-screen">
       <div className="p-4 justify-between flex">
         <h1 className="text-2xl font-bold dark:text-white">Bildirimler</h1>
         <div className="flex space-x-4">
