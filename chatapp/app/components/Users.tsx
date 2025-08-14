@@ -6,7 +6,7 @@ import { supabase } from "../lib/supabaseClient";
 import AddChatName from "./AddChatName";
 import AddNewUsers from "./AddNewUsers";
 import { useUser } from "../context/UserContext";
-import { UserProps ,OpenProps} from "../../types/ContactUser";
+import { UserProps ,OpenProps} from "../../types/contactUser";
 
 const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
   const {user}=useUser();

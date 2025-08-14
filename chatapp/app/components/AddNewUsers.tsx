@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { toast } from 'react-toastify';
 import { supabase } from '../lib/supabaseClient';
 import { useUser } from '../context/UserContext';
-import { UserProps,AddNewUsersProps } from "../../types/ContactUser";
+import { UserProps,AddNewUsersProps} from "../../types/contactUser";
 
 
 function AddNewUsers({ setOpenUsers, onUserAdded }: AddNewUsersProps) {
