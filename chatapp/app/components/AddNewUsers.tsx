@@ -66,8 +66,8 @@ function AddNewUsers({ setOpenUsers, onUserAdded }: AddNewUsersProps) {
     const {error:notifError}=await supabase.from("notifications").insert({
       user_id: existingUser.id,
       type:"new_contact",
-      title: `Yeni bildirim from ${user?.user_metadata.name || 'Bilinmeyen'}`,
-      message: `${existingUser.name} (${existingUser.email}) kullanıcısı eklendi.`,
+      title: `${user?.user_metadata.name || 'Bilinmeyen'} kişisinden Yeni Bildirim`,
+      message: `${user?.user_metadata.name}  sizi ekledi.`,
     });
 
     if (notifError) {
