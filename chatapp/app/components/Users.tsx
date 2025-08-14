@@ -1,25 +1,12 @@
 "use client";
-import React, { use, useEffect, useState } from "react";
+import React, {useEffect, useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { supabase } from "../lib/supabaseClient";
 import AddChatName from "./AddChatName";
 import AddNewUsers from "./AddNewUsers";
 import { useUser } from "../context/UserContext";
-
-interface OpenProps {
-  setOpenUsers: (open: boolean) => void;
-  onCreateChat: (selectedUsers: string[]) => void;
-  name: string;
-  setName: (name: string) => void;
-}
-interface UserProps {
-  id: string;
-  name: string;
-  email: string;
-  avatar_url: string;
-  nickname: string;
-}
+import { UserProps ,OpenProps} from "../../types/ContactUser";
 
 const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
   const {user}=useUser();
@@ -27,7 +14,7 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [openNameState, setOpenNameState] = useState<boolean>(false);
   const [openNewUsers, setOpenNewUsersState] = useState<boolean>(false);
-  //Kullanıcıları getir
+
   useEffect(() => {
     const getUsers = async () => {
       try {
@@ -59,7 +46,11 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
     getUsers();
   }, [user]);
 
-  //Çoklu kullanıcı seçimi
+    const handleUserAdded = (newUser: UserProps) => {
+       setUsers((prev) => [...prev, newUser]);
+      };
+
+
   const handleUserSelect = (userId: string) => {
     setSelectedUsers((prev) =>
       prev.includes(userId)
@@ -68,7 +59,6 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
     );
   };
 
-  // Dışa tıklama ile kapanma için handler
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       setOpenUsers(false);
@@ -76,12 +66,12 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
   };
   const handleCreateGroupChat = () => {
     if (selectedUsers.length > 0) {
-      onCreateChat(selectedUsers); // Seçilen kullanıcıları üst bileşene ilet
+      onCreateChat(selectedUsers);
     } else {
       console.log("Lütfen en az bir kullanıcı seçin.");
     }
   };
-  //isim belirleme componentini açma
+
   const handleOpenName = () => {
     if (selectedUsers.length > 0) {
       setOpenNameState(true);
@@ -99,7 +89,6 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
       onClick={handleOverlayClick}
     >
       <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6 w-full max-w-md mx-auto transform translate-y-[-10%] md:translate-y-0">
-        {/* Kapatma Butonu */}
         <button
           onClick={() => setOpenUsers(false)}
           className="absolute top-3 right-3 text-gray-400  hover:text-red-500 transition-colors"
@@ -107,7 +96,6 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
           <XMarkIcon className="h-6 w-6" />
         </button>
 
-        {/* Başlık ve Yeni kullanıcı ekleme  */}
         <div className="flex justify-between ">
         <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
           Kullanıcı Seç
@@ -116,17 +104,16 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
           Yeni Kullanıcı Ekle
         </button>
          {openNewUsers && (
-            <AddNewUsers setOpenUsers={setOpenNewUsersState}  />
+            <AddNewUsers onUserAdded={handleUserAdded} setOpenUsers={setOpenNewUsersState}  />
           )} 
       </div>
                 
        <div className="border-b border-gray-200 mb-4"></div>
 
-        {/* Kullanıcı Listesi */}
         <ul className="space-y-3 max-h-[70vh] overflow-y-auto">
           {users.map((user) => (
             <li
-              key={user?.id}
+              key={user.users.id}
               onClick={() => handleUserSelect(user.id)}
               className={`p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-700 transition cursor-pointer flex items-center justify-between ${
                 selectedUsers.includes(user.id)

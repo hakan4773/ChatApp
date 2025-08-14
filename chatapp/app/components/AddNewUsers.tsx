@@ -4,10 +4,10 @@ import React, { useState } from 'react'
 import { toast } from 'react-toastify';
 import { supabase } from '../lib/supabaseClient';
 import { useUser } from '../context/UserContext';
-interface AddNewUsersProps {
-    setOpenUsers: (open: boolean) => void;
-}
-function AddNewUsers({ setOpenUsers }: AddNewUsersProps) {
+import { UserProps,AddNewUsersProps } from "../../types/ContactUser";
+
+
+function AddNewUsers({ setOpenUsers, onUserAdded }: AddNewUsersProps) {
     const { user } = useUser();
     const [newUser, setNewUser] = useState({ name: '', email: ''});
 
@@ -53,12 +53,14 @@ function AddNewUsers({ setOpenUsers }: AddNewUsersProps) {
     contact_id: existingUser.id,
     email: email,
     nickname: name 
-  });
+  }).select() 
+    .single();
 
   if (error) {
     toast.error("Kullanıcı eklenirken hata oluştu.");
   } else {
     toast.success("Yeni Kullanıcı Eklendi");
+     onUserAdded(data as UserProps);
     setNewUser({ name: '', email: ''});
   }
 };
