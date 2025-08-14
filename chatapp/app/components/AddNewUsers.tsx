@@ -62,9 +62,22 @@ function AddNewUsers({ setOpenUsers, onUserAdded }: AddNewUsersProps) {
     toast.success("Yeni Kullanıcı Eklendi");
      onUserAdded(data as UserProps);
     setNewUser({ name: '', email: ''});
-  }
-};
 
+    const {error:notifError}=await supabase.from("notifications").insert({
+      user_id: existingUser.id,
+      type:"new_contact",
+      title: `Yeni bildirim from ${user?.user_metadata.name || 'Bilinmeyen'}`,
+      message: `${existingUser.name} (${existingUser.email}) kullanıcısı eklendi.`,
+    });
+
+    if (notifError) {
+      console.error("Bildirim gönderilirken hata oluştu", notifError);
+    } 
+
+  }
+  
+}
+  
 
   return (
       <div className="fixed inset-0  bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-50 shadow-2xl">

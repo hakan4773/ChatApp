@@ -110,13 +110,13 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
                 
        <div className="border-b border-gray-200 mb-4"></div>
 
-        <ul className="space-y-3 max-h-[70vh] overflow-y-auto">
-          {users.map((user) => (
+        <ul className="max-h-64 overflow-y-auto space-y-2">
+          {users.map((user,index) => (
             <li
-              key={user.users.id}
-              onClick={() => handleUserSelect(user.id)}
+              key={`${user.id}-${index}`}
+              onClick={() => handleUserSelect(user.users.id)}
               className={`p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-700 transition cursor-pointer flex items-center justify-between ${
-                selectedUsers.includes(user.id)
+                selectedUsers.includes(user.users.id)
                   ? "border-2 border-indigo-500"
                   : ""
               }`}
