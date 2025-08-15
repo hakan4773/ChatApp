@@ -1,17 +1,15 @@
 "use client";
 import Link from "next/link";
 import React, { useState } from "react";
-import { ChatBubbleLeftIcon, LanguageIcon } from "@heroicons/react/24/outline";
+import { ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
 import * as yup from "yup";
 import { useFormik } from "formik";
-
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
-import { User } from "@supabase/supabase-js";
 import { useUser } from "@/app/context/UserContext";
 function Page() {
      const router = useRouter();
-     const {user,setUser}=useUser();
+     const {setUser}=useUser();
 const [loading, setLoading] = useState(false);
   const formik=useFormik({
     initialValues: {
@@ -52,7 +50,7 @@ onSubmit: async (values, { setSubmitting }) => {
   });
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-200 via-blue-400 to-indigo-900 flex flex-col lg:flex-row items-center justify-center p-4">
-      {/* Header: Logo ve Dil Seçimi */}
+     
       <div className="w-full flex justify-between items-center px-4 lg:px-12 py-4 absolute top-0 left-0 right-0">
         <Link href="/login" className="flex items-center text-white text-3xl font-bold tracking-tight">
           <ChatBubbleLeftIcon className="h-8 w-8 mr-2" />
@@ -60,7 +58,6 @@ onSubmit: async (values, { setSubmitting }) => {
         </Link>
       </div>
 
-      {/* Başlık ve Açıklama */}
       <div className="text-center lg:w-1/2 mt-16 lg:mt-0">
         <h1 className="text-5xl lg:text-6xl font-extrabold text-white tracking-tight">
           Welcome Back!
@@ -70,7 +67,6 @@ onSubmit: async (values, { setSubmitting }) => {
         </p>
       </div>
 
-      {/* Giriş Formu */}
       <div className="lg:w-1/2 max-w-md w-full mt-8 lg:mt-0">
         <form className="bg-white rounded-2xl shadow-xl p-8" onSubmit={formik.handleSubmit}>
           <div className="mb-6">
