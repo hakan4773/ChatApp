@@ -54,13 +54,9 @@ onSubmit: async (values, { setSubmitting }) => {
     <div className="min-h-screen bg-gradient-to-br from-sky-200 via-blue-400 to-indigo-900 flex flex-col lg:flex-row items-center justify-center p-4">
       {/* Header: Logo ve Dil Seçimi */}
       <div className="w-full flex justify-between items-center px-4 lg:px-12 py-4 absolute top-0 left-0 right-0">
-        <Link href="/" className="flex items-center text-white text-3xl font-bold tracking-tight">
+        <Link href="/login" className="flex items-center text-white text-3xl font-bold tracking-tight">
           <ChatBubbleLeftIcon className="h-8 w-8 mr-2" />
           CHATAPP
-        </Link>
-        <Link href="/" className="flex items-center text-white text-lg font-medium">
-          <LanguageIcon className="h-6 w-6 mr-2" />
-          EN
         </Link>
       </div>
 
