@@ -145,7 +145,7 @@ const [notifications, setNotifications] = useState<Notification[]>([]);
             </div>
           ))
         )}
-
+      {notifications.length > 0 && (
         <div className="mt-4 space-x-4">
           <button onClick={readAllNotification} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
             Tümünü Oku
@@ -154,6 +154,8 @@ const [notifications, setNotifications] = useState<Notification[]>([]);
             Tümünü Sil
           </button>
         </div>
+      )}
+
       </div>
     </div>
   );
