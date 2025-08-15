@@ -11,6 +11,12 @@ export interface UserProps {
   nickname: string;
   users: UserNested;
 }
+export interface FriendsProps{
+    id:string;
+    nickname:string;
+    email:string;
+    avatar_url:string;
+}
 export interface OpenProps {
   setOpenUsers: (open: boolean) => void;
   onCreateChat: (selectedUsers: string[]) => void;

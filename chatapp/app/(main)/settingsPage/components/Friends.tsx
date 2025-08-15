@@ -4,27 +4,23 @@ import { ChatBubbleBottomCenterIcon, NoSymbolIcon, TrashIcon, UserIcon, XMarkIco
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify';
- 
-interface FriendsProps{
-    id:string;
-    nickname:string;
-    email:string;
-    avatar_url:string;
+ import {FriendsProps} from "../../../../types/contactUser";
 
-}
 interface OpenProps{
     setOpenFriendsState: (open: boolean) => void;
+    friends:FriendsProps[];
+    setFriends: (friends: FriendsProps[]) => void;
+    handleBlock:(id:string)=>void
 }
-export default function Friends({setOpenFriendsState}:OpenProps) {
+export default function Friends({setOpenFriendsState,friends,setFriends,handleBlock}:OpenProps) {
     const {user}=useUser();
-    const [friends,setFriends]=useState<FriendsProps[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
 const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
     useEffect(() => {
       const getFriendList = async () => {
         const { data, error } = await supabase
           .from("contacts")
-          .select("*")
+          .select("*").eq("is_blocked", false)
           .eq("owner_id", user?.id);
 
         if (error) {
@@ -39,18 +35,21 @@ const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
     const filteredFriends = friends.filter(friend =>
   friend.nickname ? friend.nickname.toLowerCase().includes(searchTerm.toLowerCase()) : false
 );
- 
+
+
+
 const handleDelete = async (id: string) => {
   const { error } = await supabase.from("contacts").delete().eq("id", id);
 if(error) {
   toast.error("Kullanıcı silinirken hata oluştu")
 }
 else {
-  setFriends(prev=>prev.filter(friend=>friend.id!==id));
+  setFriends(friends.filter(friend => friend.id !== id));
   toast.success("Kullanıcı başarıyla silindi");
 }
 setConfirmDelete(null);
 };
+
   return (
 <div className="fixed inset-0 bg-white/50 backdrop-blur-sm flex justify-center items-center z-50">
       <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6 w-full max-w-md mx-auto transform translate-y-[-10%] md:translate-y-0">
@@ -95,10 +94,7 @@ setConfirmDelete(null);
                   </div>
                 </div>
                 <div className="flex space-x-2  ">
-                  <button className='rounded-md bg-blue-500  hover:bg-blue-600 text-white px-2 py-2 '>
-                    <ChatBubbleBottomCenterIcon className="h-4 w-4 text-white" />
-                      </button>
-                  <button className='rounded-md bg-yellow-500  hover:bg-yellow-600 text-white px-2 py-2 '>
+                  <button onClick={()=>handleBlock(friend.id)} className='rounded-md bg-yellow-500  hover:bg-yellow-600 text-white px-2 py-2 '>
                     <NoSymbolIcon className="h-4 w-4 text-white" /></button>
                   <button onClick={()=>setConfirmDelete(friend.id)} className='rounded-md bg-red-500 hover:bg-red-600 text-white px-2 py-2 '>
                     <TrashIcon className="h-4 w-4  text-white" /></button>

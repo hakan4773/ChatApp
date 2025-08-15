@@ -4,16 +4,32 @@ import { ArrowLeftIcon, UserIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import { useTheme } from "../../context/ThemaContext";
 import Friends from "./components/Friends";
+import Blocked from "./components/Blocked";
+import { toast } from "react-toastify";
+import { supabase } from "@/app/lib/supabaseClient";
+ import {FriendsProps} from "../../../types/contactUser";
+
 type Theme = "light" | "dark";
-
-
 
 function SettingsPage() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [language, setLanguage] = useState("tr");
   const [openFriendsState,setOpenFriendsState] = useState(false);
-
+  const [openBlockedState,setOpenBlockedState] = useState(false);
+  const [blocked,setBlocked]=useState<FriendsProps[]>([]);
+  const [friends,setFriends]=useState<FriendsProps[]>([]);
+  const handleBlock=async(id:string)=>{
+    const {error}=await supabase.from("contacts").update({is_blocked:true}).eq("id",id);
+    if(error) {
+      toast.error("Kullanıcı engellenirken hata oluştu")
+    }
+    else {
+      setFriends(prev=>prev.filter(friend=>friend.id!==id));
+      setBlocked(prev=>[...prev,...blocked]);
+      toast.success("Kullanıcı engellendi");
+    }
+  }
   return (
     <div className="min-h-screen p-4 bg-white dark:bg-gray-900 transition-colors duration-300">
       <div className="max-w-2xl mx-auto">
@@ -50,7 +66,7 @@ function SettingsPage() {
             </button>
             
             <button 
-              onClick={() => router.push('/settings/blocked')}
+              onClick={()=>setOpenBlockedState(true)}
               className="w-full flex justify-between items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-800 dark:text-gray-200"
             >
               <span>Engellenen Kullanıcılar</span>
@@ -58,8 +74,12 @@ function SettingsPage() {
             </button>
           </div>
           {openFriendsState && (
-            <Friends setOpenFriendsState={setOpenFriendsState}/>
+            <Friends friends={friends} handleBlock={handleBlock}  setFriends={setFriends} setOpenFriendsState={setOpenFriendsState}/>
           )}
+          {openBlockedState && (
+            <Blocked blocked={blocked} setBlocked={setBlocked} setOpenBlockedState={setOpenBlockedState}/>
+          )}
+
         </div>
         
         {/* Tema Ayarları */}
