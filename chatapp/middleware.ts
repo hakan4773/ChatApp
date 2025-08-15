@@ -9,16 +9,29 @@ export async function middleware(request: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  if (!session && !request.nextUrl.pathname.startsWith("/login")) {
+  if (!session && !request.nextUrl.pathname.startsWith("/login") && !request.nextUrl.pathname.startsWith("/register")) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     return NextResponse.redirect(redirectUrl);
-  } else {
+  }
+
+  if (session && (request.nextUrl.pathname.startsWith("/login") || request.nextUrl.pathname.startsWith("/register"))) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/";
+    return NextResponse.redirect(redirectUrl);
   }
 
   return res;
 }
 
 export const config = {
-  matcher: [ "/profiles/:path*", "/chats/:path*"],
+  matcher: [
+    "/",
+    "/profiles/:path*",
+    "/chats/:path*",
+    "/chat_notifications/:path*",
+    "/settingsPage/:path*",
+    "/login",
+    "/register",
+  ],
 };
