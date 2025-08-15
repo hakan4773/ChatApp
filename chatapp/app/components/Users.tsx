@@ -52,6 +52,7 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
 
 
   const handleUserSelect = (userId: string) => {
+     if (!userId) return;
     setSelectedUsers((prev) =>
       prev.includes(userId)
         ? prev.filter((id) => id !== userId)
@@ -113,10 +114,10 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
         <ul className="max-h-64 overflow-y-auto space-y-2">
           {users.map((user,index) => (
             <li
-              key={`${user.id}-${index}`}
-              onClick={() => handleUserSelect(user.users.id)}
+              key={`${user.contact_id}-${index}`}
+              onClick={() => handleUserSelect(user.users?.id)}
               className={`p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-700 transition cursor-pointer flex items-center justify-between ${
-                selectedUsers.includes(user.users.id)
+                selectedUsers.includes(user.users?.id || "")
                   ? "border-2 border-indigo-500"
                   : ""
               }`}
@@ -125,7 +126,7 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
                 {/* Avatar */}
                 <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 overflow-hidden">
                   <Image
-                    src={user.avatar_url ? user.avatar_url : `/5.jpg`}
+                    src={user.users?.avatar_url || `/5.jpg`}
                     alt={user.nickname}
                     width={40}
                     height={40}
@@ -142,12 +143,12 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
               </div>
               <span
                 className={`text-indigo-600 font-medium ${
-                  selectedUsers.includes(user.id)
+                  selectedUsers.includes(user.users?.id)
                     ? "opacity-100"
                     : "opacity-0 group-hover:opacity-100"
                 } transition-opacity`}
               >
-                {selectedUsers.includes(user.id) ? "Seçili" : "Seç"}
+                {selectedUsers.includes(user.users?.id) ? "Seçili" : "Seç"}
               </span>{" "}
             </li>
           ))}

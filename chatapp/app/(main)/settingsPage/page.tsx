@@ -3,6 +3,7 @@ import React, {  useState } from "react";
 import { ArrowLeftIcon, UserIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import { useTheme } from "../../context/ThemaContext";
+import Friends from "./components/Friends";
 type Theme = "light" | "dark";
 
 
@@ -11,6 +12,7 @@ function SettingsPage() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [language, setLanguage] = useState("tr");
+  const [openFriendsState,setOpenFriendsState] = useState(false);
 
   return (
     <div className="min-h-screen p-4 bg-white dark:bg-gray-900 transition-colors duration-300">
@@ -40,7 +42,7 @@ function SettingsPage() {
           
           <div className="space-y-4">
             <button 
-              onClick={() => router.push('/settings/friends')}
+              onClick={()=>setOpenFriendsState(true)}
               className="w-full flex justify-between items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-800 dark:text-gray-200"
             >
               <span>Arkadaş Listesi</span>
@@ -55,6 +57,9 @@ function SettingsPage() {
               <span className="text-indigo-600 dark:text-indigo-400">Yönet</span>
             </button>
           </div>
+          {openFriendsState && (
+            <Friends setOpenFriendsState={setOpenFriendsState}/>
+          )}
         </div>
         
         {/* Tema Ayarları */}

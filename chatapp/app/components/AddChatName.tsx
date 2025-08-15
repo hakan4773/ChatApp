@@ -19,9 +19,9 @@ const handleSubmit = (e: React.FormEvent) => {
   setOpenNameState(false);
 };
   return (
-      <div className="fixed inset-0  bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-50 shadow-2xl">
-        <div className="bg-white rounded-lg p-6 w-96">
-          <h2 className="text-xl font-semibold mb-4">Sohbet Adı Ekle</h2>
+      <div className="fixed inset-0 bg-opacity-30 backdrop-blur-sm flex justify-center items-center z-50 shadow-2xl">
+        <div className="bg-white  dark:bg-gray-700 rounded-lg p-6 w-96">
+          <h2 className="text-xl font-semibold mb-4 dark:text-gray-200">Sohbet Adı Ekle</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="mb-4">
             <label htmlFor="chatName" className="block text-sm font-medium text-gray-700">
@@ -32,7 +32,7 @@ const handleSubmit = (e: React.FormEvent) => {
                 id="chatName"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 placeholder="Sohbet adını girin"
             />
             </div>

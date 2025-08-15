@@ -6,10 +6,8 @@ export interface UserNested {
   avatar_url: string | null;
 }
 export interface UserProps {
-  id: string;
-  name: string;
+  contact_id: string;
   email: string;
-  avatar_url: string;
   nickname: string;
   users: UserNested;
 }

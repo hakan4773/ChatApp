@@ -35,7 +35,10 @@ function AddNewUsers({ setOpenUsers, onUserAdded }: AddNewUsersProps) {
     toast.error("Kullanıcı sistemde bulunamadı.");
     return;
   }
-
+    if (existingUser.id === userId) {
+      toast.error("Kendinizi ekleyemezsiniz.");
+      return;
+    }
   const { data: existingContact } = await supabase
     .from("contacts")
     .select("*")
@@ -54,7 +57,7 @@ function AddNewUsers({ setOpenUsers, onUserAdded }: AddNewUsersProps) {
     email: email,
     nickname: name 
   }).select() 
-    .single();
+  .maybeSingle();
 
   if (error) {
     toast.error("Kullanıcı eklenirken hata oluştu.");
