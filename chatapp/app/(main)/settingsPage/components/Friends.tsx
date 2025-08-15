@@ -34,16 +34,20 @@ const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
         }
       };
       getFriendList();
-    },[]);
+    },[user]);
 
     const filteredFriends = friends.filter(friend =>
   friend.nickname ? friend.nickname.toLowerCase().includes(searchTerm.toLowerCase()) : false
 );
  
 const handleDelete = async (id: string) => {
-  const { data, error } = await supabase.from("contacts").delete().eq("id", id).select();
+  const { error } = await supabase.from("contacts").delete().eq("id", id);
 if(error) {
   toast.error("Kullanıcı silinirken hata oluştu")
+}
+else {
+  setFriends(prev=>prev.filter(friend=>friend.id!==id));
+  toast.success("Kullanıcı başarıyla silindi");
 }
 setConfirmDelete(null);
 };
@@ -68,7 +72,7 @@ setConfirmDelete(null);
           className="w-full p-2 mb-4 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
 
-        <ul className="flex flex-col space-y-2 overflow-y-auto min-h-52">
+        <ul className="flex flex-col space-y-2  overflow-y-auto max-h-[300px] md:max-h-[400px]">
           {filteredFriends.length > 0 ? (
             filteredFriends.map((friend) => (
               <li key={friend.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-700 transition  flex items-center justify-between">
@@ -114,7 +118,7 @@ setConfirmDelete(null);
               <p className="mb-4 dark:text-white">Bu arkadaşı silmek istiyor musunuz?</p>
               <div className="flex justify-end space-x-2">
                 <button onClick={() => setConfirmDelete(null)} className="text-gray-500">İptal</button>
-                <button onClick={() => handleDelete(confirmDelete)} className="text-red-500">Sil</button>
+                <button onClick={() => handleDelete(confirmDelete)} className="text-red-500  hover:bg-white hover:text-red-500 p-2 rounded">Sil</button>
               </div>
             </div>
           </div>
