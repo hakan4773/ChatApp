@@ -193,16 +193,20 @@ return () => {
   const sendMessage = async () => {
      if (!newMessage.trim() || !user) return;
      
-     // 1. Kullanıcının engellenmiş veya silinmiş olup olmadığını kontrol et(tekli sohbet)
+       const isDirectChat = members.length === 2;
+
+  if (isDirectChat) {
     const blockedRecipients = members.filter(member => {
     const contact = contacts.find(f => f.contact_id === member.id);
-    return contact?.is_blocked;
+    return !contact?.is_blocked;
     });
-
-  if (blockedRecipients.length > 0) {
+    if (blockedRecipients.length > 0) {
     toast.error("Bazı kullanıcılar engellenmiş veya silinmiş, mesaj gönderilemez!");
     return;
   }
+  }
+
+  
 
     //mesajı kaydet
     const { data, error } = await supabase
