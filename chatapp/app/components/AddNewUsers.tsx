@@ -71,6 +71,8 @@ function AddNewUsers({ setOpenUsers, onUserAdded }: AddNewUsersProps) {
       type:"new_contact",
       title: `${user?.user_metadata.name || 'Bilinmeyen'} kişisinden Yeni Bildirim`,
       message: `${user?.user_metadata.name}  sizi ekledi.`,
+      sender_id: userId,
+      is_read: false
     });
 
     if (notifError) {

@@ -261,7 +261,8 @@ return () => {
           type: 'chat',
           title: `Yeni mesaj from ${user.user_metadata.name || 'Bilinmeyen'}`,
           message: newMessage.trim(),
-          is_read: false
+          is_read: false,
+          sender_id: user.id
         }))
     );
 

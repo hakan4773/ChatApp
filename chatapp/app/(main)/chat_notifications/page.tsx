@@ -9,6 +9,8 @@ interface Notification {
   message: string;
   created_at: string;
   is_read: boolean;
+  user_id: string;
+  sender_id?: string;
 }
 
 
@@ -22,15 +24,32 @@ const [notifications, setNotifications] = useState<Notification[]>([]);
  }, [user?.id]);
     const getNotifications = async () => {
     if (!user?.id) return;
-      const { data, error } = await supabase.from("notifications").select("*")
+      const { data:notifications_data, error } = await supabase.from("notifications").select("*")
       .eq("user_id", user?.id)
       .order("created_at", { ascending: false });
       if (error) console.error("Bildirimler alınamadı:", error.message);
-      if (data) {
-        setNotifications(data as Notification[]);
-        setReadNotifications(data.filter((n) => n.is_read).length);
-        setUnreadNotifications(data.filter((n) => !n.is_read).length);
-      }
+
+    const { data: blockedData, error: blockedError } = await supabase
+    .from("contacts")
+    .select("*")
+    .eq("owner_id", user.id)
+    .eq("is_blocked", true);
+
+  if (blockedError) {
+    console.error("Engellenen kullanıcılar alınamadı:", blockedError.message);
+    return;
+  }
+
+  const blockedUserIds = blockedData?.map((contact) => contact.contact_id) || [];
+  const filteredNotifications = notifications_data?.filter(
+    (n) => !blockedUserIds.includes(n.sender_id)
+  );
+  console.log(blockedUserIds)
+
+setNotifications(filteredNotifications ?? []);
+setReadNotifications((filteredNotifications ?? []).filter((n) => n.is_read).length);
+setUnreadNotifications((filteredNotifications ?? []).filter((n) => !n.is_read).length);
+
     };
 
     const readNotification = (id: number) => {
