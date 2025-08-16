@@ -8,40 +8,52 @@ import Blocked from "./components/Blocked";
 import { toast } from "react-toastify";
 import { supabase } from "@/app/lib/supabaseClient";
  import {FriendsProps} from "../../../types/contactUser";
+import { useUser } from "@/app/context/UserContext";
 
 type Theme = "light" | "dark";
 
 function SettingsPage() {
-  const router = useRouter();
+  const router = useRouter(); 
+   const { user } = useUser();
   const { theme, setTheme } = useTheme();
   const [language, setLanguage] = useState("tr");
   const [openFriendsState,setOpenFriendsState] = useState(false);
   const [openBlockedState,setOpenBlockedState] = useState(false);
   const [blocked,setBlocked]=useState<FriendsProps[]>([]);
   const [friends,setFriends]=useState<FriendsProps[]>([]);
-  const handleBlock=async(id:string)=>{
-    const isBlocked = blocked.find(friend => friend.id === id)?.is_blocked;
-    const {error}=await supabase
+
+  const handleBlock = async (id: string) => {
+  const isBlocked = blocked.some(b => b.contact_id === id);
+
+  const { error } = await supabase
     .from("contacts")
-    .update({is_blocked:!isBlocked}).eq("id",id);
-    if(error) {
-      toast.error("Kullanıcı engellenirken hata oluştu")
-    }
-    if(isBlocked) {
-           setBlocked(prev=>prev.filter(blocked=>blocked.id!==id));
-           setFriends(prev=>[...prev,{id,nickname:"",email:"",avatar_url:"",is_blocked:false}]);
-           toast.success("Kullanıcı engeli kaldırıldı");
-      }
-      else {
-        const userToBlock = friends.find(friend => friend.id === id);
-        if (userToBlock) {
-        setFriends(prev => prev.filter(friend => friend.id !== id));
-        setBlocked(prev => [...prev, { ...userToBlock, is_blocked: true }]);
-         }
-      
-      toast.success("Kullanıcı engellendi");
-       }
+    .update({ is_blocked: !isBlocked })
+    .eq("contact_id", id).eq("owner_id", user?.id);
+
+  if (error) {
+    toast.error("Kullanıcı engellenirken hata oluştu");
+    return;
   }
+
+  if (isBlocked) {
+    const userToUnblock = blocked.find(b => b.contact_id === id);
+    setBlocked(prev => prev.filter(b => b.contact_id !== id));
+
+    if (userToUnblock) {
+      setFriends(prev => [...prev, { ...userToUnblock, is_blocked: false }]);
+    }
+
+    toast.success("Kullanıcı engeli kaldırıldı");
+  } else {
+    const userToBlock = friends.find(f => f.contact_id === id);
+    if (userToBlock) {
+      setFriends(prev => prev.filter(f => f.contact_id !== id));
+      setBlocked(prev => [...prev, { ...userToBlock, is_blocked: true }]);
+    }
+    toast.success("Kullanıcı engellendi");
+  }
+};
+
   return (
     <div className="min-h-screen p-4 bg-white dark:bg-gray-900 transition-colors duration-300">
       <div className="max-w-2xl mx-auto">

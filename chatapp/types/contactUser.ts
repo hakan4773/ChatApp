@@ -12,11 +12,11 @@ export interface UserProps {
   users: UserNested;
 }
 export interface FriendsProps{
-    id:string;
     nickname:string;
     email:string;
-    avatar_url:string;
     is_blocked:boolean;
+    contact_id:string;
+    users:UserNested;
 }
 export interface OpenProps {
   setOpenUsers: (open: boolean) => void;

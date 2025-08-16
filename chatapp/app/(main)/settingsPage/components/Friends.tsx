@@ -9,18 +9,26 @@ import { toast } from 'react-toastify';
 interface OpenProps{
     setOpenFriendsState: (open: boolean) => void;
     friends:FriendsProps[];
-    setFriends: (friends: FriendsProps[]) => void;
+    setFriends: React.Dispatch<React.SetStateAction<FriendsProps[]>>;
     handleBlock:(id:string)=>void
 }
 export default function Friends({setOpenFriendsState,friends,setFriends,handleBlock}:OpenProps) {
     const {user}=useUser();
     const [searchTerm, setSearchTerm] = useState("");
-const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
     useEffect(() => {
       const getFriendList = async () => {
         const { data, error } = await supabase
           .from("contacts")
-          .select("*").eq("is_blocked", false)
+          .select(`contact_id,
+              nickname,
+              email,
+              users!contacts_contact_id_fkey1 (
+                id,
+                name,
+                email,
+                avatar_url
+           )`).eq("is_blocked", false)
           .eq("owner_id", user?.id);
 
         if (error) {
@@ -36,15 +44,15 @@ const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   friend.nickname ? friend.nickname.toLowerCase().includes(searchTerm.toLowerCase()) : false
 );
 
-
+console.log(friends)
 
 const handleDelete = async (id: string) => {
-  const { error } = await supabase.from("contacts").delete().eq("id", id);
+  const { error } = await supabase.from("contacts").delete().eq("contact_id", id).eq("owner_id", user?.id);;
 if(error) {
   toast.error("Kullanıcı silinirken hata oluştu")
 }
 else {
-  setFriends(friends.filter(friend => friend.id !== id));
+  setFriends(friends.filter(friend => friend.contact_id !== id));
   toast.success("Kullanıcı başarıyla silindi");
 }
 setConfirmDelete(null);
@@ -74,11 +82,11 @@ setConfirmDelete(null);
         <ul className="flex flex-col space-y-2  overflow-y-auto max-h-[300px] md:max-h-[400px]">
           {filteredFriends.length > 0 ? (
             filteredFriends.map((friend) => (
-              <li key={friend.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-700 transition  flex items-center justify-between">
+              <li key={friend.contact_id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-700 transition  flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 overflow-hidden">
                     <Image
-                      src={friend.avatar_url ? friend.avatar_url : `/5.jpg`}
+                      src={friend.users.avatar_url ? friend.users.avatar_url : `/5.jpg`}
                       alt={friend?.nickname +"images"}
                       width={40}
                       height={40}
@@ -94,9 +102,9 @@ setConfirmDelete(null);
                   </div>
                 </div>
                 <div className="flex space-x-2  ">
-                  <button onClick={()=>handleBlock(friend.id)} className='rounded-md bg-yellow-500  hover:bg-yellow-600 text-white px-2 py-2 '>
+                  <button onClick={()=>handleBlock(friend.contact_id)} className='rounded-md bg-yellow-500  hover:bg-yellow-600 text-white px-2 py-2 '>
                     <NoSymbolIcon className="h-4 w-4 text-white" /></button>
-                  <button onClick={()=>setConfirmDelete(friend.id)} className='rounded-md bg-red-500 hover:bg-red-600 text-white px-2 py-2 '>
+                  <button onClick={()=>setConfirmDelete(friend.contact_id)} className='rounded-md bg-red-500 hover:bg-red-600 text-white px-2 py-2 '>
                     <TrashIcon className="h-4 w-4  text-white" /></button>
                 </div>
               </li>
