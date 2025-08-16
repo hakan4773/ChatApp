@@ -30,7 +30,7 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
       email,
       avatar_url
     )
-  `).eq("owner_id", user?.id);       
+  `).eq("owner_id", user?.id).eq("is_blocked", false);       
   
        
   if (error) {
