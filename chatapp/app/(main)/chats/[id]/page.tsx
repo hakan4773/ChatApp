@@ -11,6 +11,7 @@ import { playMessageSound } from "@/app/utils/sound";
 import MessageInput from "@/app/components/MessageInput";
 import ChatHeader from "@/app/components/ChatHeader";
 import MessagesList from "@/app/components/MessagesList";
+import { FriendsProps } from "@/types/contactUser";
 
 const Page = () => {
   const router = useRouter();
@@ -49,7 +50,8 @@ const Page = () => {
   } | null>(null);
   const [openSettings, setOpenSettings] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
-
+  const [contacts, setContacts] = useState<FriendsProps[]>([]);
+  const [blocked,setBlocked] = useState<FriendsProps[]>([]);
   useEffect(() => {
     const getChatInfo = async () => {
       setLoading(true);
@@ -87,8 +89,39 @@ const Page = () => {
           console.error("Mesajlar alınamadı:", error.message);
           return;
         }
+        //engellenen kullanıcıları getir
+        const { data: blockedData, error: blockedError } = await supabase
+          .from("contacts")
+          .select("*")
+          .eq("is_blocked", true)
+          .eq("owner_id", user.id);
 
-        setMessages(data || []);
+        if (blockedError) {
+          console.error("Engellenen kullanıcılar alınamadı:", blockedError.message);
+          return;
+        }
+        setBlocked(blockedData || []);
+        console.log(blockedData)
+
+        //engelleenen kullanıcının mesajını gösterme
+        const filteredMessages = data.filter(message => {
+          const senderContact = blockedData.find(c => c.contact_id === message.user_id);
+          return !senderContact?.is_blocked;
+        });
+
+        setMessages(filteredMessages);
+        
+           //mesaj engelleme
+          const { data: contactsData, error: contactsError } = await supabase
+            .from("contacts")
+            .select("*").eq("is_blocked", false)
+            .eq("owner_id", user.id);
+
+          if (contactsError) {
+            console.error(contactsError);
+            return;
+          }
+          setContacts(contactsData || []);        
 
         setChatInfo({
           name: chatData?.name || null,
@@ -157,7 +190,19 @@ return () => {
 
   //mesaj gönderme
   const sendMessage = async () => {
-    if (!newMessage.trim() || !user) return;
+     if (!newMessage.trim() || !user) return;
+     
+     // 1. Kullanıcının engellenmiş veya silinmiş olup olmadığını kontrol et(tekli sohbet)
+    const blockedRecipients = members.filter(member => {
+    const contact = contacts.find(f => f.contact_id === member.id);
+    return contact?.is_blocked;
+    });
+
+  if (blockedRecipients.length > 0) {
+    toast.error("Bazı kullanıcılar engellenmiş veya silinmiş, mesaj gönderilemez!");
+    return;
+  }
+
     //mesajı kaydet
     const { data, error } = await supabase
       .from("messages")

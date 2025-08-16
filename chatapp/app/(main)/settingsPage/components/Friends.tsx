@@ -44,8 +44,6 @@ export default function Friends({setOpenFriendsState,friends,setFriends,handleBl
   friend.nickname ? friend.nickname.toLowerCase().includes(searchTerm.toLowerCase()) : false
 );
 
-console.log(friends)
-
 const handleDelete = async (id: string) => {
   const { error } = await supabase.from("contacts").delete().eq("contact_id", id).eq("owner_id", user?.id);;
 if(error) {
