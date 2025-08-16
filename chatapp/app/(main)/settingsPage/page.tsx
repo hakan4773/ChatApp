@@ -33,8 +33,12 @@ function SettingsPage() {
            toast.success("Kullanıcı engeli kaldırıldı");
       }
       else {
-      setFriends(prev=>prev.filter(friend=>friend.id!==id));
-      setBlocked(prev=>[...prev,...blocked]);
+        const userToBlock = friends.find(friend => friend.id === id);
+        if (userToBlock) {
+        setFriends(prev => prev.filter(friend => friend.id !== id));
+        setBlocked(prev => [...prev, { ...userToBlock, is_blocked: true }]);
+         }
+      
       toast.success("Kullanıcı engellendi");
        }
   }
