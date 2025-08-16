@@ -10,9 +10,10 @@ type OpenProps = {
     setOpenBlockedState:(open: boolean) => void;
     blocked:FriendsProps[];
     setBlocked: (friends: FriendsProps[]) => void
+    handleBlock:(id:string)=>void
  }
    
-function Blocked({setOpenBlockedState,blocked,setBlocked}:OpenProps) {
+function Blocked({setOpenBlockedState,blocked,setBlocked,handleBlock}:OpenProps) {
     const { user } = useUser();
      useEffect(()=>{
       const getBlockedList = async () => {
@@ -30,7 +31,7 @@ function Blocked({setOpenBlockedState,blocked,setBlocked}:OpenProps) {
       };
       getBlockedList();
 
-    },[])
+    },[blocked])
   return (
    <div className="fixed inset-0 bg-white/50 backdrop-blur-sm flex justify-center items-center z-50">
       <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6 w-full max-w-md mx-auto transform translate-y-[-10%] md:translate-y-0">
@@ -67,7 +68,7 @@ function Blocked({setOpenBlockedState,blocked,setBlocked}:OpenProps) {
                   </div>
                 </div>
                 <div className="flex space-x-2  ">
-                  <button  className='rounded-md bg-green-500  hover:bg-green-600 text-white px-2 py-2 '>
+                  <button onClick={()=>handleBlock(block.id)}  className='rounded-md bg-green-500  hover:bg-green-600 text-white px-2 py-2 '>
                     <NoSymbolIcon className="h-4 w-4 text-white" /></button>
                  
                 </div>

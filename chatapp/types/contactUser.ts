@@ -16,6 +16,7 @@ export interface FriendsProps{
     nickname:string;
     email:string;
     avatar_url:string;
+    is_blocked:boolean;
 }
 export interface OpenProps {
   setOpenUsers: (open: boolean) => void;

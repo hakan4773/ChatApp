@@ -20,15 +20,23 @@ function SettingsPage() {
   const [blocked,setBlocked]=useState<FriendsProps[]>([]);
   const [friends,setFriends]=useState<FriendsProps[]>([]);
   const handleBlock=async(id:string)=>{
-    const {error}=await supabase.from("contacts").update({is_blocked:true}).eq("id",id);
+    const isBlocked = blocked.find(friend => friend.id === id)?.is_blocked;
+    const {error}=await supabase
+    .from("contacts")
+    .update({is_blocked:!isBlocked}).eq("id",id);
     if(error) {
       toast.error("Kullanıcı engellenirken hata oluştu")
     }
-    else {
+    if(isBlocked) {
+           setBlocked(prev=>prev.filter(blocked=>blocked.id!==id));
+           setFriends(prev=>[...prev,{id,nickname:"",email:"",avatar_url:"",is_blocked:false}]);
+           toast.success("Kullanıcı engeli kaldırıldı");
+      }
+      else {
       setFriends(prev=>prev.filter(friend=>friend.id!==id));
       setBlocked(prev=>[...prev,...blocked]);
       toast.success("Kullanıcı engellendi");
-    }
+       }
   }
   return (
     <div className="min-h-screen p-4 bg-white dark:bg-gray-900 transition-colors duration-300">
@@ -77,7 +85,7 @@ function SettingsPage() {
             <Friends friends={friends} handleBlock={handleBlock}  setFriends={setFriends} setOpenFriendsState={setOpenFriendsState}/>
           )}
           {openBlockedState && (
-            <Blocked blocked={blocked} setBlocked={setBlocked} setOpenBlockedState={setOpenBlockedState}/>
+            <Blocked blocked={blocked} handleBlock={handleBlock} setBlocked={setBlocked} setOpenBlockedState={setOpenBlockedState}/>
           )}
 
         </div>
