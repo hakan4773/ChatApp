@@ -44,7 +44,7 @@ const [notifications, setNotifications] = useState<Notification[]>([]);
   const filteredNotifications = notifications_data?.filter(
     (n) => !blockedUserIds.includes(n.sender_id)
   );
-  console.log(blockedUserIds)
+ 
 
 setNotifications(filteredNotifications ?? []);
 setReadNotifications((filteredNotifications ?? []).filter((n) => n.is_read).length);

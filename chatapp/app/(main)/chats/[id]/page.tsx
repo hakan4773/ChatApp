@@ -24,6 +24,7 @@ const Page = () => {
       id: string;
       name: string;
       avatar_url: string;
+      email: string;
       created_at: string;
     }[]
   >([]);
@@ -68,7 +69,7 @@ const Page = () => {
         // 2. Sohbetteki kullanıcıları al (mevcut kullanıcı hariç)
         const { data: usersData } = await supabase
           .from("chat_members")
-          .select("users(id, name, avatar_url, created_at)")
+          .select("users(id, name, avatar_url,email, created_at)")
           .eq("chat_id", chatId);
 
         if (usersData) {
@@ -405,6 +406,7 @@ return () => {
       <ChatHeader
         chatInfo={chatInfo}
         members={members}
+        contacts={contacts}
         openSettings={openSettings}
         handleSettings={handleSettings}
         handleOverlayClick={handleOverlayClick}
