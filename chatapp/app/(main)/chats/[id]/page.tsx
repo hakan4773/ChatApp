@@ -188,12 +188,13 @@ return () => {
   subscription.unsubscribe();
 };
 }, [user?.id]);
+  
+   const isDirectChat = members.length === 2;
 
   //mesaj gönderme
   const sendMessage = async () => {
      if (!newMessage.trim() || !user) return;
-     
-       const isDirectChat = members.length === 2;
+
 
   if (isDirectChat) {
     const blockedRecipients = members.filter(member => {
@@ -280,6 +281,16 @@ return () => {
   };
   //resim
   const handleImageUpload = async (file: File) => {
+       if (isDirectChat) {
+        const blockedRecipients = members.filter(member => {
+          const contact = contacts.find(f => f.contact_id === member.id);
+          return !contact?.is_blocked;
+        });
+        if (blockedRecipients.length > 0) {
+          toast.error("Bazı kullanıcılar engellenmiş veya silinmiş, mesaj gönderilemez!");
+          return;
+        }
+      }
     try {
       // 1. Resmi Supabase'e yükle
       const fileExt = file.name.split(".").pop();
@@ -314,6 +325,16 @@ return () => {
   };
   //dosya yükleme
   const handleFileUpload = async (file: File) => {
+       if (isDirectChat) {
+        const blockedRecipients = members.filter(member => {
+          const contact = contacts.find(f => f.contact_id === member.id);
+          return !contact?.is_blocked;
+        });
+        if (blockedRecipients.length > 0) {
+          toast.error("Bazı kullanıcılar engellenmiş veya silinmiş, mesaj gönderilemez!");
+          return;
+        }
+      }
     try {
       const fileExt = file.name.split(".").pop();
       const fileName = `${Date.now()}.${fileExt}`;
@@ -346,7 +367,16 @@ return () => {
   //konum gönderme
   const handleSendLocation = async(location: { lat: number; lng: number }) => {
     if (!user || !chatId) return;
-
+   if (isDirectChat) {
+        const blockedRecipients = members.filter(member => {
+          const contact = contacts.find(f => f.contact_id === member.id);
+          return !contact?.is_blocked;
+        });
+        if (blockedRecipients.length > 0) {
+          toast.error("Bazı kullanıcılar engellenmiş veya silinmiş, mesaj gönderilemez!");
+          return;
+        }
+      }
     const { data, error } = await supabase
       .from("messages")
       .insert({
