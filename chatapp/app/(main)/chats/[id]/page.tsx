@@ -52,7 +52,9 @@ const Page = () => {
   const [openSettings, setOpenSettings] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [contacts, setContacts] = useState<FriendsProps[]>([]);
-  const [blocked,setBlocked] = useState<FriendsProps[]>([]);
+  const [blockedByMe, setBlockedByMe] = useState<FriendsProps[]>([]);
+  const [blockedMe, setBlockedMe] = useState<FriendsProps[]>([]);
+
   useEffect(() => {
     const getChatInfo = async () => {
       setLoading(true);
@@ -78,7 +80,7 @@ const Page = () => {
           setMembers([]);
         }
         //mesajları getirme
-        const { data, error } = await supabase
+        const { data:messageData, error } = await supabase
           .from("messages")
           .select(
             "id, content, user_id, created_at,image_url,file_url,location, users(id, name, avatar_url)"
@@ -90,39 +92,39 @@ const Page = () => {
           console.error("Mesajlar alınamadı:", error.message);
           return;
         }
-        //engellenen kullanıcıları getir
-        const { data: blockedData, error: blockedError } = await supabase
+        //engellenen kullanıcıları getir 
+         const { data: blockedData } = await supabase
           .from("contacts")
           .select("*")
           .eq("is_blocked", true)
           .eq("owner_id", user.id);
 
-        if (blockedError) {
-          console.error("Engellenen kullanıcılar alınamadı:", blockedError.message);
-          return;
-        }
-        setBlocked(blockedData || []);
-        console.log(blockedData)
+        const { data: blockedByData } = await supabase
+          .from("contacts")
+          .select("*")
+          .eq("is_blocked", true)
+          .neq("owner_id", user.id)
+          .eq("contact_id", user.id);
 
-        //engelleenen kullanıcının mesajını gösterme
-        const filteredMessages = data.filter(message => {
-          const senderContact = blockedData.find(c => c.contact_id === message.user_id);
-          return !senderContact?.is_blocked;
-        });
+        setBlockedByMe(blockedData || []);
+        setBlockedMe(blockedByData || []);
 
+        // Engellenen mesajları filtrele
+        const filteredMessages = messageData?.filter(msg => {
+          const blockedSender = blockedData?.find(c => c.contact_id === msg.user_id);
+          return !blockedSender?.is_blocked;
+        }) || [];
         setMessages(filteredMessages);
-        
-           //mesaj engelleme
-          const { data: contactsData, error: contactsError } = await supabase
-            .from("contacts")
-            .select("*").eq("is_blocked", false)
-            .eq("owner_id", user.id);
 
-          if (contactsError) {
-            console.error(contactsError);
-            return;
-          }
-          setContacts(contactsData || []);        
+        // Engellenmemiş kontaklar
+        const { data: contactsData } = await supabase
+          .from("contacts")
+          .select("*")
+          .eq("is_blocked", false)
+          .eq("owner_id", user.id);
+
+        setContacts(contactsData || []);
+       
 
         setChatInfo({
           name: chatData?.name || null,
@@ -190,24 +192,19 @@ return () => {
 }, [user?.id]);
   
    const isDirectChat = members.length === 2;
+ const isBlockedBetween = (memberId: string) => {
+    return blockedByMe.some(c => c.contact_id === memberId) || blockedMe.some(c => c.owner_id === memberId);
+  };
 
   //mesaj gönderme
   const sendMessage = async () => {
      if (!newMessage.trim() || !user) return;
 
+    if (isDirectChat && members.some(m => isBlockedBetween(m.id))) {
+      toast.error("Bu kullanıcıyla mesajlaşamazsınız!");
+      return;
+    }
 
-  if (isDirectChat) {
-    const blockedRecipients = members.filter(member => {
-    const contact = contacts.find(f => f.contact_id === member.id);
-    return !contact?.is_blocked;
-    });
-    if (blockedRecipients.length > 0) {
-    toast.error("Bazı kullanıcılar engellenmiş veya silinmiş, mesaj gönderilemez!");
-    return;
-  }
-  }
-
-  
 
     //mesajı kaydet
     const { data, error } = await supabase
@@ -257,10 +254,14 @@ return () => {
      
     //Notifications oluştur
     if (data) {
+       const notifRecipients = members
+      .filter(member => member.id !== user.id) 
+       .filter(member => !isBlockedBetween(member.id)); 
+
   const { error: notifError } = await supabase
     .from('notifications')
     .insert(
-      members
+      notifRecipients
         .filter(member => member.id !== user.id)
         .map(member => ({
           user_id: member.id,
@@ -275,22 +276,16 @@ return () => {
   if (notifError) console.error("Notification eklenemedi:", notifError.message);
 }
 
-
-
-
   };
   //resim
   const handleImageUpload = async (file: File) => {
-       if (isDirectChat) {
-        const blockedRecipients = members.filter(member => {
-          const contact = contacts.find(f => f.contact_id === member.id);
-          return !contact?.is_blocked;
-        });
-        if (blockedRecipients.length > 0) {
-          toast.error("Bazı kullanıcılar engellenmiş veya silinmiş, mesaj gönderilemez!");
-          return;
-        }
-      }
+    if (!user) return;
+    //engellenenler birbirine mesaj gönderemez
+        if (isDirectChat && members.some(m => isBlockedBetween(m.id))) {
+      toast.error("Bu kullanıcıyla mesajlaşamazsınız!");
+      return;
+    }
+
     try {
       // 1. Resmi Supabase'e yükle
       const fileExt = file.name.split(".").pop();
@@ -325,16 +320,10 @@ return () => {
   };
   //dosya yükleme
   const handleFileUpload = async (file: File) => {
-       if (isDirectChat) {
-        const blockedRecipients = members.filter(member => {
-          const contact = contacts.find(f => f.contact_id === member.id);
-          return !contact?.is_blocked;
-        });
-        if (blockedRecipients.length > 0) {
-          toast.error("Bazı kullanıcılar engellenmiş veya silinmiş, mesaj gönderilemez!");
-          return;
-        }
-      }
+       if (isDirectChat && members.some(m => isBlockedBetween(m.id))) {
+      toast.error("Bu kullanıcıyla mesajlaşamazsınız!");
+      return;
+    }
     try {
       const fileExt = file.name.split(".").pop();
       const fileName = `${Date.now()}.${fileExt}`;
@@ -367,16 +356,11 @@ return () => {
   //konum gönderme
   const handleSendLocation = async(location: { lat: number; lng: number }) => {
     if (!user || !chatId) return;
-   if (isDirectChat) {
-        const blockedRecipients = members.filter(member => {
-          const contact = contacts.find(f => f.contact_id === member.id);
-          return !contact?.is_blocked;
-        });
-        if (blockedRecipients.length > 0) {
-          toast.error("Bazı kullanıcılar engellenmiş veya silinmiş, mesaj gönderilemez!");
-          return;
-        }
-      }
+       if (isDirectChat && members.some(m => isBlockedBetween(m.id))) {
+      toast.error("Bu kullanıcıyla mesajlaşamazsınız!");
+      return;
+    }
+
     const { data, error } = await supabase
       .from("messages")
       .insert({

@@ -12,6 +12,7 @@ export interface UserProps {
   users: UserNested;
 }
 export interface FriendsProps{
+   owner_id:string; // yeni eekledim karşololşı engellemede mesaj engelleme
     nickname:string;
     email:string;
     is_blocked:boolean;
