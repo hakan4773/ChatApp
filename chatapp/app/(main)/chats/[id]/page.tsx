@@ -12,6 +12,7 @@ import MessageInput from "@/app/components/MessageInput";
 import ChatHeader from "@/app/components/ChatHeader";
 import MessagesList from "@/app/components/MessagesList";
 import { FriendsProps } from "@/types/contactUser";
+ import { notifyUsers } from "@/app/utils/NotifyUsers";
 
 const Page = () => {
   const router = useRouter();
@@ -252,29 +253,14 @@ return () => {
       console.error("last_message_id güncellenemedi:", updateError.message);
     }
      
-    //Notifications oluştur
-    if (data) {
-       const notifRecipients = members
-      .filter(member => member.id !== user.id) 
-       .filter(member => !isBlockedBetween(member.id)); 
+await notifyUsers({
+  members,
+  blockedByMe,
+  blockedMe,
+  senderId: user.id,
+  message: newMessage.trim(),
+});
 
-  const { error: notifError } = await supabase
-    .from('notifications')
-    .insert(
-      notifRecipients
-        .filter(member => member.id !== user.id)
-        .map(member => ({
-          user_id: member.id,
-          type: 'chat',
-          title: `Yeni mesaj from ${user.user_metadata.name || 'Bilinmeyen'}`,
-          message: newMessage.trim(),
-          is_read: false,
-          sender_id: user.id
-        }))
-    );
-
-  if (notifError) console.error("Notification eklenemedi:", notifError.message);
-}
 
   };
   //resim
@@ -311,8 +297,14 @@ return () => {
 
       if (messageError) throw messageError;
 
-      // 3. Mesaj listesini güncelle
       setMessages((prev) => [...prev, messageData]);
+      await notifyUsers({
+          members,
+          blockedByMe,
+          blockedMe,
+          senderId: user?.id,
+          message: newMessage.trim(),
+        });
     } catch (error) {
       console.error("Resim yükleme hatası:", error);
       toast.error("Resim yüklenirken hata oluştu");
@@ -320,6 +312,7 @@ return () => {
   };
   //dosya yükleme
   const handleFileUpload = async (file: File) => {
+    if (!user) return;
        if (isDirectChat && members.some(m => isBlockedBetween(m.id))) {
       toast.error("Bu kullanıcıyla mesajlaşamazsınız!");
       return;
@@ -348,6 +341,13 @@ return () => {
       if (messageError) throw messageError;
 
       setMessages((prev) => [...prev, messageData]);
+      await notifyUsers({
+        members,
+        blockedByMe,
+        blockedMe,
+        senderId: user?.id,
+        message: newMessage.trim(),
+      });
     } catch (error) {
       console.error("Dosya yükleme hatası:", error);
       toast.error("Dosya yüklenirken hata oluştu");
@@ -375,8 +375,15 @@ return () => {
     if (error) {
       console.error("Konum gönderilemedi:", error.message);
     }
-    //yeni mesajı ekle
+
     setMessages((prev) => [...prev, data]);
+    await notifyUsers({
+        members,
+        blockedByMe,
+        blockedMe,
+        senderId: user?.id,
+        message: newMessage.trim(),
+      });
   };
 
   //Ayarları göster
