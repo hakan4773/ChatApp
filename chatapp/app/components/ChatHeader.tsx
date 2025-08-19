@@ -87,25 +87,29 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   };
   return (
     <div
-      className="bg-blue-500 dark:bg-blue-900 text-white  p-4 flex items-center justify-between shadow-md relative"
+      className="bg-gradient-to-r from-blue-600 to-teal-500 dark:from-gray-800 dark:to-gray-700 text-white p-4 flex items-center justify-between shadow-md relative"
       onClick={handleOverlayClick}
     >
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-4">
         <Image
           src={chatInfo?.users[0]?.avatar_url || "/5.jpg"}
-          width={40}
-          height={40}
+          width={48}
+          height={48}
           alt="avatar"
-          className="rounded-full object-cover border-2 border-white dark:border-blue-800"
+          className="rounded-full object-cover border-2 border-white dark:border-gray-700 shadow-sm"
         />
         <div>
-          <h1 className="font-bold">{chatInfo?.name}</h1>
-          <div className="flex">
+          <h1 className="font-bold text-lg">{chatInfo?.name}</h1>
+          <div className="flex flex-wrap">
             {members.map((member, index) => {
               const contact = contacts.find((c) => c.contact_id === member.id);
               return (
-                <p key={index} className="text-xs text-blue-100">
-                  {contact ? contact.nickname || contact.email : member.email},
+                <p
+                  key={index}
+                  className="text-xs text-gray-100 dark:text-gray-300 mr-1"
+                >
+                  {contact ? contact.nickname || contact.email : member.email}
+                  {index < members.length - 1 ? "," : ""}
                 </p>
               );
             })}
@@ -115,11 +119,12 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 
       <button
         onClick={handleSettings}
-        className="p-2 rounded-full hover:bg-blue-600"
+        className="p-2 rounded-full hover:bg-blue-700 dark:hover:bg-gray-600 transition-colors"
+        aria-label="Ayarlar"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
+          className="h-6 w-6 text-gray-100 dark:text-gray-300"
           viewBox="0 0 20 20"
           fill="currentColor"
         >
@@ -128,20 +133,20 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       </button>
 
       {openSettings && (
-        <div className="absolute flex flex-col border p-2 space-y-2 z-50 top-9 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 right-8 rounded-md shadow-lg">
+        <div className="absolute flex flex-col border p-2 space-y-2 z-50 top-14 right-4 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-lg shadow-lg w-48">
           {/* Bilgi */}
           <button
-            className="flex space-x-2 items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600"
+            className="flex space-x-2 items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             onClick={() => setShowInfoModal(true)}
           >
-            <InformationCircleIcon className="h-5 w-5" />
+            <InformationCircleIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
             <span>Bilgi</span>
           </button>
 
           {/* Sessize al */}
           <button
             onClick={handleToggleMute}
-            className="flex space-x-2 items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600"
+            className="flex space-x-2 items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             {isMuted ? (
               <BellSlashIcon className="h-5 w-5 text-red-400" />
@@ -154,7 +159,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           {/* Gruptan çık */}
           <button
             onClick={handleLeaveGroup}
-            className="flex space-x-2 items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 text-red-500"
+            className="flex space-x-2 items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-red-500"
           >
             <TrashIcon className="h-5 w-5" />
             <span>Gruptan Çık</span>
@@ -164,5 +169,4 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     </div>
   );
 };
-
 export default ChatHeader;

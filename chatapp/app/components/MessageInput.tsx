@@ -166,69 +166,67 @@ const triggerImageInput = () => {
 
   {/* Açılır menü */}
   {openMethods && (
-    <div className="absolute bottom-16 left-12 bg-white shadow-xl rounded-lg p-2 z-20 w-56 border border-gray-100">
+    <div className="absolute bottom-16 left-12 bg-white dark:bg-gray-800 shadow-xl rounded-lg p-2 z-20 w-56 border border-gray-100 dark:border-gray-700">
       {/* Ok işareti */}
-      <div className="absolute -bottom-2 left-5 w-4 h-4 bg-white transform rotate-45 border-b border-r border-gray-200"></div>
+      <div className="absolute -bottom-2 left-5 w-4 h-4 bg-white dark:bg-gray-800 transform rotate-45 border-b border-r border-gray-200 dark:border-gray-700"></div>
       
       <div className="flex flex-col space-y-1">
-    {/*Resim gönderme fonksiyonu*/}
-    <button 
-  className="flex items-center space-x-3 p-3 rounded-md hover:bg-blue-50 transition-colors text-left w-full"
-  onClick={triggerImageInput}  
->
-  <div className="p-2 bg-blue-100 rounded-full">
-    <CameraIcon className="w-5 h-5 text-blue-600" />
-  </div>
-  <div>
-    <p className="font-medium text-gray-900">Fotoğraf/Video</p>
-    <p className="text-xs text-gray-500">Galeriden seç veya çek</p>
-  </div>
-  <input 
-    ref={imageInputRef}
-    type="file" 
-    accept="image/*" 
-    onChange={handleImageChange}
-    className="hidden" 
-  />
-</button>
-    {/*Dosya gönderme fonksiyonu*/}
-
+        {/* Resim gönderme fonksiyonu */}
         <button 
-          className="flex items-center space-x-3 p-3 rounded-md hover:bg-blue-50 transition-colors text-left"
-         onClick={triggerFileInput}  
-
-          >
-          <div className="p-2 bg-purple-100 rounded-full">
-            <DocumentIcon className="w-5 h-5 text-purple-600" />
+          className="flex items-center space-x-3 p-3 rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors text-left w-full"
+          onClick={triggerImageInput}  
+        >
+          <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+            <CameraIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-      <input 
-  ref={fileInputRef}
-  type="file" 
-  accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
-  onChange={handleImageChange}
-  className="hidden" 
-/>
-            <p className="font-medium text-gray-900">Dosya</p>
-            <p className="text-xs text-gray-500">PDF, Word, Excel gönder</p>
+            <p className="font-medium text-gray-900 dark:text-gray-200">Fotoğraf/Video</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Galeriden seç veya çek</p>
+          </div>
+          <input 
+            ref={imageInputRef}
+            type="file" 
+            accept="image/*" 
+            onChange={handleImageChange}
+            className="hidden" 
+          />
+        </button>
+        {/* Dosya gönderme fonksiyonu */}
+        <button 
+          className="flex items-center space-x-3 p-3 rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors text-left"
+          onClick={triggerFileInput}  
+        >
+          <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-full">
+            <DocumentIcon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div>
+            <input 
+              ref={fileInputRef}
+              type="file" 
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
+              onChange={handleImageChange}
+              className="hidden" 
+            />
+            <p className="font-medium text-gray-900 dark:text-gray-200">Dosya</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">PDF, Word, Excel gönder</p>
           </div>
         </button>
- {/* Konum gönderme fonksiyonu */}
+        {/* Konum gönderme fonksiyonu */}
         <button 
-          className="flex items-center space-x-3 p-3 rounded-md hover:bg-blue-50 transition-colors text-left"
-       onClick={getLocation}
+          className="flex items-center space-x-3 p-3 rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors text-left"
+          onClick={getLocation}
         >
-          <div className="p-2 bg-green-100 rounded-full">
-            <MapPinIcon className="w-5 h-5 text-green-600" />
+          <div className="p-2 bg-green-100 dark:bg-green-900 rounded-full">
+            <MapPinIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
           </div>
           <div>
-            <p className="font-medium text-gray-900">Konum</p>
-            <p className="text-xs text-gray-500">Mevcut konumunu paylaş</p>
+            <p className="font-medium text-gray-900 dark:text-gray-200">Konum</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Mevcut konumunu paylaş</p>
           </div>
         </button>
       </div>
     </div>
-  )}
+)}
 </div>
   )
 }
