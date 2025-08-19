@@ -2,6 +2,7 @@
 import { User, Session } from "@supabase/supabase-js";
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useRouter } from "next/navigation";
 
 type UserContextType = {
   user: User | null;
@@ -21,7 +22,7 @@ export const UserProvider = ({
   serverSession?: Session | null;
 }) => {
   const supabase = createClientComponentClient();
-
+  const router = useRouter(); 
   const [user, setUser] = useState<User | null>(serverSession?.user ?? null);
   const [loading, setLoading] = useState(!serverSession);
 
@@ -32,6 +33,7 @@ export const UserProvider = ({
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     setUser(null);
+    router.push("/login");
   } catch (error: any) {
     console.error('Error signing out:', error.message);
   } finally {
