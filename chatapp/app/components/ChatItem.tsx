@@ -11,6 +11,7 @@ type User = {
 type LastMessage = {
   content: string;
   created_at: string;
+  user_id?: string;
 };
 
 type Chat = {
@@ -20,10 +21,12 @@ type Chat = {
   last_message?: LastMessage | null;
   other_users: User[];
   unread_count?: number;
+  is_blocked?: boolean; 
 };
 
 type ChatItemProps = {
   chat: Chat;
+   blockedIds?: string[];
   onClick: () => void;
 };
 
@@ -32,7 +35,13 @@ const formatDate = (dateString: string) => {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };
 
-const ChatItem = ({ chat, onClick }: ChatItemProps) => {
+const ChatItem = ({ chat,blockedIds, onClick }: ChatItemProps) => {
+const isMessageBlocked = chat.is_blocked; 
+const getMessageContent = () => {
+    if (!chat.last_message) return "Sohbet başlatıldı";
+    if (isMessageBlocked) return "Engellenen kullanıcıdan mesaj";
+    return chat.last_message.content;
+};
   return (
     <div
       onClick={onClick}
@@ -52,7 +61,7 @@ const ChatItem = ({ chat, onClick }: ChatItemProps) => {
             <FiUsers className="text-gray-400 text-xl" />
           </div>
         )}
-        {(chat.unread_count ?? 0) > 0 && (
+        {(chat.unread_count ?? 0) > 0 && !isMessageBlocked && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
             {chat.unread_count ?? 0} <span className="sr-only">okunmamış mesaj</span>
           </span>
@@ -72,7 +81,7 @@ const ChatItem = ({ chat, onClick }: ChatItemProps) => {
         </div>
         {chat.last_message ? (
           <p className="text-sm text-gray-500 truncate">
-            {chat.last_message.content}
+            {getMessageContent()}
           </p>
         ) : (
           <p className="text-sm text-gray-400 italic">Sohbet başlatıldı</p>

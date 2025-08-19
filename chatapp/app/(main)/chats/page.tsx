@@ -21,6 +21,7 @@ type Chat = {
   last_message?: {
     content: string;
     created_at: string;
+    user_id?: string;
   } | null;
   other_users: User[];
   unread_count?: number;
@@ -30,6 +31,7 @@ const ChatList = () => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [blockedIds, setBlockedIds] = useState<string[]>([]);
   const { user } = useUser();
   const router = useRouter();
 
@@ -48,12 +50,36 @@ const ChatList = () => {
               name,
               created_at,
               last_message_id,
-              messages:last_message_id (content, created_at)
+              messages:last_message_id (content, created_at,user_id)
             )
           `)
           .eq("user_id", user.id);
 
         if (chatsError) throw chatsError;
+        if (!userChats || userChats.length === 0) {
+          setChats([]);
+          return;
+        }
+        //engellenen kullanıcının mesajlarını filtrele önce contacts tablosu gerekmiyormu
+        const { data: blockedData } = await supabase
+          .from("contacts")
+          .select("contact_id")
+          .eq("is_blocked", true)
+          .eq("owner_id", user.id);
+
+        const { data: blockedByData } = await supabase
+          .from("contacts")
+          .select("owner_id")
+          .eq("is_blocked", true)
+          .eq("contact_id", user.id);
+
+        const ids = [
+          ...(blockedData?.map(b => b.contact_id) || []),
+          ...(blockedByData?.map(b => b.owner_id) || [])
+        ];
+        const currentBlockedIds = ids.filter(id => id !== undefined);
+
+          setBlockedIds(currentBlockedIds);
 
         const chatsWithUsers = await Promise.all(
           userChats.map(async ({ chat_id, chats }) => {
@@ -79,23 +105,33 @@ const ChatList = () => {
     
         const { data: unreadCounts, error: unreadError } = await supabase
           .from("user_message_status")
-          .select("chat_id") 
+          .select("chat_id ,message_id,messages!inner(user_id)") 
           .eq("user_id", user.id)
-          .eq("is_read", false);
+          .eq("is_read", false);    
 
            if (unreadError) {
             console.error("Okunmamış mesajlar alınamadı:", unreadError.message);
              }
+                const filteredUnreadCounts =
+              unreadCounts?.filter(
+            (u) => !currentBlockedIds.includes(u.messages?.user_id)
+          ) || [];
 
          const unreadCountMap: Record<string, number> = {};
-       unreadCounts?.forEach(({ chat_id }) => {
+       filteredUnreadCounts?.forEach(({ chat_id }) => {
          unreadCountMap[chat_id] = (unreadCountMap[chat_id] || 0) + 1;
       });
 
-      const finalChats = chatsWithUsers.map(chat => ({
-       ...chat,
-     unread_count: unreadCountMap[chat.id] || 0,
-        }));
+      const finalChats = chatsWithUsers.map(chat => {//burası engellenen kullanıcının mesajlarını filtrele
+          const lastMessageUserId = chat.last_message?.user_id;
+          const isBlocked = lastMessageUserId && currentBlockedIds.includes(lastMessageUserId);
+
+            return {
+            ...chat,
+           unread_count: isBlocked ? 0 : (unreadCountMap[chat.id] || 0),
+           is_blocked: isBlocked 
+          };
+        });
 
         finalChats.sort((a, b) => 
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -164,7 +200,7 @@ const filteredChats = chats.filter(chat =>
       </div>
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
           {filteredChats.map((chat) => (
-            <ChatItem key={chat.id} chat={chat} onClick={() => router.push(`/chats/${chat.id}`)} />
+            <ChatItem key={chat.id} blockedIds={blockedIds}  chat={chat} onClick={() => router.push(`/chats/${chat.id}`)} />
           ))}
         </div></>
       )}
