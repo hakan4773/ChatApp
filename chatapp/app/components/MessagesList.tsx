@@ -2,7 +2,7 @@
 import { format } from "timeago.js";
 import Image from "next/image";
 import { DocumentIcon, MapPinIcon } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MessageContextMenu from "./MessageContextMenu";
 
 interface Message {
@@ -36,6 +36,8 @@ const MessagesList: React.FC<MessagesListProps> = ({
   const [messagesState, setMessagesState] = useState<Message[]>(messages);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+   const chatRef = useRef<HTMLDivElement>(null);
+
   const openGoogleMaps = (lat: number, lng: number) => {
     window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
   };
@@ -45,10 +47,20 @@ const MessagesList: React.FC<MessagesListProps> = ({
   };
     useEffect(() => {
       setMessagesState(messages);
+      if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
     }, [messages]);
 
   return (
 <div
+ref={chatRef}
+      style={{
+        height: "400px",
+        overflowY: "auto",
+        border: "1px solid #ccc",
+        padding: "10px"
+      }}
       className="flex-1 p-4 overflow-y-auto space-y-4 bg-gradient-to-b   bg-[url('/bg.jpg')] dark:bg-[url('/darkbg.jpg')]
     bg-cover bg-center from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800">
       {messagesState.length > 0 && (
@@ -107,19 +119,19 @@ const MessagesList: React.FC<MessagesListProps> = ({
               <img
                 src={`https://kpdoboupcsggbkjhfacv.supabase.co/storage/v1/object/public/chat-images/${msg.image_url}`}
                 alt="Resim"
-               className="rounded-lg w-48 h-48 max-w-full object-cover mt-2 shadow-sm border border-gray-200 dark:border-gray-700"              />
+               className="rounded-lg mt-4 w-48 h-48 max-w-full object-cover  shadow-sm border border-gray-200 dark:border-gray-700"              />
             ) : msg.file_url ? (
               <a
                 href={`https://kpdoboupcsggbkjhfacv.supabase.co/storage/v1/object/public/chat-files/${msg.file_url}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-400 dark:text-blue-300 underline flex items-center text-sm hover:text-blue-600 dark:hover:text-blue-400"
+                className="text-blue-400 mt-4 dark:text-blue-300 underline flex items-center text-sm hover:text-blue-600 dark:hover:text-blue-400"
               >
                 <DocumentIcon className="w-4 h-4 mr-1" />
                 {msg.content}
               </a>
             ) : (
-              <p className="text-sm leading-relaxed">{msg.content}</p>
+              <p className="text-sm mt-2 leading-relaxed">{msg.content}</p>
             )}
 
             <p
