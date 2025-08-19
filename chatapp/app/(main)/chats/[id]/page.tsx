@@ -43,6 +43,7 @@ const Page = () => {
   >([]);
   const [loading, setLoading] = useState(true);
   const [chatInfo, setChatInfo] = useState<{
+    id: string;
     name: string | null;
     users: Array<{
       id: string;
@@ -128,6 +129,7 @@ const Page = () => {
        
 
         setChatInfo({
+          id: chatId,
           name: chatData?.name || null,
           users: usersData?.map(({ users }) => users) || [],
         });
@@ -252,6 +254,7 @@ return () => {
     }
      
 await notifyUsers({
+  chatId,
   members,
   blockedByMe,
   blockedMe,
@@ -296,6 +299,7 @@ await notifyUsers({
 
       setMessages((prev) => [...prev, messageData]);
       await notifyUsers({
+          chatId,
           members,
           blockedByMe,
           blockedMe,
@@ -339,6 +343,7 @@ await notifyUsers({
 
       setMessages((prev) => [...prev, messageData]);
       await notifyUsers({
+        chatId,
         members,
         blockedByMe,
         blockedMe,
@@ -375,6 +380,7 @@ await notifyUsers({
 
     setMessages((prev) => [...prev, data]);
     await notifyUsers({
+        chatId,
         members,
         blockedByMe,
         blockedMe,

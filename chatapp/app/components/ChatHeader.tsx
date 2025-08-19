@@ -1,11 +1,15 @@
 "use client";
 import { FriendsProps } from "@/types/contactUser";
-import { InformationCircleIcon, TrashIcon, BellSlashIcon } from "@heroicons/react/24/outline";
+import { InformationCircleIcon, TrashIcon, BellSlashIcon, BellIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient";
+import { useUser } from "../context/UserContext";
+import { toast } from "react-toastify";
 
 interface ChatHeaderProps {
   chatInfo: {
+    id: string;
     name: string | null;
     users: {
       id: string;
@@ -38,7 +42,49 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   handleLeaveGroup,
   setShowInfoModal,
 }) => {
+  const { user } = useUser();
+  const [isMuted, setIsMuted] = useState(false);
 
+  useEffect(() => {
+    const fetchMuteStatus = async () => {
+      if (!chatInfo || !user) return;
+
+      const { data, error } = await supabase
+        .from("chat_members")
+        .select("is_muted")
+        .eq("chat_id", chatInfo.id)
+        .eq("user_id", user.id)
+        .single();
+
+      if (!error && data) {
+        setIsMuted(data.is_muted);
+      }
+    };
+
+    fetchMuteStatus();
+  }, [chatInfo, user]);
+
+  const handleToggleMute = async () => {
+    if (!chatInfo || !user) return;
+
+    const chatId = chatInfo.id;
+    const newMuteStatus = !isMuted;
+
+    const { error } = await supabase
+      .from("chat_members")
+      .update({ is_muted: newMuteStatus })
+      .eq("chat_id", chatId)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Mute güncellenemedi:", error.message);
+    } else {
+      setIsMuted(newMuteStatus);
+      toast.success(
+        newMuteStatus ? "Sessiz mod aktif edildi." : "Sessiz mod kapatıldı."
+      );
+    }
+  };
   return (
     <div
       className="bg-blue-500 dark:bg-blue-900 text-white  p-4 flex items-center justify-between shadow-md relative"
@@ -82,23 +128,35 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       </button>
 
       {openSettings && (
-        <div className="absolute flex flex-col border p-2 space-y-3 z-50 top-9 bg-gray-50 dark:bg-gray-800 border-gray-50 dark:border-gray-700 text-gray-500 dark:text-gray-300 right-8 rounded-md">
+        <div className="absolute flex flex-col border p-2 space-y-2 z-50 top-9 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 right-8 rounded-md shadow-lg">
+          {/* Bilgi */}
           <button
-            className=" hover:bg-gray-100 dark:hover:bg-gray-600 flex space-x-2 p-2 items-center"
+            className="flex space-x-2 items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600"
             onClick={() => setShowInfoModal(true)}
           >
-            <InformationCircleIcon className="h-4 w-4 " />
+            <InformationCircleIcon className="h-5 w-5" />
             <span>Bilgi</span>
           </button>
-          <button className=" hover:bg-gray-100 dark:hover:bg-gray-600  flex space-x-2 items-center p-2">
-            <BellSlashIcon className="h-4 w-4" />
-            <span>Sessize Al</span>
+
+          {/* Sessize al */}
+          <button
+            onClick={handleToggleMute}
+            className="flex space-x-2 items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600"
+          >
+            {isMuted ? (
+              <BellSlashIcon className="h-5 w-5 text-red-400" />
+            ) : (
+              <BellIcon className="h-5 w-5 text-green-400" />
+            )}
+            <span>{isMuted ? "Sessizden Çıkar" : "Sessize Al"}</span>
           </button>
+
+          {/* Gruptan çık */}
           <button
             onClick={handleLeaveGroup}
-            className=" p-2 hover:bg-gray-100 dark:hover:bg-gray-600 flex space-x-2 items-center"
+            className="flex space-x-2 items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 text-red-500"
           >
-            <TrashIcon className="h-4 w-4 " />
+            <TrashIcon className="h-5 w-5" />
             <span>Gruptan Çık</span>
           </button>
         </div>
