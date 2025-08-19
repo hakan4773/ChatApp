@@ -164,7 +164,6 @@ useEffect(() => {
   markMessagesAsRead();
 }, [chatId, user?.id]);
 
-//Sonradan kontrol edilecek kod
 useEffect(() => {
   if (!user?.id) return;
 
@@ -207,7 +206,6 @@ return () => {
     }
 
 
-    //mesajı kaydet
     const { data, error } = await supabase
       .from("messages")
       .insert({
@@ -266,8 +264,7 @@ await notifyUsers({
   //resim
   const handleImageUpload = async (file: File) => {
     if (!user) return;
-    //engellenenler birbirine mesaj gönderemez
-        if (isDirectChat && members.some(m => isBlockedBetween(m.id))) {
+       if (isDirectChat && members.some(m => isBlockedBetween(m.id))) {
       toast.error("Bu kullanıcıyla mesajlaşamazsınız!");
       return;
     }

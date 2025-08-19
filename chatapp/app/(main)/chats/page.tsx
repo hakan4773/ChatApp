@@ -60,7 +60,7 @@ const ChatList = () => {
           setChats([]);
           return;
         }
-        //engellenen kullanıcının mesajlarını filtrele önce contacts tablosu gerekmiyormu
+     
         const { data: blockedData } = await supabase
           .from("contacts")
           .select("contact_id")
@@ -122,7 +122,7 @@ const ChatList = () => {
          unreadCountMap[chat_id] = (unreadCountMap[chat_id] || 0) + 1;
       });
 
-      const finalChats = chatsWithUsers.map(chat => {//burası engellenen kullanıcının mesajlarını filtrele
+      const finalChats = chatsWithUsers.map(chat => {
           const lastMessageUserId = chat.last_message?.user_id;
           const isBlocked = lastMessageUserId && currentBlockedIds.includes(lastMessageUserId);
 
