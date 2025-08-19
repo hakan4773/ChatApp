@@ -108,15 +108,17 @@ useEffect(() => {
       if (activeChatsError) throw activeChatsError;
         setActiveChats(activeChats.length);
         
-      // Paylaşılan dosya sayısını al
+      // Paylaşılan dosya ,image ve video sayısını al
+
       const { data: sharedFiles, error: sharedFilesError } = await supabase
         .from("messages")
-        .select("id", { count: "exact" })
+        .select("id,file_url,image_url", { count: "exact" })
         .eq("user_id", user.id)
-        .not("file_url", "is", null); 
+        .or("file_url.not.is.null,image_url.not.is.null");
+        console.log(sharedFiles)
 
       if (sharedFilesError) throw sharedFilesError;
-         setSharedFiles(sharedFiles.length);
+         setSharedFiles(sharedFiles.length || 0);
 
        // Yeni bildirim sayısını al
        const { data: notifications, error: notificationsError } = await supabase
