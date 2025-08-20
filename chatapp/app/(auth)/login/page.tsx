@@ -7,6 +7,7 @@ import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
 import { useUser } from "@/app/context/UserContext";
+import { toast } from "react-toastify";
 function Page() {
      const router = useRouter();
      const {setUser}=useUser();
@@ -30,8 +31,7 @@ onSubmit: async (values, { setSubmitting }) => {
         });
 
         if (error) {
-          alert("Giriş hatası: " + error.message);
-          console.error("Supabase Auth Hatası:", error);
+          toast.error("Hesap bulunamadı, lütfen kaydolun.");
           return;
         }
 
@@ -40,8 +40,8 @@ onSubmit: async (values, { setSubmitting }) => {
           router.push("/"); 
         }
       } catch (err) {
-        console.error("Beklenmedik hata:", err);
-        alert("Beklenmedik bir hata oluştu, lütfen tekrar deneyin.");
+        
+        toast.error("Beklenmedik bir hata oluştu, lütfen tekrar deneyin.");
       } finally {
         setLoading(false);
         setSubmitting(false);
