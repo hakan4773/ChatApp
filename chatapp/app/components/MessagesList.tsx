@@ -58,10 +58,9 @@ ref={chatRef}
       style={{
         height: "400px",
         overflowY: "auto",
-        border: "1px solid #ccc",
         padding: "10px"
       }}
-      className="flex-1 p-4 overflow-y-auto space-y-4 bg-gradient-to-b bg-[url('/bg.jpg')] dark:bg-[url('/darkbg.jpg')]
+      className="flex-1 p-4 overflow-y-auto  space-y-4 bg-gradient-to-b bg-[url('/bg.jpg')] dark:bg-[url('/darkbg.jpg')]
     bg-cover bg-center from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800">
       {messagesState.length > 0 && (
         <div className="flex justify-center">
