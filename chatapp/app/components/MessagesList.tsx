@@ -37,7 +37,7 @@ const MessagesList: React.FC<MessagesListProps> = ({
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
    const chatRef = useRef<HTMLDivElement>(null);
-
+   const messagesEndRef = useRef<HTMLDivElement>(null);
   const openGoogleMaps = (lat: number, lng: number) => {
     window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
   };
@@ -45,12 +45,23 @@ const MessagesList: React.FC<MessagesListProps> = ({
     setSelectedMessage(msg);
     setIsContextMenuOpen((prev) => (selectedMessage === msg ? !prev : true));
   };
-    useEffect(() => {
-      setMessagesState(messages);
-      if (chatRef.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight;
-    }
-    }, [messages]);
+ const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    setMessagesState(messages);
+  }, [messages]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messagesState]); 
+
+ 
+  useEffect(() => {
+    scrollToBottom();
+  }, []);
+
 
   return (
 <div
@@ -172,6 +183,7 @@ ref={chatRef}
           </div>
         </div>
       ))}
+        <div ref={messagesEndRef} />
     </div>
   );
 };
