@@ -86,10 +86,11 @@ const ChatList = () => {
             const { data: otherUsers } = await supabase
               .from("chat_members")
               .select(`
-                users!chat_members_user_id_fkey (id, name, avatar_url)
+                users!chat_members_user_id_fkey1 (id, name, avatar_url)
               `)
               .eq("chat_id", chat_id)
               .neq("user_id", user.id);
+             console.log(otherUsers)
 
             return {
               id: chats.id,
@@ -99,9 +100,9 @@ const ChatList = () => {
               other_users: otherUsers?.map(({ users }) => users) || [],
               unread_count: 0
             };
+
           })
         );
-
     
         const { data: unreadCounts, error: unreadError } = await supabase
           .from("user_message_status")
@@ -181,24 +182,24 @@ const filteredChats = chats.filter(chat =>
       </div>
     ) :
       chats.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-10 text-center text-gray-500 ">
-          <FiUsers className="text-gray-400 text-4xl mb-3" />
+        <div className="flex flex-col items-center justify-center py-10 text-center bg-white/80 dark:bg-gray-800/80 rounded-lg shadow-sm">
+          <FiUsers className="text-gray-400 dark:text-gray-300 text-5xl mb-3" />
           <p className="text-gray-500">Henüz sohbet yok</p>
-          <p className="text-gray-400 text-sm mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Yeni bir sohbet başlatmak için bir kullanıcı arayın
           </p>
         </div>
       ) : (
         <>
            <div className="flex items-center justify-between mb-4 text-gray-800 dark:text-gray-200">
-        <h2 className="text-xl font-semibold  flex items-center">
-          <FiMessageSquare className="mr-2" /> Sohbetler
+        <h2 className="text-lg sm:text-xl font-semibold flex items-center">
+          <FiMessageSquare className="mr-2 w-6 h-6" /> Sohbetler
         </h2>
         {/* Arama çubuğu */}
       <SearchInput  searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
       </div>
-      <div className="divide-y divide-gray-200 dark:divide-gray-700">
+      <div className="divide-y divide-gray-200 dark:divide-gray-700 bg-white/80 dark:bg-gray-800/80 rounded-lg shadow-sm">
           {filteredChats.map((chat) => (
             <ChatItem key={chat.id} blockedIds={blockedIds}  chat={chat} onClick={() => router.push(`/chats/${chat.id}`)} />
           ))}

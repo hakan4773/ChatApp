@@ -45,20 +45,20 @@ const getMessageContent = () => {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center p-3  hover:bg-gray-50 hover:dark:bg-gray-700 cursor-pointer transition`}
+      className={`flex items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-700 active:bg-gray-100 dark:active:bg-gray-600 cursor-pointer transition-colors`}
     >
       <div className="relative mr-3">
-        {chat.other_users.length > 0 ? (
+        {chat.other_users.length < 2 ? (
           <Image
             src={chat.other_users[0]?.avatar_url || "/5.jpg"}
             alt="Avatar"
-            width={48}
-            height={48}
-            className="w-12 h-12 rounded-full object-cover"
+            width={56}
+            height={56}
+            className="w-14 h-14 rounded-full object-cover border border-gray-200 dark:border-gray-700 shadow-sm"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-            <FiUsers className="text-gray-400 text-xl" />
+          <div className="w-14 h-14 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-sm">
+            <FiUsers className="text-gray-400 dark:text-gray-300 text-2xl" />
           </div>
         )}
         {(chat.unread_count ?? 0) > 0 && !isMessageBlocked && (
@@ -70,17 +70,17 @@ const getMessageContent = () => {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-baseline">
-          <h3 className="text-sm font-semibold  dark:text-gray-200 truncate">
+          <h3 className="text-base font-semibold text-gray-800 dark:text-gray-200 truncate">
             {chat.name || chat.other_users.map((u) => u.name).join(", ")}
           </h3>
           {chat.last_message && (
-            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 whitespace-nowrap">
+             <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 whitespace-nowrap">
               {formatDate(chat.last_message.created_at)}
             </span>
           )}
         </div>
         {chat.last_message ? (
-          <p className="text-sm text-gray-500 truncate">
+         <p className="text-sm text-gray-600 dark:text-gray-300 truncate">
             {getMessageContent()}
           </p>
         ) : (
