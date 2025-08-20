@@ -90,7 +90,6 @@ const ChatList = () => {
               `)
               .eq("chat_id", chat_id)
               .neq("user_id", user.id);
-             console.log(otherUsers)
 
             return {
               id: chats.id,
@@ -195,7 +194,7 @@ const filteredChats = chats.filter(chat =>
         <h2 className="text-lg sm:text-xl font-semibold flex items-center">
           <FiMessageSquare className="mr-2 w-6 h-6" /> Sohbetler
         </h2>
-        {/* Arama çubuğu */}
+
       <SearchInput  searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
       </div>
