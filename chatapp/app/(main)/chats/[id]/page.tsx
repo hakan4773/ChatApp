@@ -437,6 +437,7 @@ await notifyUsers({
         members={members}
         contacts={contacts}
         openSettings={openSettings}
+        setOpenSettings ={setOpenSettings}
         handleSettings={handleSettings}
         handleOverlayClick={handleOverlayClick}
         handleLeaveGroup={handleLeaveGroup}

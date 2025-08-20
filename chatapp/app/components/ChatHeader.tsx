@@ -30,6 +30,7 @@ interface ChatHeaderProps {
   handleSettings: () => void;
   handleOverlayClick: (e: React.MouseEvent<HTMLDivElement>) => void;
   handleLeaveGroup: () => void;
+  setOpenSettings: (open: boolean) => void;
   setShowInfoModal: (value: boolean) => void;
 }
 
@@ -38,6 +39,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   members,
   contacts,
   openSettings,
+  setOpenSettings,
   handleSettings,
   handleOverlayClick,
   handleLeaveGroup,
@@ -147,7 +149,12 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           {/* Bilgi */}
           <button
             className="flex space-x-2 items-center px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            onClick={() => setShowInfoModal(true)}
+            onClick={() => {
+              setShowInfoModal(true)
+              setOpenSettings(false)
+            }
+
+            }
           >
             <InformationCircleIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
             <span>Bilgi</span>
