@@ -1,11 +1,12 @@
 "use client";
 import { FriendsProps } from "@/types/contactUser";
-import { InformationCircleIcon, TrashIcon, BellSlashIcon, BellIcon } from "@heroicons/react/24/outline";
+import { InformationCircleIcon, TrashIcon, BellSlashIcon, BellIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { useUser } from "../context/UserContext";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 interface ChatHeaderProps {
   chatInfo: {
@@ -43,6 +44,8 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   setShowInfoModal,
 }) => {
   const { user } = useUser();
+    const router = useRouter();
+
   const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
@@ -90,7 +93,13 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       className="bg-gradient-to-r from-blue-600 to-teal-500 dark:from-gray-800 dark:to-gray-700 text-white p-4 flex items-center justify-between shadow-md relative"
       onClick={handleOverlayClick}
     >
-      <div className="flex items-center space-x-4">
+   <button
+      onClick={() => router.back()}
+      className="p-2 block  md:hidden rounded-full hover:bg-blue-500/30 dark:hover:bg-gray-700 transition"
+    >
+      <ArrowLeftIcon className="w-6 h-6 text-white dark:text-gray-200" />
+    </button>
+        <div className="flex items-center space-x-4">
         <Image
           src={chatInfo?.users[0]?.avatar_url || "/5.jpg"}
           width={48}
