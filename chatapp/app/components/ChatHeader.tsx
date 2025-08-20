@@ -110,7 +110,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
         <div>
           <h1 className="font-bold text-lg">{chatInfo?.name}</h1>
           <div className="flex flex-wrap">
-            {members.map((member, index) => {
+            {members.slice(0, 2).map((member, index) => {
               const contact = contacts.find((c) => c.contact_id === member.id);
               return (
                 <p
@@ -122,6 +122,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                 </p>
               );
             })}
+            {members.length > 2 ? "..." : ""}
           </div>
         </div>
       </div>
