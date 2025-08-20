@@ -422,9 +422,8 @@ await notifyUsers({
   };
 
   return (
-    <div className=" min-h-screen flex flex-col bg-blue-100 dark:bg-blue-800"
+    <div className="min-h-screen flex flex-col bg-blue-100 dark:bg-blue-800 ">
     
-    >
       {/* Bilgi Modalı */}
       <InformationModal
         isOpen={showInfoModal}

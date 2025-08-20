@@ -30,19 +30,12 @@ function LeftBar({ setIsOpen, isOpen }: LeftBarProps) {
 
   const toggleMenu = () => setIsOpen(!isOpen);
    
-  // if( loading) {
-  //   return (
-  //     <div className="fixed top-0 left-0 h-screen w-16 bg-white dark:bg-gray-800 border-r shadow flex items-center justify-center z-50">
-  //       <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
-  //     </div>
-  //   );
-  // }
 
   return (
-    <div
-      className={`fixed top-0 left-0 h-screen ${
-        isOpen ? "w-64" : "w-16"
-      } bg-white dark:bg-gray-800 border-r shadow transition-all duration-300 flex flex-col justify-between z-50`}
+     <div
+      className={`hidden md:flex fixed top-0 left-0 h-screen ${
+        isOpen ? "w-44" : "w-16"
+      } bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-md transition-all duration-300 flex flex-col justify-between z-50`}
     >
       {/* Üst Kısım */}
       <div>

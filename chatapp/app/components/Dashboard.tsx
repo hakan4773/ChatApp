@@ -153,7 +153,7 @@ const handleOpen=()=>{
             <div className="mb-8 text-center">
               <h2 className="text-3xl font-semibold ">Merhaba, {user?.user_metadata.name}!</h2>
               <p className="text-gray-500  mt-2">
-                ChatApp'e hoş geldiniz! Yeni bir sohbete başlayın veya dosyalarınızı paylaşın.
+                ChatApp'e hoş geldiniz! Arkadaşlarınızla anında sohbete baslayın veya oyunlar oynayın.
               </p>
             </div>
 
@@ -183,8 +183,8 @@ const handleOpen=()=>{
           className="p-6 dark:bg-gray-800 dark:hover:bg-gray-700 bg-white rounded-xl shadow-sm hover:shadow-md transition"
         >
           <DocumentArrowUpIcon className="w-10 h-10 text-indigo-600 mb-4" />
-          <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">Notlarım</h3>
-          <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
+          <h3 className="text-lg font-medium  text-center text-gray-800 dark:text-gray-200">Notlarım</h3>
+          <p className="text-sm text-center text-gray-500 mt-1 dark:text-gray-400">
             Kişisel notlarınızı kaydedin ve düzenleyin.
           </p>
          </Link>
@@ -195,8 +195,8 @@ const handleOpen=()=>{
                 className="p-6 bg-white rounded-xl dark:bg-gray-800 dark:hover:bg-gray-700 shadow-sm hover:shadow-md transition "
               >
                 <UserCircleIcon className="w-10 h-10 text-indigo-600 mb-4" />
-                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">Profil</h3>
-                <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
+                <h3 className="text-lg  text-center font-medium text-gray-800 dark:text-gray-200">Profil</h3>
+                <p className="text-sm text-center text-gray-500 mt-1 dark:text-gray-400">
                   Profil bilgilerinizi düzenleyin.
                 </p>
               </Link>
