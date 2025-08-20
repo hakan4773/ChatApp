@@ -25,7 +25,7 @@ export default function RootLayout({
             {/* Sayfa içeriği */}
        <main  
         className={`flex-1 overflow-auto transition-all duration-300 safe-area-padding ${
-          isOpen ? "pl-0 md:pl-44" : "pl-0 md:pl-16 pb-16 md:pb-0"
+          isOpen ? "pl-0 md:pl-44" : `pl-0 md:pl-16 ${!isChatPage ? "pb-16 md:pb-0" : "pb-0"}`
         }`}
       >            {children}
             </main>
