@@ -37,6 +37,17 @@ onSubmit: async (values, { setSubmitting }) => {
 
         if (data.user) {
           setUser(data.user);
+          const { data: userData } = await supabase.auth.getUser();
+                await supabase.from("users").upsert({
+                  id: userData?.user?.id,
+                  email: userData?.user?.email,
+                  password: userData?.user?.user_metadata?.password || null,
+                  avatar_url: userData?.user?.user_metadata?.avatar_url || null,
+                  name: userData?.user?.user_metadata?.name || null,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                });
+
           router.push("/"); 
         }
       } catch (err) {

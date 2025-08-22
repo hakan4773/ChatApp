@@ -7,60 +7,30 @@ import { supabase } from "../../lib/supabaseClient";
 import type { User } from '@supabase/supabase-js';
 import * as yup from 'yup';
 function page() {
-const [user, setUser] = useState<User | null>(null);
-const [isRegistered, setIsRegistered] = useState(false);
-const [formData, setFormData] = useState({
-  name: "",
-  email: "",
-  password: "",
-});
 const formik = useFormik({
-  initialValues: formData,
-  onSubmit: async (values) => {
-    if(user?.email){
-      alert("bu email zaten kayıtlı")
-    }
-    const { data, error } = await supabase.auth.signUp({
-      email: values.email,
-      password: values.password,
-      options: {
-        emailRedirectTo: "http://localhost:3000/email-verified",
-        data: {
-          name: values.name,
+    initialValues: { name: "", email: "", password: "" },
+    onSubmit: async (values) => {
+      const { data, error } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          emailRedirectTo: "http://localhost:3000/email-verified",
+          data: { name: values.name },
         },
-      },
-    });
- if (error) {
-    if (error.message.includes("already registered")) {
-      alert("Bu e-posta zaten kayıtlı. Lütfen giriş yapın.");
-    } else {
-      console.error("Sign-up error:", error.message);
-      alert(error.message);
-    }
-    return;
-  }
+      });
 
-  if (data?.user?.identities?.length === 0) {
-    // Kullanıcı zaten kayıtlı ama doğrulanmamış: e-posta tekrar gönderildi
-    alert("Bu e-posta adresine daha önce kayıt olunmuş ama henüz doğrulanmamış. Yeni doğrulama e-postası gönderildi.");
-  } else {
-    alert("Kayıt başarılı! Lütfen e-postanı kontrol et ve hesabını doğrula.");
-  }
-
-  
-  },
-  validationSchema: yup.object({
-    name: yup.string().required("Name is required"),
-    email: yup
-      .string()
-      .email("Invalid email address")
-      .required("Email is required"),
-    password: yup
-      .string()
-      .min(6, "Password must be at least 6 characters")
-      .required("Password is required"),
-  }),
-});
+      if (error) {
+        alert(error.message);
+        return;
+      }
+      alert("Kayıt başarılı! Lütfen e-postanı kontrol et.");
+    },
+    validationSchema: yup.object({
+      name: yup.string().required("Ad gerekli"),
+      email: yup.string().email("Geçersiz e-posta").required("E-posta gerekli"),
+      password: yup.string().min(6, "Şifre en az 6 karakter olmalı").required("Şifre gerekli"),
+    }),
+  });
 
   return (
 
