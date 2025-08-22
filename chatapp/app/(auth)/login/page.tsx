@@ -41,7 +41,7 @@ onSubmit: async (values, { setSubmitting }) => {
                 await supabase.from("users").upsert({
                   id: userData?.user?.id,
                   email: userData?.user?.email,
-                  password: userData?.user?.user_metadata?.password || null,
+                  password: userData?.user?.user_metadata?.encrypted_password || null,
                   avatar_url: userData?.user?.user_metadata?.avatar_url || null,
                   name: userData?.user?.user_metadata?.name || null,
                   created_at: new Date().toISOString(),
