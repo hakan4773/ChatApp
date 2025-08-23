@@ -9,7 +9,7 @@ interface Message {
   id: string;
   content: string;
   user_id: string;
-  avatar_url: string;
+  avatar_url?: string | null;
   location?: {
     lat: number;
     lng: number;

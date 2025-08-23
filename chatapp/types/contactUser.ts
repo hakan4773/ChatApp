@@ -17,7 +17,7 @@ export interface FriendsProps{
     email:string;
     is_blocked:boolean;
     contact_id:string;
-    users:UserNested;
+    users?:UserNested;
 }
 export interface OpenProps {
   setOpenUsers: (open: boolean) => void;

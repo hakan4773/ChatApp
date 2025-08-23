@@ -34,7 +34,7 @@ const Page = () => {
       id: string;
       content: string;
       user_id: string;
-      avatar_url: string;
+      avatar_url?: string | null;
       location?: { lat: number; lng: number } | null;
       file_url: string | null;
       image_url: string;
@@ -81,7 +81,13 @@ const Page = () => {
           .eq("chat_id", chatId);
 
         if (usersData) {
-          setMembers(usersData.map(({ users }) => users) || []);
+          setMembers(usersData.map(({ users }) => ({
+            id: users.id,
+            name: users.name ?? '',
+            avatar_url: users.avatar_url ?? '',
+            email: users.email ?? '',
+            created_at: users.created_at ?? '',
+          })));
         } else {
           setMembers([]);
         }
@@ -89,7 +95,7 @@ const Page = () => {
         const { data:messageData, error } = await supabase
           .from("messages")
           .select(
-            "id, content, user_id, created_at,image_url,file_url,location, users(id, name, avatar_url)"
+            "id, content,  user_id, created_at, image_url, file_url, location, users(id, name, avatar_url)"
           )
           .eq("chat_id", chatId)
           .order("created_at", { ascending: true });
@@ -234,7 +240,7 @@ return () => {
         .filter(member => member.id !== user.id)
         .map(member => ({
           user_id: member.id,
-          message_id: data.id,
+          message_id: data?.id,
           chat_id: chatId,
           is_read: false
         }))
@@ -243,14 +249,16 @@ return () => {
   if (statusError) throw statusError;
 
     //yeni mesajı ekle
-    setMessages((prev) => [...prev, data]);
+    if (data) {
+      setMessages((prev) => [...prev, data]);
+    }
     setNewMessage("");
     playMessageSound();
 
     //chats tablosunda last_message_id alanını güncelle
     const { error: updateError } = await supabase
       .from("chats")
-      .update({ last_message_id: data.id })
+      .update({ last_message_id: data?.id })
       .eq("id", chatId);
 
     if (updateError) {
@@ -302,6 +310,7 @@ await notifyUsers({
       if (messageError) throw messageError;
 
       setMessages((prev) => [...prev, messageData]);
+      playMessageSound();
       await notifyUsers({
           chatId,
           members,
@@ -381,8 +390,10 @@ await notifyUsers({
     if (error) {
       console.error("Konum gönderilemedi:", error.message);
     }
-
-    setMessages((prev) => [...prev, data]);
+    if (data) {
+      setMessages((prev) => [...prev, data]);
+    }
+    playMessageSound();
     await notifyUsers({
         chatId,
         members,
@@ -422,6 +433,7 @@ await notifyUsers({
       toast.error("Sesli mesaj gönderilemedi.");
     } else {
     setMessages((prev) => (data ? [...prev, data] : prev));
+    playMessageSound();
        await notifyUsers({
         chatId,
         members,
