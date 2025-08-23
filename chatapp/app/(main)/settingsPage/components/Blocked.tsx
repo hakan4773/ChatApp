@@ -16,6 +16,9 @@ type OpenProps = {
 function Blocked({setOpenBlockedState,blocked,setBlocked,handleBlock}:OpenProps) {
     const { user } = useUser();
      useEffect(()=>{
+      if(!user?.id){
+        return;
+      }
       const getBlockedList = async () => {
         const { data, error } = await supabase
           .from("contacts")

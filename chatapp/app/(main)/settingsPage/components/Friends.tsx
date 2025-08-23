@@ -17,6 +17,9 @@ export default function Friends({setOpenFriendsState,friends,setFriends,handleBl
     const [searchTerm, setSearchTerm] = useState("");
     const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
     useEffect(() => {
+      if (!user) {
+        return;
+      }
       const getFriendList = async () => {
         const { data, error } = await supabase
           .from("contacts")
@@ -45,6 +48,7 @@ export default function Friends({setOpenFriendsState,friends,setFriends,handleBl
 );
 
 const handleDelete = async (id: string) => {
+  if (!user?.id) return;
   const { error } = await supabase.from("contacts").delete().eq("contact_id", id).eq("owner_id", user?.id);;
 if(error) {
   toast.error("Kullanıcı silinirken hata oluştu")
@@ -84,7 +88,7 @@ setConfirmDelete(null);
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 overflow-hidden">
                     <Image
-                      src={friend.users.avatar_url ? friend.users.avatar_url : `/5.jpg`}
+                      src={friend.users?.avatar_url ? friend.users.avatar_url : `/5.jpg`}
                       alt={friend?.nickname +"images"}
                       width={40}
                       height={40}

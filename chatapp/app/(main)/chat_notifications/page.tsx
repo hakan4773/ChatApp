@@ -4,7 +4,7 @@ import { supabase } from "@/app/lib/supabaseClient";
 import React, { useEffect, useState } from "react";
 
 interface Notification {
-  id: number;
+  id: string;
   title: string;
   message: string;
   created_at: string;
@@ -52,7 +52,7 @@ setUnreadNotifications((filteredNotifications ?? []).filter((n) => !n.is_read).l
 
     };
 
-    const readNotification = (id: number) => {
+    const readNotification = (id: string) => {
       supabase
         .from("notifications")
         .update({ is_read: true })
@@ -103,7 +103,7 @@ setUnreadNotifications((filteredNotifications ?? []).filter((n) => !n.is_read).l
    setUnreadNotifications(0);
  }
 
- const deleteNotification = (id: number) => {
+ const deleteNotification = (id: string) => {
        supabase
          .from("notifications")
          .delete()

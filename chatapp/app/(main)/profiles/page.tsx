@@ -39,6 +39,7 @@ function page() {
     const { error: tableError } = await supabase
       .from('users')
       .update({
+        id: user.id,
         name: values.name,
         avatar_url: values.avatar_url,
         updated_at: new Date().toISOString(),

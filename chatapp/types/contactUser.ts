@@ -9,10 +9,10 @@ export interface UserProps {
   contact_id: string;
   email: string;
   nickname: string;
-  users: UserNested;
+  users?: UserNested;
 }
 export interface FriendsProps{
-   owner_id:string; // yeni eekledim karşololşı engellemede mesaj engelleme
+   owner_id:string; 
     nickname:string;
     email:string;
     is_blocked:boolean;

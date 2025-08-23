@@ -20,6 +20,10 @@ function AddNewUsers({ setOpenUsers, onUserAdded }: AddNewUsersProps) {
   const { name, email } = newUser;
   const userId = user?.id; 
 
+      if (!userId) {
+      toast.error("Kullanıcı bilgisi bulunamadı.");
+      return;
+      }
   if (!name || !email) {
     toast.error("Lütfen tüm alanları doldurun.");
     return;
@@ -65,6 +69,7 @@ function AddNewUsers({ setOpenUsers, onUserAdded }: AddNewUsersProps) {
     toast.success("Yeni Kullanıcı Eklendi");
      onUserAdded(data as UserProps);
     setNewUser({ name: '', email: ''});
+
 
     const {error:notifError}=await supabase.from("notifications").insert({
       user_id: existingUser.id,

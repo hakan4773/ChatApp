@@ -16,6 +16,7 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
   const [openNewUsers, setOpenNewUsersState] = useState<boolean>(false);
 
   useEffect(() => {
+      if (!user) return;
     const getUsers = async () => {
       try {
          const { data, error } = await supabase
@@ -115,7 +116,7 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
           {users.map((user,index) => (
             <li
               key={`${user.contact_id}-${index}`}
-              onClick={() => handleUserSelect(user.users?.id)}
+              onClick={() => user.users?.id && handleUserSelect(user.users.id)}
               className={`p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-indigo-50 dark:hover:bg-gray-700 transition cursor-pointer flex items-center justify-between ${
                 selectedUsers.includes(user.users?.id || "")
                   ? "border-2 border-indigo-500"
@@ -143,12 +144,12 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
               </div>
               <span
                 className={`text-indigo-600 font-medium ${
-                  selectedUsers.includes(user.users?.id)
+                 user.users?.id && selectedUsers.includes(user.users.id)
                     ? "opacity-100"
                     : "opacity-0 group-hover:opacity-100"
                 } transition-opacity`}
               >
-                {selectedUsers.includes(user.users?.id) ? "Seçili" : "Seç"}
+                {user.users?.id && selectedUsers.includes(user.users.id) ? "Seçili" : "Seç"}
               </span>{" "}
             </li>
           ))}

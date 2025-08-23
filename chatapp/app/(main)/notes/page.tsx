@@ -41,6 +41,7 @@ function Page() {
   }, [user?.id]);
 
     const handleDelete = async (id: string) => {
+      if (!user?.id) return; 
     const confirmDelete = window.confirm("Bu notu silmek istediğinize emin misiniz?");
     if (!confirmDelete) return;
 

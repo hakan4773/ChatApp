@@ -23,6 +23,7 @@ function SettingsPage() {
   const [friends,setFriends]=useState<FriendsProps[]>([]);
 
   const handleBlock = async (id: string) => {
+    if (!user?.id) return;
   const isBlocked = blocked.some(b => b.contact_id === id);
 
   const { error } = await supabase
