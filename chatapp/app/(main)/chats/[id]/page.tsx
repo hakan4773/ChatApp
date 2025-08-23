@@ -16,7 +16,7 @@ import { FriendsProps } from "@/types/contactUser";
 
 const Page = () => {
   const router = useRouter();
-  const { user } = useUser();
+  const { user, loading: userLoading } = useUser();
   const params = useParams();
   const chatId = params?.id as string;
   const [newMessage, setNewMessage] = useState("");
@@ -58,9 +58,13 @@ const Page = () => {
   const [blockedMe, setBlockedMe] = useState<FriendsProps[]>([]);
 
   useEffect(() => {
+    if (userLoading) return;
     const getChatInfo = async () => {
-      setLoading(true);
-      if (!user) return;
+       setLoading(true);
+        if (!user) {
+          setLoading(false);
+          return;
+            }
 
       try {
         // 1. Sohbet bilgilerini al
@@ -142,7 +146,7 @@ const Page = () => {
     };
 
     getChatInfo();
-  }, [chatId]);
+  }, [chatId, user, userLoading]);
 
     //Mesajı okundu olarak işaretleme
 useEffect(() => {
@@ -405,16 +409,39 @@ await notifyUsers({
       alert("Gruptan çıkılamadı, lütfen tekrar deneyin.");
     }
   };
-  //yüklenme durumu
+  const sendVoiceMessage=async(audioURL:string)=>{
+    const {data,error}=await supabase.from("messages").insert({
+      chat_id: chatId,
+      user_id: user?.id,
+      content: "Bir sesli mesaj gönderdi",
+      file_url: audioURL,
+    }).select().single();
+
+    if (error) {
+      console.error("Sesli mesaj gönderilemedi:", error.message);
+      toast.error("Sesli mesaj gönderilemedi.");
+    } else {
+    setMessages((prev) => (data ? [...prev, data] : prev));
+       await notifyUsers({
+        chatId,
+        members,
+        blockedByMe,
+        blockedMe,
+        senderId: user!.id,
+        message: "Bir sesli mesaj gönderdi",
+      });
+    }
+  };
+
   if (loading) {
     return (
-      <div className="p-4 flex flex-col items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
-        <p className="mt-3 text-gray-600">Sohbetler yükleniyor...</p>
+      <div className="p-4 flex flex-col dark:bg-gray-800 items-center justify-center h-screen">
+        <div className="animate-spin dark:bg-gray-600  dark:text-gray-100 rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+        <p className="mt-3 text-gray-600 dark:text-gray-100">Sohbetler yükleniyor...</p>
       </div>
     );
   }
-  // Dışa tıklama ile kapanma için handler
+
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       setOpenSettings(false);
@@ -459,6 +486,7 @@ await notifyUsers({
         setNewMessage={setNewMessage}
         sendMessage={sendMessage}
         onSendFile={handleFileUpload}
+        onSendVoiceMessage={sendVoiceMessage}
       />
     </div>
   );

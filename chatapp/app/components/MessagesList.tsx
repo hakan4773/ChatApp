@@ -130,17 +130,14 @@ ref={chatRef}
                 src={`https://kpdoboupcsggbkjhfacv.supabase.co/storage/v1/object/public/chat-images/${msg.image_url}`}
                 alt="Resim"
                className="rounded-lg mt-4 w-48 h-48 max-w-full object-cover  shadow-sm border border-gray-200 dark:border-gray-700"              />
-            ) : msg.file_url ? (
-              <a
-                href={`https://kpdoboupcsggbkjhfacv.supabase.co/storage/v1/object/public/chat-files/${msg.file_url}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 mt-4 dark:text-blue-300 underline flex items-center text-sm hover:text-blue-600 dark:hover:text-blue-400"
-              >
-                <DocumentIcon className="w-4 h-4 mr-1" />
-                {msg.content}
-              </a>
-            ) : (
+            ) : msg.file_url?.endsWith(".webm") ? (
+                <audio controls src={msg.file_url} />
+             ) : msg.file_url ? (
+            <a href={`https://kpdoboupcsggbkjhfacv.supabase.co/storage/v1/object/public/chat-files/${msg.file_url}`} target="_blank" rel="noopener noreferrer">
+              <DocumentIcon className="w-4 h-4 mr-1" />
+              {msg.content}
+            </a>
+          ) : (
               <p className="text-sm mt-2 leading-relaxed">{msg.content}</p>
             )}
 

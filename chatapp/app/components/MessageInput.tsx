@@ -4,6 +4,7 @@ import React, { useRef, useState,ChangeEvent  } from 'react'
 import {isValidFileType } from '../utils/FileUtils'
 import İmagePreview from './İmagePreview';
 import { useLocation } from '../hooks/useLocation';
+import AddVoiceMessage from './AddVoiceMessage';
 interface MessageInputProps {
   newMessage: string;
   setNewMessage: (value: string) => void;
@@ -11,16 +12,16 @@ interface MessageInputProps {
   onSendImage: (file: File) => void;
   onSendFile: (file: File) => void;
   onSendLocation: (location: { lat: number; lng: number }) => void;
+  onSendVoiceMessage?: (url: string) => void;
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage, sendMessage ,onSendImage,onSendFile,onSendLocation }) => {
+const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage,onSendVoiceMessage, sendMessage ,onSendImage,onSendFile,onSendLocation }) => {
     const [openMethods,setOpenMethods]=useState(false);
      const [imagePreview, setImagePreview] = useState<string | null>(null);
-     //referanslar
-    const imageInputRef = useRef<HTMLInputElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);     
-   //konum gönderme fonksiyonu
+     const imageInputRef = useRef<HTMLInputElement>(null);
+     const fileInputRef = useRef<HTMLInputElement>(null);     
      const { location,getLocation,setLocation } = useLocation();
+     const [openVoiceMessage, setOpenVoiceMessage] = useState(false);
 
   const sendCurrentLocation = () => {
     if (location) {
@@ -58,15 +59,13 @@ const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage, 
   }
 
   };
-  // dosya yükleme tetikleme
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
 
-  // Resim yükleme tetikleme
-const triggerImageInput = () => {
-  imageInputRef.current?.click();
-};
+  const triggerImageInput = () => {
+    imageInputRef.current?.click();
+  };
 
   const handleSend = () => {
     if (newMessage.trim()) {
@@ -86,20 +85,19 @@ const triggerImageInput = () => {
 
   return (
      <div className="p-2 sm:p-4 border-t bg-white/80 dark:bg-gray-800/80 relative">
-              {/* Resim önizleme */}
     {imagePreview && (
-  <İmagePreview
-    previewUrl={imagePreview}
-    onSend={() => {
-      const file = imageInputRef.current?.files?.[0];
-      if (file) {
-        onSendImage(file);
-        removePreview();
-      }
-    }}
-    onRemove={removePreview}
-  />
-)}
+        <İmagePreview
+          previewUrl={imagePreview}
+          onSend={() => {
+            const file = imageInputRef.current?.files?.[0];
+            if (file) {
+              onSendImage(file);
+              removePreview();
+            }
+          }}
+          onRemove={removePreview}
+        />
+       )}
 {location && (
 <div className="absolute bottom-14 left-2 sm:left-4 w-full max-w-xs bg-white dark:bg-gray-800 p-2 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 flex items-center space-x-2 z-50">
             <MapPinIcon className="w-6 h-6 text-red-500" />
@@ -121,16 +119,15 @@ const triggerImageInput = () => {
 
 
 
-      <div className="flex items-center space-x-1 sm:space-x-2 relative">
-    {/* Mikrofon butonu */}
-   <button
+  <div className="flex items-center space-x-1 sm:space-x-2 relative">
+     <button onClick={() => setOpenVoiceMessage(!openVoiceMessage)}
           className="p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors"
           aria-label="Sesli mesaj"
         >
- <MicrophoneIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+       <MicrophoneIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
      </button>
+       {openVoiceMessage && <AddVoiceMessage onSendAudio={onSendVoiceMessage}/>}
 
-    {/* Ekstra seçenekler butonu */}
     <button 
       className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
       onClick={handleOpenMethods}
@@ -139,7 +136,6 @@ const triggerImageInput = () => {
       <PlusCircleIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
     </button>
 
-    {/* Mesaj input alanı */}
     <input
       type="text"
       value={newMessage}
@@ -149,7 +145,6 @@ const triggerImageInput = () => {
       className="flex-1 border rounded-full dark:text-gray-200 py-2 px-3 sm:px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 transition-all text-sm sm:text-base" 
          />
 
-    {/* Gönder butonu */}
      <button
           onClick={handleSend}
           disabled={!newMessage.trim()}
@@ -164,14 +159,11 @@ const triggerImageInput = () => {
         </button>
   </div>
 
-  {/* Açılır menü */}
   {openMethods && (
     <div className="absolute bottom-16 left-12 bg-white dark:bg-gray-800 shadow-xl rounded-lg p-2 z-20 w-56 border border-gray-100 dark:border-gray-700">
-      {/* Ok işareti */}
       <div className="absolute -bottom-2 left-5 w-4 h-4 bg-white dark:bg-gray-800 transform rotate-45 border-b border-r border-gray-200 dark:border-gray-700"></div>
       
       <div className="flex flex-col space-y-1">
-        {/* Resim gönderme fonksiyonu */}
         <button 
           className="flex items-center space-x-3 p-3 rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors text-left w-full"
           onClick={triggerImageInput}  
@@ -191,7 +183,6 @@ const triggerImageInput = () => {
             className="hidden" 
           />
         </button>
-        {/* Dosya gönderme fonksiyonu */}
         <button 
           className="flex items-center space-x-3 p-3 rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors text-left"
           onClick={triggerFileInput}  
@@ -211,7 +202,6 @@ const triggerImageInput = () => {
             <p className="text-xs text-gray-500 dark:text-gray-400">PDF, Word, Excel gönder</p>
           </div>
         </button>
-        {/* Konum gönderme fonksiyonu */}
         <button 
           className="flex items-center space-x-3 p-3 rounded-md hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors text-left"
           onClick={getLocation}
