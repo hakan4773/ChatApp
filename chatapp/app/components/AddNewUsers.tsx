@@ -31,9 +31,9 @@ function AddNewUsers({ setOpenUsers, onUserAdded }: AddNewUsersProps) {
 
   const { data: existingUser, error: userError } = await supabase
     .from("users")
-    .select("*")
+    .select("id, name, email")
     .eq("email", email)
-    .single();
+    .maybeSingle();
 
   if (userError || !existingUser) {
     toast.error("Kullanıcı sistemde bulunamadı.");
@@ -48,7 +48,7 @@ function AddNewUsers({ setOpenUsers, onUserAdded }: AddNewUsersProps) {
     .select("*")
     .eq("owner_id", userId)
     .eq("contact_id", existingUser.id)
-    .single();
+    .maybeSingle();
 
   if (existingContact) {
     toast.error("Bu kullanıcı zaten eklenmiş.");
