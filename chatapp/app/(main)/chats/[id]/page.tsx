@@ -13,6 +13,7 @@ import ChatHeader from "@/app/components/ChatHeader";
 import MessagesList from "@/app/components/MessagesList";
 import { FriendsProps } from "@/types/contactUser";
  import { notifyUsers } from "@/app/utils/NotifyUsers";
+import { ChatInfoType, MembersType, MessageType } from "@/types/message";
 
 const Page = () => {
   const router = useRouter();
@@ -20,37 +21,10 @@ const Page = () => {
   const params = useParams();
   const chatId = params?.id as string;
   const [newMessage, setNewMessage] = useState("");
-  const [members, setMembers] = useState<
-    {
-      id: string;
-      name: string;
-      avatar_url: string;
-      email: string;
-      created_at: string;
-    }[]
-  >([]);
-  const [messages, setMessages] = useState<
-    {
-      id: string;
-      content: string;
-      user_id: string;
-      avatar_url?: string | null;
-      location?: { lat: number; lng: number } | null;
-      file_url: string | null;
-      image_url: string;
-      created_at: string;
-    }[]
-  >([]);
+  const [members, setMembers] = useState<MembersType[]>([]);
+  const [messages, setMessages] = useState<MessageType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [chatInfo, setChatInfo] = useState<{
-    id: string;
-    name: string | null;
-    users: Array<{
-      id: string;
-      name: string | null;
-      avatar_url: string | null;
-    }>;
-  } | null>(null);
+  const [chatInfo, setChatInfo] = useState<ChatInfoType | null>(null);
   const [openSettings, setOpenSettings] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [contacts, setContacts] = useState<FriendsProps[]>([]);
@@ -174,6 +148,35 @@ useEffect(() => {
   };
 
   markMessagesAsRead();
+}, [chatId, user?.id]);
+
+useEffect(() => {
+  if (!chatId) return;
+
+  const channel = supabase
+    .channel(`messages:${chatId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `chat_id=eq.${chatId}`,
+      },
+      (payload) => {
+    
+        const newMessage = payload.new as MessageType;
+        setMessages((prev) => [...prev, newMessage]); 
+        if (newMessage.user_id !== user?.id) {
+          playMessageSound();
+        }
+      }
+    )
+    .subscribe();
+
+  return () => {
+    channel.unsubscribe();
+  };
 }, [chatId, user?.id]);
 
 useEffect(() => {
