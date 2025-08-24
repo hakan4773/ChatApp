@@ -14,8 +14,7 @@ import MessagesList from "@/app/components/MessagesList";
 import { FriendsProps } from "@/types/contactUser";
  import { notifyUsers } from "@/app/utils/NotifyUsers";
 import { ChatInfoType, MembersType, MessageType, MessageWithUserType } from "@/types/message";
-type SubscriptionStatus = 'SUBSCRIBED' | 'UNSUBSCRIBED' | 'ERROR';
-
+import { REALTIME_SUBSCRIBE_STATES } from '@supabase/supabase-js'
 const Page = () => {
   const router = useRouter();
   const { user, loading: userLoading } = useUser();
@@ -153,28 +152,56 @@ useEffect(() => {
 
 useEffect(() => {
   if (!chatId || !user?.id) return;
+
   const channel = supabase
     .channel(`messages:${chatId}`)
     .on(
-      "postgres_changes",
+      'postgres_changes',
       {
-        event: "INSERT",
-        schema: "public",
-        table: "messages",
-        filter: `chat_id=eq.'${chatId}'`,
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `chat_id=eq.${chatId}`,
       },
       (payload) => {
+        console.log('Gelen payload:', payload); 
         const newMessage = payload.new as MessageType;
-        setMessages((prev) => [...prev, newMessage]);
-        if (newMessage.user_id !== user.id) playMessageSound();
+        console.log('Yeni mesaj:', newMessage);
+        const isBlocked = blockedByMe.some(c => c.contact_id === newMessage.user_id) ||
+                         blockedMe.some(c => c.owner_id === newMessage.user_id);
+        if (!isBlocked) {
+          setMessages((prev) => {
+            const updatedMessages = [...prev, newMessage];
+            console.log('Güncellenen mesajlar:', updatedMessages); 
+            return updatedMessages;
+          });
+          if (newMessage.user_id !== user.id) {
+            playMessageSound();
+            toast.info(`Yeni mesaj: ${newMessage.content || 'Yeni mesaj var!'}`);
+          }
+        } else {
+          console.log('Mesaj engellenen bir kullanıcıdan geldi, eklenmedi:', newMessage.user_id);
+        }
       }
-    );
+    )
+    .subscribe((status) => {
+      console.log('Subscription durumu:', status);
+      if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
+        console.log(`Kanal ${chatId} için subscription aktif`);
+      } else if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
+        console.error('Subscription hatası:', supabase.getChannels());
+      } else if (status === REALTIME_SUBSCRIBE_STATES.TIMED_OUT) {
+        console.warn('Subscription zaman aşımına uğradı, yeniden bağlanmayı deneyin');
+      } else if (status === REALTIME_SUBSCRIBE_STATES.CLOSED) {
+        console.warn('Subscription kapatıldı');
+      }
+    });
 
-  channel.subscribe();
   return () => {
-    channel.unsubscribe();
+    console.log('Kanal temizleniyor:', channel);
+    supabase.removeChannel(channel);
   };
-}, [chatId, user?.id]);
+}, [chatId, user?.id, blockedByMe, blockedMe]);
 
 
 
