@@ -13,7 +13,7 @@ import ChatHeader from "@/app/components/ChatHeader";
 import MessagesList from "@/app/components/MessagesList";
 import { FriendsProps } from "@/types/contactUser";
  import { notifyUsers } from "@/app/utils/NotifyUsers";
-import { ChatInfoType, MembersType, MessageType } from "@/types/message";
+import { ChatInfoType, MembersType, MessageType, MessageWithUserType } from "@/types/message";
 
 const Page = () => {
   const router = useRouter();
@@ -156,17 +156,32 @@ useEffect(() => {
   const channel = supabase
     .channel(`messages:${chatId}`)
     .on(
-      'postgres_changes',
+      "postgres_changes",
       {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
         filter: `chat_id=eq.${chatId}`,
       },
-      (payload) => {
-    
-        const newMessage = payload.new as MessageType;
-        setMessages((prev) => [...prev, newMessage]); 
+      async (payload) => {
+        let newMessage = payload.new as MessageType;
+
+        // Kullanıcı bilgilerini doldur
+        const { data: userData } = await supabase
+          .from("users")
+          .select("id, name, avatar_url")
+          .eq("id", newMessage.user_id)
+          .single();
+
+        if (userData) {
+          newMessage = {
+            ...newMessage,
+            users: userData,
+          }as MessageWithUserType;
+        }
+
+        setMessages((prev) => [...prev, newMessage]);
+
         if (newMessage.user_id !== user?.id) {
           playMessageSound();
         }
@@ -175,9 +190,10 @@ useEffect(() => {
     .subscribe();
 
   return () => {
-    channel.unsubscribe();
+    supabase.removeChannel(channel); 
   };
 }, [chatId, user?.id]);
+
 
 useEffect(() => {
   if (!user?.id) return;

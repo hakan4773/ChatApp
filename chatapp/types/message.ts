@@ -8,6 +8,13 @@ export interface MessageType {
           image_url: string;
           created_at: string;
 }
+export interface MessageWithUserType extends MessageType {
+  users: {
+    id: string;
+    name: string;
+    avatar_url: string;
+  };
+}
 
 export interface ChatInfoType {
         id: string;
