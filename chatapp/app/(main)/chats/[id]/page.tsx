@@ -161,7 +161,7 @@ useEffect(() => {
         event: 'INSERT',
         schema: 'public',
         table: 'messages',
-        filter: `chat_id=eq.${chatId}`,
+        filter: `chat_id=eq.'${chatId}'`,
       },
       (payload) => {
         console.log('Gelen payload:', payload); 
