@@ -190,10 +190,11 @@ const filteredChats = chats.filter(chat =>
         </div>
       ) : (
         <>
-           <div className="flex items-center justify-between mb-4 text-gray-800 dark:text-gray-200">
-        <h2 className="text-lg sm:text-xl font-semibold flex items-center">
-          <FiMessageSquare className="mr-2 w-6 h-6" /> Sohbetler
-        </h2>
+    <div className="flex flex-col lg:flex-row items-center justify-between gap-4 px-4 py-3 bg-gray-100 dark:bg-gray-800 ">
+      <h2 className="text-2xl font-bold flex items-center text-gray-900 dark:text-gray-100">
+        <FiMessageSquare className="mr-2 w-6 h-6 text-blue-600 dark:text-blue-400" />
+        Sohbetler
+      </h2>
 
       <SearchInput  searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 

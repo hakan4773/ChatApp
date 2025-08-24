@@ -7,6 +7,8 @@ import AddChatName from "./AddChatName";
 import AddNewUsers from "./AddNewUsers";
 import { useUser } from "../context/UserContext";
 import { UserProps ,OpenProps} from "../../types/contactUser";
+import { toast } from "react-toastify";
+
 
 const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
   const {user}=useUser();
@@ -14,6 +16,8 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [openNameState, setOpenNameState] = useState<boolean>(false);
   const [openNewUsers, setOpenNewUsersState] = useState<boolean>(false);
+const isGroup = selectedUsers.length > 1;
+ 
 
   useEffect(() => {
       if (!user) return;
@@ -75,11 +79,16 @@ const Users = ({ setOpenUsers,onCreateChat,name,setName }: OpenProps) => {
   };
 
   const handleOpenName = () => {
-    if (selectedUsers.length > 0) {
-      setOpenNameState(true);
-    } else {
-      console.log("Lütfen en az bir kullanıcı seçin.");
-    }
+     if (selectedUsers.length === 0) {
+     toast.error("Lütfen en az bir kullanıcı seçin.");
+     return;
+  }
+  if (isGroup) {
+    setOpenNameState(true);
+  } else {
+    onCreateChat(selectedUsers);
+    setOpenUsers(false);
+  }
   };
 
   const handleNewUser = () => {

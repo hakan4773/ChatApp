@@ -110,7 +110,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           className="rounded-full object-cover border-2 border-white dark:border-gray-700 shadow-sm"
         />
         <div>
-          <h1 className="font-bold text-lg">{chatInfo?.name}</h1>
+          <h1 className="font-bold text-lg">{chatInfo?.name || members.map((u) => u.id !== user?.id ? u.name : "")}</h1>
           <div className="flex flex-wrap">
             {members.slice(0, 2).map((member, index) => {
               const contact = contacts.find((c) => c.contact_id === member.id);

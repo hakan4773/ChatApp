@@ -35,7 +35,6 @@ try {
       // Aynı üyelerden oluşan bir sohbet var mı kontrol et
       let chatId: string | undefined;
       if (chatMembers && chatMembers.length > 0) {
-        // chat_id'ye göre grupla
         const chatGroups: { [key: string]: string[] } = {};
         chatMembers.forEach((member: any) => {
           if (!chatGroups[member.chat_id]) {
@@ -54,13 +53,14 @@ try {
           chatId = foundChat[0];
         }
       }
-
+  
       if (!chatId) {
         // Yeni sohbet oluştur
+        
         const { data: newChat, error: insertChatError } = await supabase
           .from("chats")
           .insert({ created_at: new Date().toISOString(),
-            name: name || "Yeni Sohbet", 
+           name: selectedUsers.length > 1 ? name : "",
            })
           .select("id")
           .single();
