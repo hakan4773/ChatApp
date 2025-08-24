@@ -14,6 +14,7 @@ import MessagesList from "@/app/components/MessagesList";
 import { FriendsProps } from "@/types/contactUser";
  import { notifyUsers } from "@/app/utils/NotifyUsers";
 import { ChatInfoType, MembersType, MessageType, MessageWithUserType } from "@/types/message";
+type SubscriptionStatus = 'SUBSCRIBED' | 'UNSUBSCRIBED' | 'ERROR';
 
 const Page = () => {
   const router = useRouter();
@@ -151,8 +152,7 @@ useEffect(() => {
 }, [chatId, user?.id]);
 
 useEffect(() => {
-  if (!chatId) return;
-
+  if (!chatId || !user?.id) return;
   const channel = supabase
     .channel(`messages:${chatId}`)
     .on(
@@ -163,36 +163,20 @@ useEffect(() => {
         table: "messages",
         filter: `chat_id=eq.${chatId}`,
       },
-      async (payload) => {
-        let newMessage = payload.new as MessageType;
-
-        // Kullanıcı bilgilerini doldur
-        const { data: userData } = await supabase
-          .from("users")
-          .select("id, name, avatar_url")
-          .eq("id", newMessage.user_id)
-          .single();
-
-        if (userData) {
-          newMessage = {
-            ...newMessage,
-            users: userData,
-          }as MessageWithUserType;
-        }
-
+      (payload) => {
+        const newMessage = payload.new as MessageType;
         setMessages((prev) => [...prev, newMessage]);
-
-        if (newMessage.user_id !== user?.id) {
-          playMessageSound();
-        }
+        if (newMessage.user_id !== user.id) playMessageSound();
       }
-    )
-    .subscribe();
+    );
 
+  channel.subscribe();
   return () => {
-    supabase.removeChannel(channel); 
+    channel.unsubscribe();
   };
 }, [chatId, user?.id]);
+
+
 
 
 useEffect(() => {
