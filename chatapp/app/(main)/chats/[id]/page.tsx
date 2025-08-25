@@ -150,77 +150,111 @@ useEffect(() => {
   markMessagesAsRead();
 }, [chatId, user?.id]);
 
-// useEffect(() => {
-//   if (!chatId || !user?.id) return;
 
-//   const channel = supabase
-//     .channel(`messages:${chatId}`)
-//     .on(
-//       'postgres_changes',
-//       {
-//         event: 'INSERT',
-//         schema: 'public',
-//         table: 'messages',
-//         filter: `chat_id=eq.'${chatId}'`,
-//       },
-//       (payload) => {
-//         console.log('Gelen payload:', payload); 
-//         const newMessage = payload.new as MessageType;
-//         console.log('Yeni mesaj:', newMessage);
-//         const isBlocked = blockedByMe.some(c => c.contact_id === newMessage.user_id) ||
-//                          blockedMe.some(c => c.owner_id === newMessage.user_id);
-//         if (!isBlocked) {
-//           setMessages((prev) => {
-//             const updatedMessages = [...prev, newMessage];
-//             console.log('Güncellenen mesajlar:', updatedMessages); 
-//             return updatedMessages;
-//           });
-//           if (newMessage.user_id !== user.id) {
-//             playMessageSound();
-//             toast.info(`Yeni mesaj: ${newMessage.content || 'Yeni mesaj var!'}`);
-//           }
-//         } else {
-//           console.log('Mesaj engellenen bir kullanıcıdan geldi, eklenmedi:', newMessage.user_id);
-//         }
-//       }
-//     )
-//     .subscribe((status) => {
-//       console.log('Subscription durumu:', status);
-//       if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
-//         console.log(`Kanal ${chatId} için subscription aktif`);
-//       } else if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
-//         console.error('Subscription hatası:', supabase.getChannels());
-//       } else if (status === REALTIME_SUBSCRIBE_STATES.TIMED_OUT) {
-//         console.warn('Subscription zaman aşımına uğradı, yeniden bağlanmayı deneyin');
-//       } else if (status === REALTIME_SUBSCRIBE_STATES.CLOSED) {
-//         console.warn('Subscription kapatıldı');
-//       }
-//     });
+//burası
+const channelRef = useRef<RealtimeChannel | null>(null);
+  const blockedRef = useRef({ blockedByMe, blockedMe });
 
-//   return () => {
-//     console.log('Kanal temizleniyor:', channel);
-//     supabase.removeChannel(channel);
-//   };
-// }, [chatId, user?.id]);
-const channel = useRef<RealtimeChannel | null>(null);
+  // Blocked ref'i güncelle
+  useEffect(() => {
+    blockedRef.current = { blockedByMe, blockedMe };
+  }, [blockedByMe, blockedMe]);
 
-useEffect(() => {
-  if (!channel.current) {
-    channel.current = supabase
-      .channel('messages')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, payload => {
-        console.log('Realtime payload:', payload)
-      })
-      .subscribe(status => console.log("Channel status:", status));
-  }
+ useEffect(() => {
+    if (!chatId || !user?.id) return;
 
-  return () => {
-    if (channel.current) {
-      supabase.removeChannel(channel.current);
-      channel.current = null;
+    // Önceki kanalı temizle
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
     }
-  }
-}, []);
+
+    // Yeni kanal oluştur
+    const newChannel = supabase
+      .channel(`messages:${chatId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `chat_id=eq.${chatId}`,
+        },
+        async (payload) => {
+          console.log("Yeni mesaj payload:", payload);
+          
+          const newMessage = payload.new as MessageType;
+          const { blockedByMe: currentBlockedByMe, blockedMe: currentBlockedMe } = blockedRef.current;
+          
+          // Engellenen kullanıcı kontrolü
+          const isBlocked = currentBlockedByMe.some(c => c.contact_id === newMessage.user_id) ||
+                           currentBlockedMe.some(c => c.owner_id === newMessage.user_id);
+          
+          console.log('Engelleme durumu:', { isBlocked, userId: newMessage.user_id, blockedByMe: currentBlockedByMe, blockedMe: currentBlockedMe });
+
+          if (!isBlocked) {
+            try {
+              // Kullanıcı bilgilerini getir
+              const { data: userData } = await supabase
+                .from('users')
+                .select('id, name, avatar_url')
+                .eq('id', newMessage.user_id)
+                .single();
+
+              const messageWithUser = {
+                ...newMessage,
+                users: userData || { id: newMessage.user_id, name: 'Unknown', avatar_url: null }
+              };
+
+              console.log('Eklenen mesaj:', messageWithUser);
+              
+              // State'i güncelle - functional update kullan
+              setMessages(prev => {
+                // Aynı mesaj zaten var mı kontrol et
+                const isDuplicate = prev.some(msg => msg.id === messageWithUser.id);
+                if (isDuplicate) {
+                  console.log('Duplicate mesaj, eklenmedi:', messageWithUser.id);
+                  return prev;
+                }
+                
+                console.log('Önceki mesaj sayısı:', prev.length, 'Yeni mesaj eklendi');
+                return [...prev, messageWithUser];
+              });
+              
+              if (newMessage.user_id !== user.id) {
+                playMessageSound();
+                toast.info(`Yeni mesaj: ${newMessage.content || 'Yeni mesaj var!'}`);
+                
+                // Mesajı okundu olarak işaretle
+                await supabase
+                  .from('user_message_status')
+                  .update({ is_read: true })
+                  .eq('message_id', newMessage.id)
+                  .eq('user_id', user.id);
+              }
+            } catch (error) {
+              console.error('Mesaj işleme hatası:', error);
+            }
+          } else {
+            console.log('Mesaj engellendi, eklenmedi:', newMessage.user_id);
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log("Channel status:", status);
+      });
+
+    channelRef.current = newChannel;
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+    };
+  }, [chatId, user?.id]);
+
+
+
 
 
   
@@ -299,10 +333,10 @@ return () => {
 
   if (statusError) throw statusError;
 
-    //yeni mesajı ekle
-    if (data) {
-      setMessages((prev) => [...prev, data]);
-    }
+    // yeni mesajı ekle
+    // if (data) {
+    //   setMessages((prev) => [...prev, data]);
+    // }
     setNewMessage("");
     playMessageSound();
 
