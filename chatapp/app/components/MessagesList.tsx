@@ -4,24 +4,11 @@ import Image from "next/image";
 import { DocumentIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react";
 import MessageContextMenu from "./MessageContextMenu";
-
-interface Message {
-  id: string;
-  chat_id: string;
-  content: string;
-  user_id: string;
-  avatar_url?: string | null;
-  location?: {
-    lat: number;
-    lng: number;
-  } | null;
-  file_url?: string | null;
-  image_url?: string;
-  created_at: string;
-}
+import {  MessageType } from "@/types/message";
 
 interface MessagesListProps {
-  messages: Message[];
+  messages: MessageType[];
+  setReplyingTo: (message: MessageType | null) => void;
   userId: string | undefined;
   chatUsers: {
     id: string;
@@ -33,16 +20,18 @@ const MessagesList: React.FC<MessagesListProps> = ({
   messages,
   userId,
   chatUsers,
+  setReplyingTo
 }) => {
-  const [messagesState, setMessagesState] = useState<Message[]>(messages);
+  const [messagesState, setMessagesState] = useState<MessageType[]>(messages);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [selectedMessage, setSelectedMessage] = useState<MessageType | null>(null);
+  
    const chatRef = useRef<HTMLDivElement>(null);
    const messagesEndRef = useRef<HTMLDivElement>(null);
   const openGoogleMaps = (lat: number, lng: number) => {
     window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
   };
-   const handleMessageClick = (msg: Message) => {
+   const handleMessageClick = (msg: MessageType) => {
     setSelectedMessage(msg);
     setIsContextMenuOpen((prev) => (selectedMessage === msg ? !prev : true));
   };
@@ -86,7 +75,12 @@ ref={chatRef}
         </div>
       )}
 
-      {messagesState.map((msg, index) => (
+      {messagesState.map((msg, index) => {
+        const replyTo = msg.reply_to
+          ? messagesState.find((m) => m.id === msg.reply_to)
+          : null;
+     
+     return ( 
         <div
           key={msg.id || index}
           className={`flex ${
@@ -113,6 +107,12 @@ ref={chatRef}
                 : "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-tl-none"
             }`}
           >
+             
+              {replyTo && (
+                <div className="mb-2 border-l-4 border-blue-400 pl-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded">
+                  {replyTo.content || "Mesaj silindi"}
+                </div>
+              )}
             {msg.location ? (
               <div
                 className="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md p-2 transition-colors"
@@ -170,6 +170,8 @@ ref={chatRef}
             {isContextMenuOpen && selectedMessage === msg && (
               <MessageContextMenu
                 message={msg}
+                messages={messagesState}
+                setReplyingTo={setReplyingTo}
                 onDelete={(deletedMessageId: string) => {
                   setMessagesState((prev) =>
                     prev.filter((m) => m.id !== deletedMessageId)
@@ -180,7 +182,7 @@ ref={chatRef}
             )}
           </div>
         </div>
-      ))}
+      )}) }
         <div ref={messagesEndRef} />
     </div>
   );

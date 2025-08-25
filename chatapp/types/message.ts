@@ -8,6 +8,7 @@ export interface MessageType {
           file_url?: string | null;
           image_url?: string;
           created_at: string;
+          reply_to?:string;
 }
 
 export interface ChatInfoType {

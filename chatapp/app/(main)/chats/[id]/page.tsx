@@ -30,6 +30,7 @@ const Page = () => {
   const [contacts, setContacts] = useState<FriendsProps[]>([]);
   const [blockedByMe, setBlockedByMe] = useState<FriendsProps[]>([]);
   const [blockedMe, setBlockedMe] = useState<FriendsProps[]>([]);
+  const [replyingTo, setReplyingTo] = useState<MessageType | null>(null);
 
   useEffect(() => {
     if (userLoading) return;
@@ -69,7 +70,7 @@ const Page = () => {
         const { data:messageData, error } = await supabase
           .from("messages")
           .select(
-            "id, content,chat_id,  user_id, created_at, image_url, file_url, location, users(id, name, avatar_url)"
+            "id, content,chat_id,  user_id, created_at, image_url, file_url, location,reply_to, users(id, name, avatar_url)"
           )
           .eq("chat_id", chatId)
           .order("created_at", { ascending: true });
@@ -315,6 +316,7 @@ return () => {
         chat_id: chatId,
         user_id: user?.id,
         content: newMessage.trim(),
+        reply_to: replyingTo?.id,
       })
       .select()
       .single();
@@ -579,6 +581,7 @@ await notifyUsers({
         messages={messages}
         userId={user?.id}
         chatUsers={chatInfo?.users || []}
+        setReplyingTo={setReplyingTo}
       />
 
       {/* Input Area */}
@@ -590,6 +593,8 @@ await notifyUsers({
         sendMessage={sendMessage}
         onSendFile={handleFileUpload}
         onSendVoiceMessage={sendVoiceMessage}
+        setReplyingTo={setReplyingTo}
+        replyingTo={replyingTo}
       />
     </div>
   );

@@ -5,6 +5,8 @@ import {isValidFileType } from '../utils/FileUtils'
 import İmagePreview from './İmagePreview';
 import { useLocation } from '../hooks/useLocation';
 import AddVoiceMessage from './AddVoiceMessage';
+import { MessageType } from '@/types/message';
+
 interface MessageInputProps {
   newMessage: string;
   setNewMessage: (value: string) => void;
@@ -13,9 +15,11 @@ interface MessageInputProps {
   onSendFile: (file: File) => void;
   onSendLocation: (location: { lat: number; lng: number }) => void;
   onSendVoiceMessage?: (url: string) => void;
+  replyingTo?: MessageType | null;
+  setReplyingTo?: (message: MessageType | null) => void;
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage,onSendVoiceMessage, sendMessage ,onSendImage,onSendFile,onSendLocation }) => {
+const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage,onSendVoiceMessage, sendMessage ,onSendImage,onSendFile,onSendLocation, replyingTo, setReplyingTo }) => {
     const [openMethods,setOpenMethods]=useState(false);
      const [imagePreview, setImagePreview] = useState<string | null>(null);
      const imageInputRef = useRef<HTMLInputElement>(null);
@@ -118,7 +122,17 @@ const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage,o
       )}
 
 
-
+{replyingTo && (
+  <div className="bg-gray-200 dark:bg-gray-700 p-2 rounded-md mb-2 flex justify-between items-center">
+    <div>
+      <p className="text-xs text-gray-700 dark:text-gray-300">Alıntı: {replyingTo.content}</p>
+      <p className="text-xs text-gray-500">{replyingTo.user_id || "Bilinmeyen"}</p>
+    </div>
+    <button onClick={() => setReplyingTo?.(null)}>
+      <XMarkIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+    </button>
+  </div>
+)}
   <div className="flex items-center space-x-1 sm:space-x-2 relative">
      <button onClick={() => setOpenVoiceMessage(!openVoiceMessage)}
           className="p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors"
@@ -158,6 +172,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ newMessage, setNewMessage,o
           <PaperAirplaneIcon className="w-6 h-6" />
         </button>
   </div>
+
 
   {openMethods && (
     <div className="absolute bottom-16 left-12 bg-white dark:bg-gray-800 shadow-xl rounded-lg p-2 z-20 w-56 border border-gray-100 dark:border-gray-700">
