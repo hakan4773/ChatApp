@@ -83,7 +83,7 @@ ref={chatRef}
      return ( 
         <div
           key={msg.id || index}
-          className={`flex ${
+          className={`flex  ${
             msg.user_id === userId ? "justify-end" : "items-start space-x-3"
           }`}
         >
@@ -109,7 +109,7 @@ ref={chatRef}
           >
              
               {replyTo && (
-                <div className="mb-2 border-l-4 border-blue-400 pl-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded">
+                <div className=" border-l-3 mt-4 border-blue-400 pl-2 py-1 text-xs text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-r">
                   {replyTo.content || "Mesaj silindi"}
                 </div>
               )}
@@ -153,16 +153,16 @@ ref={chatRef}
             {msg.user_id === userId && (
               <button
                 onClick={() => handleMessageClick(msg)}
-                className="absolute top-2 right-2 p-1 rounded-full hover:bg-blue-600/80 dark:hover:bg-gray-700 transition-colors"
+                className="absolute top-1 right-0 p-1 rounded-full hover:bg-blue-600/80 dark:hover:bg-gray-700 transition-colors"
                 aria-label="Mesaj seçenekleri"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 text-gray-200 dark:text-gray-300"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+                 <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 text-gray-200 dark:text-gray-300"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                 </svg>
               </button>
             )}
