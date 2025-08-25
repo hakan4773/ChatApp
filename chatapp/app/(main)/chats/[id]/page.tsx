@@ -13,7 +13,7 @@ import ChatHeader from "@/app/components/ChatHeader";
 import MessagesList from "@/app/components/MessagesList";
 import { FriendsProps } from "@/types/contactUser";
  import { notifyUsers } from "@/app/utils/NotifyUsers";
-import { ChatInfoType, MembersType, MessageType, MessageWithUserType } from "@/types/message";
+import { ChatInfoType, MembersType, MessageType } from "@/types/message";
 import { RealtimeChannel } from '@supabase/supabase-js';
 const Page = () => {
   const router = useRouter();
@@ -69,7 +69,7 @@ const Page = () => {
         const { data:messageData, error } = await supabase
           .from("messages")
           .select(
-            "id, content,  user_id, created_at, image_url, file_url, location, users(id, name, avatar_url)"
+            "id, content,chat_id,  user_id, created_at, image_url, file_url, location, users(id, name, avatar_url)"
           )
           .eq("chat_id", chatId)
           .order("created_at", { ascending: true });
@@ -100,7 +100,7 @@ const Page = () => {
           const blockedSender = blockedData?.find(c => c.contact_id === msg.user_id);
           return !blockedSender?.is_blocked;
         }) || [];
-        setMessages(filteredMessages);
+        setMessages(filteredMessages as MessageType[]);
 
         // Engellenmemiş kontaklar
         const { data: contactsData } = await supabase
@@ -155,103 +155,109 @@ useEffect(() => {
 const channelRef = useRef<RealtimeChannel | null>(null);
   const blockedRef = useRef({ blockedByMe, blockedMe });
 
-  // Blocked ref'i güncelle
   useEffect(() => {
+    if (!blockedByMe || !blockedMe) return;
     blockedRef.current = { blockedByMe, blockedMe };
   }, [blockedByMe, blockedMe]);
 
- useEffect(() => {
-    if (!chatId || !user?.id) return;
+useEffect(() => {
+  if (userLoading || !user?.id || !chatId) return;
 
-    // Önceki kanalı temizle
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-    }
+  const setupChannel = async () => {
+    
+    const { data: blockedData } = await supabase
+      .from("contacts")
+      .select("*")
+      .eq("is_blocked", true)
+      .eq("owner_id", user.id);
 
-    // Yeni kanal oluştur
+    const { data: blockedByData } = await supabase
+      .from("contacts")
+      .select("*")
+      .eq("is_blocked", true)
+      .neq("owner_id", user.id)
+      .eq("contact_id", user.id);
+
+    blockedRef.current = {
+      blockedByMe: blockedData || [],
+      blockedMe: blockedByData || []
+    };
+
+    const { data: messageData } = await supabase
+      .from("messages")
+      .select(
+        "id, chat_id, content, user_id, created_at, users(id, name, avatar_url)"
+      )
+      .eq("chat_id", chatId)
+      .order("created_at", { ascending: true });
+
+    const filteredMessages = (messageData || []).filter(msg => {
+      const { blockedByMe, blockedMe } = blockedRef.current;
+      const isBlocked = blockedByMe.some(c => c.contact_id === msg.user_id) ||
+                        blockedMe.some(c => c.owner_id === msg.user_id);
+      return !isBlocked;
+    });
+
+    setMessages(filteredMessages as MessageType[]);
+    // 3. Realtime kanalı aç
     const newChannel = supabase
       .channel(`messages:${chatId}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
           filter: `chat_id=eq.${chatId}`,
         },
         async (payload) => {
-          console.log("Yeni mesaj payload:", payload);
-          
           const newMessage = payload.new as MessageType;
-          const { blockedByMe: currentBlockedByMe, blockedMe: currentBlockedMe } = blockedRef.current;
-          
-          // Engellenen kullanıcı kontrolü
-          const isBlocked = currentBlockedByMe.some(c => c.contact_id === newMessage.user_id) ||
-                           currentBlockedMe.some(c => c.owner_id === newMessage.user_id);
-          
-          console.log('Engelleme durumu:', { isBlocked, userId: newMessage.user_id, blockedByMe: currentBlockedByMe, blockedMe: currentBlockedMe });
+          const { blockedByMe, blockedMe } = blockedRef.current;
+
+          const isBlocked = blockedByMe.some(c => c.contact_id === newMessage.user_id) ||
+                            blockedMe.some(c => c.owner_id === newMessage.user_id);
 
           if (!isBlocked) {
-            try {
-              // Kullanıcı bilgilerini getir
-              const { data: userData } = await supabase
-                .from('users')
-                .select('id, name, avatar_url')
-                .eq('id', newMessage.user_id)
-                .single();
+            const { data: userData } = await supabase
+              .from("users")
+              .select("id, name, avatar_url")
+              .eq("id", newMessage.user_id)
+              .single();
 
-              const messageWithUser = {
-                ...newMessage,
-                users: userData || { id: newMessage.user_id, name: 'Unknown', avatar_url: null }
-              };
+            const messageWithUser = {
+              ...newMessage,
+              users: userData || { id: newMessage.user_id, name: "Unknown", avatar_url: null }
+            };
 
-              console.log('Eklenen mesaj:', messageWithUser);
-              
-              // State'i güncelle - functional update kullan
-              setMessages(prev => {
-                // Aynı mesaj zaten var mı kontrol et
-                const isDuplicate = prev.some(msg => msg.id === messageWithUser.id);
-                if (isDuplicate) {
-                  console.log('Duplicate mesaj, eklenmedi:', messageWithUser.id);
-                  return prev;
-                }
-                
-                console.log('Önceki mesaj sayısı:', prev.length, 'Yeni mesaj eklendi');
-                return [...prev, messageWithUser];
-              });
-              
-              if (newMessage.user_id !== user.id) {
-                playMessageSound();
-                toast.info(`Yeni mesaj: ${newMessage.content || 'Yeni mesaj var!'}`);
-                
-                // Mesajı okundu olarak işaretle
-                await supabase
-                  .from('user_message_status')
-                  .update({ is_read: true })
-                  .eq('message_id', newMessage.id)
-                  .eq('user_id', user.id);
-              }
-            } catch (error) {
-              console.error('Mesaj işleme hatası:', error);
+            setMessages(prev => {
+              if (prev.some(msg => msg.id === messageWithUser.id)) return prev;
+              return [...prev, messageWithUser];
+            });
+
+            if (newMessage.user_id !== user.id) {
+              playMessageSound();
+              toast.info(`Yeni mesaj: ${newMessage.content || "Yeni mesaj var!"}`);
             }
-          } else {
-            console.log('Mesaj engellendi, eklenmedi:', newMessage.user_id);
           }
         }
       )
       .subscribe((status) => {
-        console.log("Channel status:", status);
+        console.log("Realtime channel status:", status);
       });
 
     channelRef.current = newChannel;
+  };
 
-    return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
-    };
-  }, [chatId, user?.id]);
+  setupChannel();
+
+  return () => {
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+  };
+}, [chatId, user?.id, userLoading]);
+
 
 
 

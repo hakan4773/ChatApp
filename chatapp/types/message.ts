@@ -1,19 +1,13 @@
 export interface MessageType {
           id: string;
+          chat_id:string;
           content: string;
           user_id: string;
           avatar_url?: string | null;
           location?: { lat: number; lng: number } | null;
-          file_url: string | null;
-          image_url: string;
+          file_url?: string | null;
+          image_url?: string;
           created_at: string;
-}
-export interface MessageWithUserType extends MessageType {
-  users: {
-    id: string;
-    name: string;
-    avatar_url: string;
-  };
 }
 
 export interface ChatInfoType {

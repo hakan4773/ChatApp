@@ -7,6 +7,7 @@ import MessageContextMenu from "./MessageContextMenu";
 
 interface Message {
   id: string;
+  chat_id: string;
   content: string;
   user_id: string;
   avatar_url?: string | null;
@@ -14,8 +15,8 @@ interface Message {
     lat: number;
     lng: number;
   } | null;
-  file_url: string | null;
-  image_url: string;
+  file_url?: string | null;
+  image_url?: string;
   created_at: string;
 }
 
@@ -146,7 +147,7 @@ ref={chatRef}
                 msg.user_id === userId ? "text-blue-100" : "text-gray-500 dark:text-gray-400"
               }`}
             >
-              {format(msg.created_at, "tr_TR")}
+              {format(msg.created_at , "tr_TR")}
             </p>
 
             {msg.user_id === userId && (
