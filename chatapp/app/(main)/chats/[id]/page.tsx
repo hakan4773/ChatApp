@@ -2,7 +2,7 @@
 import { useUser } from "@/app/context/UserContext";
 import { supabase } from "@/app/lib/supabaseClient";
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { leaveChat } from "../../../utils/leaveChat";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -14,7 +14,7 @@ import MessagesList from "@/app/components/MessagesList";
 import { FriendsProps } from "@/types/contactUser";
  import { notifyUsers } from "@/app/utils/NotifyUsers";
 import { ChatInfoType, MembersType, MessageType, MessageWithUserType } from "@/types/message";
-import { REALTIME_SUBSCRIBE_STATES } from '@supabase/supabase-js'
+import { RealtimeChannel } from '@supabase/supabase-js';
 const Page = () => {
   const router = useRouter();
   const { user, loading: userLoading } = useUser();
@@ -128,7 +128,7 @@ const Page = () => {
     getChatInfo();
   }, [chatId, user, userLoading]);
 
-    //Mesajı okundu olarak işaretleme
+
 useEffect(() => {
   if (!user?.id || !chatId) return;
 
@@ -150,62 +150,83 @@ useEffect(() => {
   markMessagesAsRead();
 }, [chatId, user?.id]);
 
-useEffect(() => {
-  if (!chatId || !user?.id) return;
+// useEffect(() => {
+//   if (!chatId || !user?.id) return;
 
-  const channel = supabase
-    .channel(`messages:${chatId}`)
-    .on(
-      'postgres_changes',
-      {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter: `chat_id=eq.'${chatId}'`,
-      },
-      (payload) => {
-        console.log('Gelen payload:', payload); 
-        const newMessage = payload.new as MessageType;
-        console.log('Yeni mesaj:', newMessage);
-        const isBlocked = blockedByMe.some(c => c.contact_id === newMessage.user_id) ||
-                         blockedMe.some(c => c.owner_id === newMessage.user_id);
-        if (!isBlocked) {
-          setMessages((prev) => {
-            const updatedMessages = [...prev, newMessage];
-            console.log('Güncellenen mesajlar:', updatedMessages); 
-            return updatedMessages;
-          });
-          if (newMessage.user_id !== user.id) {
-            playMessageSound();
-            toast.info(`Yeni mesaj: ${newMessage.content || 'Yeni mesaj var!'}`);
-          }
-        } else {
-          console.log('Mesaj engellenen bir kullanıcıdan geldi, eklenmedi:', newMessage.user_id);
-        }
-      }
-    )
-    .subscribe((status) => {
-      console.log('Subscription durumu:', status);
-      if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
-        console.log(`Kanal ${chatId} için subscription aktif`);
-      } else if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
-        console.error('Subscription hatası:', supabase.getChannels());
-      } else if (status === REALTIME_SUBSCRIBE_STATES.TIMED_OUT) {
-        console.warn('Subscription zaman aşımına uğradı, yeniden bağlanmayı deneyin');
-      } else if (status === REALTIME_SUBSCRIBE_STATES.CLOSED) {
-        console.warn('Subscription kapatıldı');
-      }
-    });
+//   const channel = supabase
+//     .channel(`messages:${chatId}`)
+//     .on(
+//       'postgres_changes',
+//       {
+//         event: 'INSERT',
+//         schema: 'public',
+//         table: 'messages',
+//         filter: `chat_id=eq.'${chatId}'`,
+//       },
+//       (payload) => {
+//         console.log('Gelen payload:', payload); 
+//         const newMessage = payload.new as MessageType;
+//         console.log('Yeni mesaj:', newMessage);
+//         const isBlocked = blockedByMe.some(c => c.contact_id === newMessage.user_id) ||
+//                          blockedMe.some(c => c.owner_id === newMessage.user_id);
+//         if (!isBlocked) {
+//           setMessages((prev) => {
+//             const updatedMessages = [...prev, newMessage];
+//             console.log('Güncellenen mesajlar:', updatedMessages); 
+//             return updatedMessages;
+//           });
+//           if (newMessage.user_id !== user.id) {
+//             playMessageSound();
+//             toast.info(`Yeni mesaj: ${newMessage.content || 'Yeni mesaj var!'}`);
+//           }
+//         } else {
+//           console.log('Mesaj engellenen bir kullanıcıdan geldi, eklenmedi:', newMessage.user_id);
+//         }
+//       }
+//     )
+//     .subscribe((status) => {
+//       console.log('Subscription durumu:', status);
+//       if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
+//         console.log(`Kanal ${chatId} için subscription aktif`);
+//       } else if (status === REALTIME_SUBSCRIBE_STATES.CHANNEL_ERROR) {
+//         console.error('Subscription hatası:', supabase.getChannels());
+//       } else if (status === REALTIME_SUBSCRIBE_STATES.TIMED_OUT) {
+//         console.warn('Subscription zaman aşımına uğradı, yeniden bağlanmayı deneyin');
+//       } else if (status === REALTIME_SUBSCRIBE_STATES.CLOSED) {
+//         console.warn('Subscription kapatıldı');
+//       }
+//     });
+
+//   return () => {
+//     console.log('Kanal temizleniyor:', channel);
+//     supabase.removeChannel(channel);
+//   };
+// }, [chatId, user?.id]);
+const channel = useRef<RealtimeChannel | null>(null);
+
+useEffect(() => {
+  if (!channel.current) {
+    channel.current = supabase
+      .channel('messages')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, payload => {
+        console.log('Realtime payload:', payload)
+      })
+      .subscribe(status => console.log("Channel status:", status));
+  }
 
   return () => {
-    console.log('Kanal temizleniyor:', channel);
-    supabase.removeChannel(channel);
-  };
-}, [chatId, user?.id, blockedByMe, blockedMe]);
+    if (channel.current) {
+      supabase.removeChannel(channel.current);
+      channel.current = null;
+    }
+  }
+}, []);
 
 
+  
 
 
+/*
 useEffect(() => {
   if (!user?.id) return;
 
@@ -232,7 +253,7 @@ return () => {
   subscription.unsubscribe();
 };
 }, [user?.id]);
-  
+  */
    const isDirectChat = members.length === 2;
  const isBlockedBetween = (memberId: string) => {
     return blockedByMe.some(c => c.contact_id === memberId) || blockedMe.some(c => c.owner_id === memberId);

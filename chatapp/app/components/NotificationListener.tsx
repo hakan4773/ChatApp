@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { toast } from "react-toastify"; 
 
@@ -12,8 +12,13 @@ interface Notification {
 }
 
 const NotificationListener: React.FC<{ currentUserId: string }> = ({ currentUserId }) => {
+  const channelRef = useRef<any>(null);
+
   useEffect(() => {
-    const channel = supabase
+    if (!currentUserId) return;
+    if (channelRef.current) return; // zaten varsa tekrar açma
+
+    channelRef.current = supabase
       .channel("notifications")
       .on(
         "postgres_changes",
@@ -28,10 +33,15 @@ const NotificationListener: React.FC<{ currentUserId: string }> = ({ currentUser
           toast.success(`📩 Yeni mesaj: ${newNotification.message}`);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Notification channel status:", status);
+      });
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
     };
   }, [currentUserId]);
 
