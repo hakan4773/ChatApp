@@ -152,7 +152,6 @@ useEffect(() => {
 }, [chatId, user?.id]);
 
 
-//burası
 const channelRef = useRef<RealtimeChannel | null>(null);
   const blockedRef = useRef({ blockedByMe, blockedMe });
 
@@ -165,6 +164,10 @@ useEffect(() => {
   if (userLoading || !user?.id || !chatId) return;
 
   const setupChannel = async () => {
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
     
     const { data: blockedData } = await supabase
       .from("contacts")
@@ -187,7 +190,7 @@ useEffect(() => {
     const { data: messageData } = await supabase
       .from("messages")
       .select(
-        "id, chat_id, content, user_id, created_at, users(id, name, avatar_url)"
+        "id, chat_id,reply_to, content, user_id, created_at, users(id, name, avatar_url)"
       )
       .eq("chat_id", chatId)
       .order("created_at", { ascending: true });
@@ -200,7 +203,7 @@ useEffect(() => {
     });
 
     setMessages(filteredMessages as MessageType[]);
-    // 3. Realtime kanalı aç
+    
     const newChannel = supabase
       .channel(`messages:${chatId}`)
       .on(
@@ -209,7 +212,6 @@ useEffect(() => {
           event: "INSERT",
           schema: "public",
           table: "messages",
-          filter: `chat_id=eq.${chatId}`,
         },
         async (payload) => {
           const newMessage = payload.new as MessageType;

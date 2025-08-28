@@ -1,6 +1,6 @@
 "use client";
 import { FriendsProps } from "@/types/contactUser";
-import { InformationCircleIcon, TrashIcon, BellSlashIcon, BellIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { InformationCircleIcon, TrashIcon, BellSlashIcon, BellIcon, ArrowLeftIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
@@ -49,6 +49,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     const router = useRouter();
 
   const [isMuted, setIsMuted] = useState(false);
+  const [isOnline, setIsOnline] = useState(false); 
 
   useEffect(() => {
     const fetchMuteStatus = async () => {
@@ -90,6 +91,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       );
     }
   };
+  const isGroupChat = members.length > 2;
   return (
     <div
       className="bg-gradient-to-r from-blue-600 to-teal-500 dark:from-gray-800 dark:to-gray-700 text-white p-4 flex items-center justify-between shadow-md relative"
@@ -110,21 +112,20 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           className="rounded-full object-cover border-2 border-white dark:border-gray-700 shadow-sm"
         />
         <div>
-          <h1 className="font-bold text-lg">{chatInfo?.name || members.map((u) => u.id !== user?.id ? u.name : "")}</h1>
-          <div className="flex flex-wrap">
-            {members.slice(0, 2).map((member, index) => {
-              const contact = contacts.find((c) => c.contact_id === member.id);
-              return (
-                <p
-                  key={index}
-                  className="text-xs text-gray-100 dark:text-gray-300 mr-1"
-                >
-                  {contact ? contact.nickname || contact.email : member.email}
-                  {index < members.length - 1 ? "," : ""}
+          <h1 className="font-semibold ">{chatInfo?.name || members.map((u) => u.id !== user?.id ? u.name : "")}</h1>
+          <div className="flex items-center">
+            {isGroupChat ? (
+              <>
+                <UserGroupIcon className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-1" />
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {members.length} üye
                 </p>
-              );
-            })}
-            {members.length > 2 ? "..." : ""}
+              </>
+            ) : (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {isOnline ? "Çevrimiçi" : "Çevrimdışı"}
+              </p>
+            )}
           </div>
         </div>
       </div>
