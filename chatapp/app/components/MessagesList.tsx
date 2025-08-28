@@ -8,6 +8,7 @@ import {  MessageType } from "@/types/message";
 
 interface MessagesListProps {
   messages: MessageType[];
+  setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>;
   setReplyingTo: (message: MessageType | null) => void;
   userId: string | undefined;
   chatUsers: {
@@ -18,11 +19,11 @@ interface MessagesListProps {
 
 const MessagesList: React.FC<MessagesListProps> = ({
   messages,
+  setMessages,
   userId,
   chatUsers,
   setReplyingTo
 }) => {
-  const [messagesState, setMessagesState] = useState<MessageType[]>(messages);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<MessageType | null>(null);
   
@@ -42,11 +43,9 @@ const MessagesList: React.FC<MessagesListProps> = ({
   
   useEffect(() => {
     scrollToBottom();
-  }, [messagesState]); 
+  }, [messages]); 
 
-useEffect(() => {
-    setMessagesState(messages);
-  }, [messages]);
+
   return (
 <div
 ref={chatRef}
@@ -57,10 +56,10 @@ ref={chatRef}
       }}
       className="flex-1 p-4 overflow-y-auto  space-y-4 bg-gradient-to-b bg-[url('/bg.jpg')] dark:bg-[url('/darkbg.jpg')]
     bg-cover bg-center from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800">
-      {messagesState.length > 0 && (
+      {messages.length > 0 && (
         <div className="flex justify-center">
           <span className="inline-block px-4 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white/80 dark:bg-gray-800/80 rounded-full shadow">
-            {new Date(messagesState[0].created_at).toLocaleDateString("tr-TR", {
+            {new Date(messages[0].created_at).toLocaleDateString("tr-TR", {
               day: "numeric",
               month: "long",
               year: "numeric",
@@ -69,9 +68,9 @@ ref={chatRef}
         </div>
       )}
 
-      {messagesState.map((msg, index) => {
+      {messages.map((msg, index) => {
         const replyTo = msg.reply_to
-          ? messagesState.find((m) => m.id === msg.reply_to)
+          ? messages.find((m) => m.id === msg.reply_to)
           : null;
      
      return ( 
@@ -164,10 +163,10 @@ ref={chatRef}
             {isContextMenuOpen && selectedMessage === msg && (
               <MessageContextMenu
                 message={msg}
-                messages={messagesState}
+                messages={messages}
                 setReplyingTo={setReplyingTo}
                 onDelete={(deletedMessageId: string) => {
-                  setMessagesState((prev) =>
+                  setMessages((prev) =>
                     prev.filter((m) => m.id !== deletedMessageId)
                   );
                 }}
