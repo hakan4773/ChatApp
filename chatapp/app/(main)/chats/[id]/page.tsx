@@ -8,18 +8,20 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import InformationModal from "../../../components/InformationModal";
 import { playMessageSound } from "@/app/utils/sound";
-import MessageInput from "@/app/components/MessageInput";
-import ChatHeader from "@/app/components/ChatHeader";
-import MessagesList from "@/app/components/MessagesList";
+import MessageInput from  "../../../components/MessageInput";
+import ChatHeader from "../../../components/ChatHeader";
+import MessagesList from "../../../components/MessagesList";
 import { FriendsProps } from "@/types/contactUser";
- import { notifyUsers } from "@/app/utils/NotifyUsers";
+import { notifyUsers } from "@/app/utils/NotifyUsers";
 import { ChatInfoType, MembersType, MessageType } from "@/types/message";
 import { RealtimeChannel } from '@supabase/supabase-js';
+
 const Page = () => {
   const router = useRouter();
   const { user, loading: userLoading } = useUser();
   const params = useParams();
   const chatId = params?.id as string;
+
   const [newMessage, setNewMessage] = useState("");
   const [members, setMembers] = useState<MembersType[]>([]);
   const [messages, setMessages] = useState<MessageType[]>([]);
@@ -32,55 +34,48 @@ const Page = () => {
   const [blockedMe, setBlockedMe] = useState<FriendsProps[]>([]);
   const [replyingTo, setReplyingTo] = useState<MessageType | null>(null);
 
+  const channelRef = useRef<RealtimeChannel | null>(null);
+  const blockedRef = useRef({ blockedByMe, blockedMe });
+
+  // 🔹 blockedRef güncellemesi
+  useEffect(() => {
+    blockedRef.current = { blockedByMe, blockedMe };
+  }, [blockedByMe, blockedMe]);
+
+  // 🔹 İlk chat bilgisi ve mesajları fetch etme
   useEffect(() => {
     if (userLoading) return;
     const getChatInfo = async () => {
-       setLoading(true);
-        if (!user) {
-          setLoading(false);
-          return;
-            }
+      if (!user) return;
 
+      setLoading(true);
       try {
-        // 1. Sohbet bilgilerini al
         const { data: chatData } = await supabase
           .from("chats")
           .select("name")
           .eq("id", chatId)
           .single();
 
-        // 2. Sohbetteki kullanıcıları al (mevcut kullanıcı hariç)
         const { data: usersData } = await supabase
           .from("chat_members")
           .select("users(id, name, avatar_url,email, created_at)")
           .eq("chat_id", chatId);
 
-        if (usersData) {
-          setMembers(usersData.map(({ users }) => ({
-            id: users.id,
-            name: users.name ?? '',
-            avatar_url: users.avatar_url ?? '',
-            email: users.email ?? '',
-            created_at: users.created_at ?? '',
-          })));
-        } else {
-          setMembers([]);
-        }
-        //mesajları getirme
-        const { data:messageData, error } = await supabase
+        setMembers(usersData?.map(({ users }) => ({
+          id: users.id,
+          name: users.name ?? '',
+          avatar_url: users.avatar_url ?? '',
+          email: users.email ?? '',
+          created_at: users.created_at ?? '',
+        })) || []);
+
+        const { data: messageData } = await supabase
           .from("messages")
-          .select(
-            "id, content,chat_id,  user_id, created_at, image_url, file_url, location,reply_to, users(id, name, avatar_url)"
-          )
+          .select("id, content, chat_id, user_id, created_at, image_url, file_url, location, reply_to, users(id, name, avatar_url)")
           .eq("chat_id", chatId)
           .order("created_at", { ascending: true });
 
-        if (error) {
-          console.error("Mesajlar alınamadı:", error.message);
-          return;
-        }
-        //engellenen kullanıcıları getir 
-         const { data: blockedData } = await supabase
+        const { data: blockedData } = await supabase
           .from("contacts")
           .select("*")
           .eq("is_blocked", true)
@@ -96,14 +91,23 @@ const Page = () => {
         setBlockedByMe(blockedData || []);
         setBlockedMe(blockedByData || []);
 
-        // Engellenen mesajları filtrele
-        const filteredMessages = messageData?.filter(msg => {
-          const blockedSender = blockedData?.find(c => c.contact_id === msg.user_id);
-          return !blockedSender?.is_blocked;
-        }) || [];
+        blockedRef.current = { blockedByMe: blockedData || [], blockedMe: blockedByData || [] };
+
+        const filteredMessages = (messageData || []).filter(msg => {
+          const { blockedByMe, blockedMe } = blockedRef.current;
+          const isBlocked = blockedByMe.some(c => c.contact_id === msg.user_id) ||
+                            blockedMe.some(c => c.owner_id === msg.user_id);
+          return !isBlocked;
+        });
+
         setMessages(filteredMessages as MessageType[]);
 
-        // Engellenmemiş kontaklar
+        setChatInfo({
+          id: chatId,
+          name: chatData?.name || null,
+          users: usersData?.map(({ users }) => users) || [],
+        });
+
         const { data: contactsData } = await supabase
           .from("contacts")
           .select("*")
@@ -111,14 +115,6 @@ const Page = () => {
           .eq("owner_id", user.id);
 
         setContacts(contactsData || []);
-       
-
-        setChatInfo({
-          id: chatId,
-          name: chatData?.name || null,
-          users: usersData?.map(({ users }) => users) || [],
-        });
-        setLoading(false);
       } catch (error) {
         console.error("Sohbet verileri alınamadı:", error);
       } finally {
@@ -129,174 +125,85 @@ const Page = () => {
     getChatInfo();
   }, [chatId, user, userLoading]);
 
+  // 🔹 Mesajları okundu olarak işaretleme
+  useEffect(() => {
+    if (!user?.id || !chatId) return;
 
-useEffect(() => {
-  if (!user?.id || !chatId) return;
-
-  const markMessagesAsRead = async () => {
-    const { error } = await supabase
+    supabase
       .from("user_message_status")
       .update({ is_read: true })
       .eq("user_id", user.id)
       .eq("chat_id", chatId)
-      .eq("is_read", false); 
+      .eq("is_read", false)
+      .then(({ error }) => {
+        if (error) console.error("Mesajlar okunmuş olarak işaretlenemedi:", error.message);
+      });
+  }, [chatId, user?.id]);
 
-    if (error) {
-      console.error("Mesajlar okunmuş olarak işaretlenemedi:", error.message);
-    }
-
-    
-  };
-
-  markMessagesAsRead();
-}, [chatId, user?.id]);
-
-
-const channelRef = useRef<RealtimeChannel | null>(null);
-  const blockedRef = useRef({ blockedByMe, blockedMe });
-
+  // 🔹 Realtime channel setup
   useEffect(() => {
-    if (!blockedByMe || !blockedMe) return;
-    blockedRef.current = { blockedByMe, blockedMe };
-  }, [blockedByMe, blockedMe]);
+    if (!user?.id || !chatId || userLoading) return;
 
-useEffect(() => {
-  if (userLoading || !user?.id || !chatId) return;
+    const setupChannel = async () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
 
-  const setupChannel = async () => {
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
-    
-    const { data: blockedData } = await supabase
-      .from("contacts")
-      .select("*")
-      .eq("is_blocked", true)
-      .eq("owner_id", user.id);
+       const newChannel = supabase
+        .channel(`messages:${chatId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+            filter: `chat_id=eq.${chatId}`,
+          },
+          async (payload) => {
+            const newMessage = payload.new as MessageType;
+            const { blockedByMe, blockedMe } = blockedRef.current;
+            const isBlocked = blockedByMe.some(c => c.contact_id === newMessage.user_id) ||
+                              blockedMe.some(c => c.owner_id === newMessage.user_id);
 
-    const { data: blockedByData } = await supabase
-      .from("contacts")
-      .select("*")
-      .eq("is_blocked", true)
-      .neq("owner_id", user.id)
-      .eq("contact_id", user.id);
+            if (!isBlocked) {
+              const { data: userData } = await supabase
+                .from("users")
+                .select("id, name, avatar_url")
+                .eq("id", newMessage.user_id)
+                .single();
 
-    blockedRef.current = {
-      blockedByMe: blockedData || [],
-      blockedMe: blockedByData || []
-    };
+              const messageWithUser = {
+                ...newMessage,
+                users: userData || { id: newMessage.user_id, name: "Unknown", avatar_url: null }
+              };
 
-    const { data: messageData } = await supabase
-      .from("messages")
-      .select(
-        "id, chat_id,reply_to, content, user_id, created_at, users(id, name, avatar_url)"
-      )
-      .eq("chat_id", chatId)
-      .order("created_at", { ascending: true });
+              setMessages(prev => {
+                if (prev.some(msg => msg.id === messageWithUser.id)) return prev;
+                return [...prev, messageWithUser];
+              });
 
-    const filteredMessages = (messageData || []).filter(msg => {
-      const { blockedByMe, blockedMe } = blockedRef.current;
-      const isBlocked = blockedByMe.some(c => c.contact_id === msg.user_id) ||
-                        blockedMe.some(c => c.owner_id === msg.user_id);
-      return !isBlocked;
-    });
-
-    setMessages(filteredMessages as MessageType[]);
-    
-    const newChannel = supabase
-      .channel(`messages:${chatId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-        },
-        async (payload) => {
-          const newMessage = payload.new as MessageType;
-          const { blockedByMe, blockedMe } = blockedRef.current;
-
-          const isBlocked = blockedByMe.some(c => c.contact_id === newMessage.user_id) ||
-                            blockedMe.some(c => c.owner_id === newMessage.user_id);
-
-          if (!isBlocked) {
-            const { data: userData } = await supabase
-              .from("users")
-              .select("id, name, avatar_url")
-              .eq("id", newMessage.user_id)
-              .single();
-
-            const messageWithUser = {
-              ...newMessage,
-              users: userData || { id: newMessage.user_id, name: "Unknown", avatar_url: null }
-            };
-
-            setMessages(prev => {
-              if (prev.some(msg => msg.id === messageWithUser.id)) return prev;
-              return [...prev, messageWithUser];
-            });
-
-            if (newMessage.user_id !== user.id) {
-              playMessageSound();
-              toast.info(`Yeni mesaj: ${newMessage.content || "Yeni mesaj var!"}`);
+              if (newMessage.user_id !== user.id) {
+                playMessageSound();
+                toast.info(`Yeni mesaj: ${newMessage.content || "Yeni mesaj var!"}`);
+              }
             }
           }
-        }
-      )
-      .subscribe((status) => {
-        console.log("Realtime channel status:", status);
-      });
+        )
+        .subscribe(status => console.log("Realtime channel status:", status));
 
-    channelRef.current = newChannel;
-  };
+      channelRef.current = newChannel;
+    };
 
-  setupChannel();
+    setupChannel();
 
-  return () => {
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
-  };
-}, [chatId, user?.id, userLoading]);
-
-
-
-
-
-
-  
-
-
-/*
-useEffect(() => {
-  if (!user?.id) return;
-
-const subscription = supabase
-    .channel('public:user_message_status')
-    .on(
-      'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'user_message_status', filter: `user_id=eq.${user.id}` },
-      async (payload) => {
-      if (payload.new.user_id !== user.id) {
-        const { data: messageData } = await supabase
-          .from('messages')
-          .select('content')
-          .eq('id', payload.new.message_id)
-          .single();
-
-        toast.info(`Yeni mesaj: ${messageData?.content || 'Yeni mesaj var!'}`);
-        playMessageSound();
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
       }
-    })
-    .subscribe();
-
-return () => {
-  subscription.unsubscribe();
-};
-}, [user?.id]);
-  */
+    };
+  }, [chatId, user?.id, userLoading]);
    const isDirectChat = members.length === 2;
  const isBlockedBetween = (memberId: string) => {
     return blockedByMe.some(c => c.contact_id === memberId) || blockedMe.some(c => c.owner_id === memberId);

@@ -39,20 +39,14 @@ const MessagesList: React.FC<MessagesListProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(() => {
-    setMessagesState(messages);
-  }, [messages]);
-
+  
   useEffect(() => {
     scrollToBottom();
   }, [messagesState]); 
 
- 
-  useEffect(() => {
-    scrollToBottom();
-  }, []);
-
-
+useEffect(() => {
+    setMessagesState(messages);
+  }, [messages]);
   return (
 <div
 ref={chatRef}
