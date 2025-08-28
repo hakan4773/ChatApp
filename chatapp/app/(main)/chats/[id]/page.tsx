@@ -35,12 +35,35 @@ const Page = () => {
   const [replyingTo, setReplyingTo] = useState<MessageType | null>(null);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const notificationChannelRef = useRef<RealtimeChannel | null>(null);
   const blockedRef = useRef({ blockedByMe, blockedMe });
 
-  // 🔹 blockedRef güncellemesi
+ 
   useEffect(() => {
     blockedRef.current = { blockedByMe, blockedMe };
   }, [blockedByMe, blockedMe]);
+
+  // Yardımcı: Mesajları yenile
+  const refreshMessages = async () => {
+    try {
+      const { data: messageData } = await supabase
+        .from("messages")
+        .select("id, content, chat_id, user_id, created_at, image_url, file_url, location, reply_to, users(id, name, avatar_url)")
+        .eq("chat_id", chatId)
+        .order("created_at", { ascending: true });
+
+      const { blockedByMe, blockedMe } = blockedRef.current;
+      const filteredMessages = (messageData || []).filter((msg: any) => {
+        const isBlocked = blockedByMe.some(c => c.contact_id === msg.user_id) ||
+                          blockedMe.some(c => c.owner_id === msg.user_id);
+        return !isBlocked;
+      });
+
+      setMessages(filteredMessages as MessageType[]);
+    } catch (e) {
+      console.error("Mesajlar yenilenemedi", e);
+    }
+  };
 
   // 🔹 İlk chat bilgisi ve mesajları fetch etme
   useEffect(() => {
@@ -125,7 +148,6 @@ const Page = () => {
     getChatInfo();
   }, [chatId, user, userLoading]);
 
-  // 🔹 Mesajları okundu olarak işaretleme
   useEffect(() => {
     if (!user?.id || !chatId) return;
 
@@ -140,17 +162,31 @@ const Page = () => {
       });
   }, [chatId, user?.id]);
 
-  // 🔹 Realtime channel setup
   useEffect(() => {
     if (!user?.id || !chatId || userLoading) return;
 
-    const setupChannel = async () => {
+    let retryAttempt = 0;
+    const maxRetryDelayMs = 15000;
+
+    const cleanupChannel = () => {
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
+    };
 
-       const newChannel = supabase
+    const scheduleReconnect = () => {
+      const delay = Math.min(500 * Math.pow(2, retryAttempt), maxRetryDelayMs);
+      retryAttempt += 1;
+      setTimeout(() => {
+        setupChannel();
+      }, delay);
+    };
+
+    const setupChannel = async () => {
+      cleanupChannel();
+
+      const newChannel = supabase
         .channel(`messages:${chatId}`)
         .on(
           "postgres_changes",
@@ -190,7 +226,16 @@ const Page = () => {
             }
           }
         )
-        .subscribe(status => console.log("Realtime channel status:", status));
+        .subscribe((status) => {
+          console.log("Realtime channel status:", status);
+          if (status === "SUBSCRIBED") {
+            retryAttempt = 0;
+          }
+          if (status === "TIMED_OUT" || status === "CHANNEL_ERROR" || status === "CLOSED") {
+            cleanupChannel();
+            scheduleReconnect();
+          }
+        });
 
       channelRef.current = newChannel;
     };
@@ -198,12 +243,51 @@ const Page = () => {
     setupChannel();
 
     return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
+      cleanupChannel();
     };
   }, [chatId, user?.id, userLoading]);
+
+  useEffect(() => {
+    if (!user?.id || !chatId || userLoading) return;
+
+    if (notificationChannelRef.current) {
+      supabase.removeChannel(notificationChannelRef.current);
+      notificationChannelRef.current = null;
+    }
+
+    const ch = supabase
+      .channel("notifications:listener")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        async () => {
+          refreshMessages();
+        }
+      )
+      .subscribe();
+
+    notificationChannelRef.current = ch;
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        refreshMessages();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      if (notificationChannelRef.current) {
+        supabase.removeChannel(notificationChannelRef.current);
+        notificationChannelRef.current = null;
+      }
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [user?.id, chatId, userLoading]);
    const isDirectChat = members.length === 2;
  const isBlockedBetween = (memberId: string) => {
     return blockedByMe.some(c => c.contact_id === memberId) || blockedMe.some(c => c.owner_id === memberId);
