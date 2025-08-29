@@ -4,17 +4,13 @@ import { useUser } from "@/app/context/UserContext";
 import { supabase } from "@/app/lib/supabaseClient";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-
+import { Notes } from "@/types/notes";
 type NotesProps = {
   setOpenNewNoteState: React.Dispatch<React.SetStateAction<boolean>>;
   setNotes: React.Dispatch<React.SetStateAction<Notes[]>>;
 };
 
-type Notes = {
-  id: string;
-  title: string;
-  content: string;
-};
+
 
 function AddNewNotes({ setOpenNewNoteState,setNotes }: NotesProps) {
   const { user } = useUser();

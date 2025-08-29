@@ -25,7 +25,6 @@ function page() {
   }
 
   try {
-    // 1. Supabase auth metadata güncelle
     const { error: authError } = await supabase.auth.updateUser({
       data: {
         name: values.name,
@@ -35,7 +34,6 @@ function page() {
 
     if (authError) throw authError;
 
-    // 2. users tablosunu güncelle
     const { error: tableError } = await supabase
       .from('users')
       .update({
@@ -50,7 +48,6 @@ function page() {
       console.error("Users tablosu güncelleme hatası:", tableError);
     }
 
-    // 3. En güncel kullanıcı bilgilerini çek
     const { data: refreshedUser, error: getUserError } = await supabase.auth.getUser();
     if (getUserError || !refreshedUser?.user) {
       throw getUserError || new Error("Kullanıcı bilgisi alınamadı.");
@@ -66,7 +63,6 @@ if (typeof window !== 'undefined') {
   }
 }
 
-     
   },
   
 );
@@ -97,7 +93,7 @@ if (typeof window !== 'undefined') {
     onSubmit={formik.handleSubmit}
     className="w-full max-w-4xl bg-white dark:bg-gray-700 rounded-xl shadow-md p-6 md:p-8 flex flex-col md:flex-row gap-8"
   >
-    {/* Profil resmi */}
+
     <div className="flex flex-col items-center md:items-start space-y-4">
       <div className="relative group">
         <img
@@ -133,12 +129,10 @@ if (typeof window !== 'undefined') {
       </label>
     </div>
 
-    {/* Profil bilgileri */}
     <div className="flex-1 space-y-6">
       <h2 className="text-2xl font-bold text-text-color">Profil Bilgileri</h2>
 
       <div className="space-y-4">
-        {/* Ad Soyad */}
         <div>
           <label className="block mb-1 text-sm font-medium ">
             Ad Soyad
@@ -158,7 +152,6 @@ if (typeof window !== 'undefined') {
           </div>
         </div>
 
-        {/* E-posta */}
         <div>
           <label className="block mb-1 text-sm font-medium">
             E-posta Adresi
@@ -179,7 +172,6 @@ if (typeof window !== 'undefined') {
           </div>
         </div>
 
-        {/* Güncelle Butonu */}
         <div className="pt-4">
           <button
             type="submit"

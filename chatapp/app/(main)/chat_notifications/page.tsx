@@ -2,16 +2,8 @@
 import { useUser } from "@/app/context/UserContext";
 import { supabase } from "@/app/lib/supabaseClient";
 import React, { useEffect, useState } from "react";
+import { Notification } from "@/types/Notification";
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  created_at: string;
-  is_read: boolean;
-  user_id: string;
-  sender_id?: string;
-}
 
 
 export default function page() {

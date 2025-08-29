@@ -2,13 +2,7 @@ import { useUser } from "@/app/context/UserContext";
 import { supabase } from "@/app/lib/supabaseClient";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-
-type Notes = {
-  id: string;
-  title: string;
-  content: string;
-};
-
+import { Notes } from "@/types/notes";
 type UpdateNoteModalProps = {
   note: Notes;
   setOpenUpdateState: React.Dispatch<React.SetStateAction<boolean>>;

@@ -6,12 +6,7 @@ import { useUser } from '@/app/context/UserContext';
 import { FiTrash2 } from 'react-icons/fi';
 import { PencilIcon } from '@heroicons/react/24/outline';
 import UpdateNoteModal from './components/UpdateModal';
-
-type Notes = {
-  id: string;
-  title: string;
-  content: string;
-};
+import { Notes } from '@/types/notes';
 
 function Page() {
   const { user } = useUser();

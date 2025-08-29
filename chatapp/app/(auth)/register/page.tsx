@@ -1,16 +1,15 @@
 "use client";
-import { ChatBubbleLeftIcon, LanguageIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
+import { ChatBubbleLeftIcon} from '@heroicons/react/24/outline'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React from 'react'
 import { useFormik } from "formik";
 import { supabase } from "../../lib/supabaseClient";
-import type { User } from '@supabase/supabase-js';
 import * as yup from 'yup';
 function page() {
 const formik = useFormik({
     initialValues: { name: "", email: "", password: "" },
     onSubmit: async (values) => {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
