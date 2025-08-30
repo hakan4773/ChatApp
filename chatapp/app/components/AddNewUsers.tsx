@@ -79,6 +79,7 @@ function AddNewUsers({ setOpenUsers, onUserAdded }: AddNewUsersProps) {
       sender_id: userId,
       is_read: false
     });
+    
 
     if (notifError) {
       console.error("Bildirim gönderilirken hata oluştu", notifError);

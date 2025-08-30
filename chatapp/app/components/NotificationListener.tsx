@@ -2,21 +2,17 @@
 import React, { useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { toast } from "react-toastify"; 
+import { Notification } from "@/types/notification";
+import { usePathname } from "next/navigation";
 
-interface Notification {
-  id: number;
-  sender_id: string;
-  receiver_id: string;
-  message: string;
-  created_at: string;
-}
 
 const NotificationListener: React.FC<{ currentUserId: string }> = ({ currentUserId }) => {
   const channelRef = useRef<any>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!currentUserId) return;
-    if (channelRef.current) return; // zaten varsa tekrar açma
+    if (channelRef.current) return; 
 
     channelRef.current = supabase
       .channel("notifications")
@@ -29,9 +25,17 @@ const NotificationListener: React.FC<{ currentUserId: string }> = ({ currentUser
           filter: `receiver_id=eq.${currentUserId}`,
         },
         (payload) => {
-          const newNotification = payload.new as Notification;
-          toast.success(`📩 Yeni mesaj: ${newNotification.message}`);
-        }
+          const newMessage = payload.new;
+          if (newMessage.receiver_id === currentUserId) {
+            const currentChatId = pathname.split("/chats/")[1]; 
+
+            if (currentChatId === newMessage.chat_id) {
+              console.log("Aktif sohbet açık, bildirim gösterilmedi");
+              return;
+            }
+
+          //  toast.info(`Yeni mesaj: ${newMessage.message}`);
+          }}
       )
       .subscribe((status) => {
         console.log("Notification channel status:", status);

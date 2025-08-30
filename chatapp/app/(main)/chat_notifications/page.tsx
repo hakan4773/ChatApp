@@ -2,7 +2,7 @@
 import { useUser } from "@/app/context/UserContext";
 import { supabase } from "@/app/lib/supabaseClient";
 import React, { useEffect, useState } from "react";
-import { Notification } from "@/types/Notification";
+import { Notification } from "@/types/notification";
 
 
 

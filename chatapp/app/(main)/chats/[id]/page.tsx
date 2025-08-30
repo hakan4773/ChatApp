@@ -1,7 +1,7 @@
 "use client";
 import { useUser } from "@/app/context/UserContext";
 import { supabase } from "@/app/lib/supabaseClient";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { leaveChat } from "../../../utils/leaveChat";
 import { useRouter } from "next/navigation";
@@ -21,6 +21,7 @@ const Page = () => {
   const { user, loading: userLoading } = useUser();
   const params = useParams();
   const chatId = params?.id as string;
+  const pathname = usePathname();
 
   const [newMessage, setNewMessage] = useState("");
   const [members, setMembers] = useState<MembersType[]>([]);
@@ -162,10 +163,18 @@ useEffect(() => {
                 return [...prev, messageWithUser];
               });
 
-              if (newMessage.user_id !== user.id) {
-                playMessageSound();
-                toast.info(`Yeni mesaj: ${newMessage.content || "Yeni mesaj var!"}`);
-              }
+            const currentPath = pathname;
+            const activeChatId = currentPath.split("/chats/")[1];
+
+            if (
+              newMessage.user_id !== user.id && 
+              newMessage.chat_id !== activeChatId
+            ) {
+              playMessageSound();
+              toast.info(
+                `Yeni mesaj: ${newMessage.content || "Yeni mesaj var!"}`
+              );
+            }
             }
           }
         )
@@ -182,7 +191,7 @@ useEffect(() => {
         channelRef.current = null;
       }
     };
-  }, [chatId, user?.id, userLoading]);
+  }, [chatId, user?.id, userLoading, pathname]);
 
    const isDirectChat = members.length === 2;
  const isBlockedBetween = (memberId: string) => {

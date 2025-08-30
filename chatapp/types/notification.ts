@@ -1,5 +1,6 @@
 export interface Notification {
   id: string;
+  chat_id?: string;
   title: string;
   message: string;
   created_at: string;

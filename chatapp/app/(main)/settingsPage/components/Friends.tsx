@@ -1,6 +1,6 @@
 import { useUser } from '@/app/context/UserContext';
 import { supabase } from '@/app/lib/supabaseClient'
-import { ChatBubbleBottomCenterIcon, NoSymbolIcon, TrashIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import {  NoSymbolIcon, TrashIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify';

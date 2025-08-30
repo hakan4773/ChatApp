@@ -56,7 +56,6 @@ function Blocked({setOpenBlockedState,blocked,setBlocked,handleBlock}:OpenProps)
         >
           <XMarkIcon className="h-6 w-6" />
         </button>
- {/* resim gelmiyor  */}
         <ul className="flex flex-col space-y-2  overflow-y-auto max-h-[300px] md:max-h-[400px]">
           {blocked.length > 0 ? (
             blocked.map((block) => (
@@ -69,9 +68,6 @@ function Blocked({setOpenBlockedState,blocked,setBlocked,handleBlock}:OpenProps)
                       width={40}
                       height={40}
                       className="object-cover"
-                      // onError={(e) => {
-                      //   e.currentTarget.src = "/5.jpg"; 
-                      // }}
                     />
                   </div>
                   <div>
