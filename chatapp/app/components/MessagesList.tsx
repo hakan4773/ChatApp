@@ -75,7 +75,7 @@ ref={chatRef}
      
      return ( 
         <div
-          key={msg.id || index}
+          key={msg.id}
           className={`flex  ${
             msg.user_id === userId ? "justify-end" : "items-start space-x-3"
           }`}

@@ -3,6 +3,7 @@ import { User, Session } from "@supabase/supabase-js";
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/app/lib/supabaseClient"; 
 
 type UserContextType = {
   user: User | null;
@@ -10,6 +11,7 @@ type UserContextType = {
   setUser: (user: User | null) => void;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  session: Session | null;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -21,57 +23,67 @@ export const UserProvider = ({
   children: ReactNode;
   serverSession?: Session | null;
 }) => {
-  const supabase = createClientComponentClient();
+  const supabaseAuth = createClientComponentClient();
   const router = useRouter(); 
   const [user, setUser] = useState<User | null>(serverSession?.user ?? null);
+  const [session, setSession] = useState<Session | null>(serverSession);
   const [loading, setLoading] = useState(!serverSession);
 
-
- const signOut = async () => {
-  try {
-    setLoading(true);
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-    setUser(null);
-    router.push("/login");
-  } catch (error: any) {
-    console.error('Error signing out:', error.message);
-  } finally {
-    setLoading(false);
-  }
-};
-
+  const signOut = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabaseAuth.auth.signOut();
+      if (error) throw error;
+      setUser(null);
+      setSession(null);
+      supabase.realtime.setAuth(null); 
+      router.push("/login");
+    } catch (error: any) {
+      console.error('Error signing out:', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const refreshUser = async () => {
-    const { data, error } = await supabase.auth.getUser();
+    const { data, error } = await supabaseAuth.auth.getUser();
     if (!error && data?.user) {
       setUser({ ...data.user });
     }
   };
 
   useEffect(() => {
-    const init = async () => {
-      if (serverSession) return;
-
-      setLoading(true);
-      const { data, error } = await supabase.auth.getSession();
-      if (!error && data?.session?.user) {
-        setUser(data.session.user);
-      } else {
-        setUser(null);
-      }
+    const initSession = async () => {
+      const { data: { session } } = await supabaseAuth.auth.getSession();
+      setUser(session?.user ?? null);
+      setSession(session);
       setLoading(false);
+
+      if (session?.access_token) {
+        supabase.realtime.setAuth(session.access_token);
+      }
     };
 
-    init();
+    initSession();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    const { data: authListener } = supabaseAuth.auth.onAuthStateChange(
+      async (_event, session) => {
+        setUser(session?.user ?? null);
+        setSession(session);
+        setLoading(false);
+
+        if (session?.access_token) {
+          supabase.realtime.setAuth(session.access_token);
+          console.log("Realtime auth updated with new token");
+        } else {
+          supabase.realtime.setAuth(null);
+          console.log("Realtime auth cleared");
+        }
+      }
+    );
 
     return () => {
-      authListener?.subscription?.unsubscribe();
+      authListener.subscription.unsubscribe();
     };
   }, []);
 
@@ -83,6 +95,7 @@ export const UserProvider = ({
         setUser,
         signOut,
         refreshUser,
+        session,
       }}
     >
       {children}

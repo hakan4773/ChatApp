@@ -15,30 +15,41 @@ import { FriendsProps } from "@/types/contactUser";
 import { notifyUsers } from "@/app/utils/NotifyUsers";
 import { ChatInfoType, MembersType, MessageType } from "@/types/message";
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { useChatChannel } from "@/app/hooks/useChatChannel";
 
 const Page = () => {
   const router = useRouter();
-  const { user, loading: userLoading } = useUser();
+  const { user, loading: userLoading ,session} = useUser();
   const params = useParams();
   const chatId = params?.id as string;
   const pathname = usePathname();
 
   const [newMessage, setNewMessage] = useState("");
-  const [members, setMembers] = useState<MembersType[]>([]);
-  const [messages, setMessages] = useState<MessageType[]>([]);
+  const [members, setMembers] = useState<MembersType[]>([]); 
+  const [blockedByMe, setBlockedByMe] = useState<FriendsProps[]>([]);
+  const [blockedMe, setBlockedMe] = useState<FriendsProps[]>([]);
+const { messages, setMessages } = useChatChannel({
+  chatId,
+  currentUserId: user?.id ?? '',
+  blockedByMe,
+  blockedMe,
+});
+
   const [loading, setLoading] = useState(true);
   const [chatInfo, setChatInfo] = useState<ChatInfoType | null>(null);
   const [openSettings, setOpenSettings] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [contacts, setContacts] = useState<FriendsProps[]>([]);
-  const [blockedByMe, setBlockedByMe] = useState<FriendsProps[]>([]);
-  const [blockedMe, setBlockedMe] = useState<FriendsProps[]>([]);
+ 
   const [replyingTo, setReplyingTo] = useState<MessageType | null>(null);
   const [hasFetched, setHasFetched] = useState(false);
 
-  const channelRef = useRef<RealtimeChannel | null>(null);
   const blockedRef = useRef({ blockedByMe, blockedMe });
-
+  useEffect(() => {
+    if (!session?.access_token) {
+      console.warn("No auth token available");
+    }
+   }, [session]);
   useEffect(() => {
     blockedRef.current = { blockedByMe, blockedMe };
   }, [blockedByMe, blockedMe]);
@@ -121,77 +132,85 @@ useEffect(() => {
       });
   }, [chatId, user?.id]);
 
-  useEffect(() => {
-    if (!user?.id || !chatId || userLoading) return;
+//   useEffect(() => {
+//     if (!user?.id || !chatId || userLoading) return;
+//     if (sessionStorage?.access_token) {
+//       supabase.realtime.setAuth(sessionStorage.access_token);
+//     }
+//     const setupChannel = async () => {
+//       if (channelRef.current) {
+//         supabase.removeChannel(channelRef.current);
+//         channelRef.current = null;
+//       }
 
-    const setupChannel = async () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
+//        const newChannel = supabase
+//         .channel(`messages:${chatId}`)
+//         .on(
+//           "postgres_changes",
+//           {
+//             event: "INSERT",
+//             schema: "public",
+//             table: "messages",
+//             filter: `chat_id=eq.${chatId}`,
+//           },
+//           async (payload) => {
+//             const newMessage = payload.new as MessageType;
+//             const { blockedByMe, blockedMe } = blockedRef.current;
+//             const isBlocked = blockedByMe.some(c => c.contact_id === newMessage.user_id) ||
+//                               blockedMe.some(c => c.owner_id === newMessage.user_id);
 
-       const newChannel = supabase
-        .channel(`messages:${chatId}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "INSERT",
-            schema: "public",
-            table: "messages",
-            filter: `chat_id=eq.${chatId}`,
-          },
-          async (payload) => {
-            const newMessage = payload.new as MessageType;
-            const { blockedByMe, blockedMe } = blockedRef.current;
-            const isBlocked = blockedByMe.some(c => c.contact_id === newMessage.user_id) ||
-                              blockedMe.some(c => c.owner_id === newMessage.user_id);
+//             if (!isBlocked) {
+//               const { data: userData } = await supabase
+//                 .from("users")
+//                 .select("id, name, avatar_url")
+//                 .eq("id", newMessage.user_id)
+//                 .single();
 
-            if (!isBlocked) {
-              const { data: userData } = await supabase
-                .from("users")
-                .select("id, name, avatar_url")
-                .eq("id", newMessage.user_id)
-                .single();
+//               const messageWithUser = {
+//                 ...newMessage,
+//                 users: userData || { id: newMessage.user_id, name: "Unknown", avatar_url: null }
+//               };
 
-              const messageWithUser = {
-                ...newMessage,
-                users: userData || { id: newMessage.user_id, name: "Unknown", avatar_url: null }
-              };
+//               setMessages(prev => {
+//                 if (prev.some(msg => msg.id === messageWithUser.id)) return prev;
+//                 return [...prev, messageWithUser];
+//               });
 
-              setMessages(prev => {
-                if (prev.some(msg => msg.id === messageWithUser.id)) return prev;
-                return [...prev, messageWithUser];
-              });
+//             const currentPath = pathname;
+//             const activeChatId = currentPath.split("/chats/")[1];
 
-            const currentPath = pathname;
-            const activeChatId = currentPath.split("/chats/")[1];
+//             if (
+//               newMessage.user_id !== user.id && 
+//               newMessage.chat_id !== activeChatId
+//             ) {
+//               playMessageSound();
+//               toast.info(
+//                 `Yeni mesaj: ${newMessage.content || "Yeni mesaj var!"}`
+//               );
+//             }
+//             }
+//           }
+          
+//         )
+//         .subscribe(status => console.log("Realtime channel status:", status));
+// if (status === "CLOSED" || status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+//     console.warn("Channel koptu, yeniden bağlanıyor...");
+//     setupChannel(); 
+//   }
+//       channelRef.current = newChannel;
+//     };
 
-            if (
-              newMessage.user_id !== user.id && 
-              newMessage.chat_id !== activeChatId
-            ) {
-              playMessageSound();
-              toast.info(
-                `Yeni mesaj: ${newMessage.content || "Yeni mesaj var!"}`
-              );
-            }
-            }
-          }
-        )
-        .subscribe(status => console.log("Realtime channel status:", status));
+//     if (user?.id && chatId && !userLoading) {
+//     setupChannel();
+//         }
 
-      channelRef.current = newChannel;
-    };
-
-    setupChannel();
-
-    return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
-    };
-  }, [chatId, user?.id, userLoading, pathname]);
+//     return () => {
+//       if (channelRef.current) {
+//         supabase.removeChannel(channelRef.current);
+//         channelRef.current = null;
+//       }
+//     };
+//   }, [chatId, user?.id, userLoading, pathname]);
 
    const isDirectChat = members.length === 2;
  const isBlockedBetween = (memberId: string) => {
@@ -240,9 +259,10 @@ useEffect(() => {
   if (statusError) throw statusError;
 
     // yeni mesajı ekle
-    if (data) {
-       setMessages((prev) => [...prev, data]);
-     }
+   setMessages((prev) => {
+    if (prev.some(msg => msg.id === data?.id)) return prev;
+    return [...prev, data as MessageType];
+  });
     setNewMessage("");
     playMessageSound();
 
