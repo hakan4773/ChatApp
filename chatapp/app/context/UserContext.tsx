@@ -74,10 +74,8 @@ export const UserProvider = ({
 
         if (session?.access_token) {
           supabase.realtime.setAuth(session.access_token);
-          console.log("Realtime auth updated with new token");
         } else {
           supabase.realtime.setAuth(null);
-          console.log("Realtime auth cleared");
         }
       }
     );

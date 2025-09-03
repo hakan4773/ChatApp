@@ -110,7 +110,7 @@ setUnreadNotifications((filteredNotifications ?? []).filter((n) => !n.is_read).l
 
   return (
     <div className="bg-gray-100 dark:bg-gray-800 min-h-screen">
-      <div className="p-4 justify-between flex">
+      <div className="p-4 justify-between flex lg:flex-row flex-col">
         <h1 className="text-2xl font-bold dark:text-white">Bildirimler</h1>
         <div className="flex space-x-4">
           <p className="border border-gray-200 dark:text-white rounded-md  bg-green-500 dark:border-gray-700 px-4 py-2">
@@ -157,11 +157,11 @@ setUnreadNotifications((filteredNotifications ?? []).filter((n) => !n.is_read).l
           ))
         )}
       {notifications.length > 0 && (
-        <div className="mt-4 space-x-4">
+        <div className="mt-4 space-x-4 pb-4 ">
           <button onClick={readAllNotification} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
             Tümünü Oku
           </button>
-          <button  onClick={RemoveAllNotifications} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">
+          <button  onClick={RemoveAllNotifications} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 p-4 rounded-md">
             Tümünü Sil
           </button>
         </div>

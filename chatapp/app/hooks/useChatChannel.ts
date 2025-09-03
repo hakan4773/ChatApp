@@ -48,7 +48,6 @@ export const useChatChannel = ({
       if (session?.access_token) {
         supabase.realtime.setAuth(session.access_token);
       } else {
-        console.warn("No auth token available for realtime");
         return;
       }
 
@@ -79,13 +78,10 @@ export const useChatChannel = ({
           }
         )
         .subscribe((status) => {
-          console.log("Chat channel", chatId, "status:", status);
 
           if (!isMountedRef.current) return;
 
           if (status === "CLOSED" || status === "CHANNEL_ERROR") {
-            console.warn("Channel koptu, 3 saniye sonra yeniden bağlanıyor...");
-            
             reconnectTimeoutRef.current = setTimeout(() => {
               if (isMountedRef.current && user) {
                 setupChannel();
