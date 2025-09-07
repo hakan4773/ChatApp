@@ -205,12 +205,13 @@ ref={chatRef}
             />
           )}
 
-          <div
-            className={`relative p-3 rounded-2xl min-w-[10rem] max-w-md shadow-md transition-all duration-200 ${
+          <div onClick={() => setSelectedMessage(msg)}
+            className={`relative lg:p-2 p-3 rounded-2xl   shadow-md transition-all duration-200 ${
               msg.user_id === userId
                 ? "bg-blue-500 text-white rounded-tr-none"
                 : "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-tl-none"
             }`}
+            style={{ maxWidth: "75%", minWidth: "0" }}
           >
             {/* Reactions */}
                {hoveredMessageId === msg.id && (
@@ -252,7 +253,7 @@ ref={chatRef}
               {msg.content}
             </a>
           ) : (
-              <p className="text-sm mt-2 leading-relaxed">{msg.content}</p>
+              <p className="text-sm mt-2 leading-relaxed break-words">{msg.content}</p>
             )}
 
         <div className="flex mb-2"> 
