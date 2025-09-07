@@ -22,7 +22,15 @@ const MessageContextMenu: React.FC<Props> = ({ message, onClose, onDelete, messa
       .eq("user_id", message.user_id)
       .select();
      
-    if (error) {
+      //emojileri de sil
+      const { error: reactionError } = await supabase
+      .from("message_reactions")
+      .delete()
+      .eq("message_id", message.id)
+      .eq("user_id", message.user_id)
+      .select();
+
+    if (error || reactionError) {
       toast.error("Bu mesajı silemezsiniz!");
     } else {
       toast.success("Mesaj silindi");
