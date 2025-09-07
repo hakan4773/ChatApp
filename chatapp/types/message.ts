@@ -1,3 +1,10 @@
+export interface ReactionType {
+  id?: string;        
+  message_id: string; 
+  user_id: string;    
+  emoji: string;      
+  created_at?: string;
+}
 export interface MessageType {
           id: string;
           chat_id:string;
@@ -9,6 +16,7 @@ export interface MessageType {
           image_url?: string;
           created_at: string;
           reply_to?:string;
+          reactions?: ReactionType[];
 }
 
 export interface ChatInfoType {
