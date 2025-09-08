@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { toast } from "react-toastify";
 import { MessageType } from "@/types/message";
+import { useUser } from "../context/UserContext";
 
 interface Props {
   message: MessageType;
@@ -13,16 +14,16 @@ interface Props {
 }
 
 const MessageContextMenu: React.FC<Props> = ({ message, onClose, onDelete, messages, setReplyingTo }) => {
+  const {user}=useUser();
    const handleDelete= async () => {
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("messages")
       .delete()
       .eq("id", message.id)
       .eq("user_id", message.user_id)
       .select();
      
-      //emojileri de sil
       const { error: reactionError } = await supabase
       .from("message_reactions")
       .delete()
@@ -57,7 +58,8 @@ const handleReply = (id: string) => {
       >
         Kopyala
       </button>
-      <button
+      {message.user_id === user?.id && (
+         <button
         onClick={() => {
           handleDelete();
           onClose();
@@ -66,6 +68,9 @@ const handleReply = (id: string) => {
       >
         Sil
       </button>
+      )}
+     
+
         <button
         onClick={() => {
           handleReply(message.id);

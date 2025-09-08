@@ -205,10 +205,12 @@ ref={chatRef}
           )}
 
           <div onClick={() => setSelectedMessage(msg)}
-            className={`relative p-2 sm:p-3 rounded-xl max-w-[90%] sm:max-w-[70%] lg:max-w-[50%] shadow-lg transition-all duration-200 break-words ${
+            className={`relative p-2 sm:p-3 rounded-xl shadow-lg transition-all 
+          max-w-[80%] sm:max-w-[70%] lg:max-w-[60%]
+    whitespace-pre-wrap break-words break-all    ${
               msg.user_id === userId
-                ? "bg-blue-500 text-white rounded-br-none"
-                : "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none"
+                ? "ml-auto bg-blue-500 text-white rounded-br-none"
+                : "mr-auto bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none"
             }`}
           >
 
@@ -287,7 +289,6 @@ ref={chatRef}
       </div>
               )}
 
-                {msg.user_id === userId && (
               <button
                 onClick={() => handleMessageClick(msg)}
                 className="absolute top-1 right-0 p-1 rounded-full hover:bg-blue-600/80 dark:hover:bg-gray-700 transition-colors"
@@ -302,7 +303,6 @@ ref={chatRef}
                     <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                 </svg>
               </button>
-            )}
 
             {isContextMenuOpen && selectedMessage === msg && (
               <MessageContextMenu
