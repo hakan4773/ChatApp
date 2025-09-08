@@ -186,9 +186,9 @@ ref={chatRef}
      return ( 
         <div
           key={msg.id}
-          className={`flex  ${
-            msg.user_id === userId ? "justify-end" : "items-start space-x-3"
-          }`}
+          className={`flex w-full ${
+            msg.user_id === userId ? "justify-end" : "justify-start"
+          } mb-2`}
           onMouseEnter={() => setHoveredMessageId(msg.id)}
           onMouseLeave={() => setHoveredMessageId(null)}
         >
@@ -201,39 +201,35 @@ ref={chatRef}
               width={40}
               height={40}
               alt="avatar"
-              className="rounded-full h-10 w-10 object-cover"
-            />
+              className="rounded-full h-8 w-8 sm:h-10 sm:w-10 object-cover mr-2"            />
           )}
 
           <div onClick={() => setSelectedMessage(msg)}
-            className={`relative lg:p-2 p-3 rounded-2xl min-w-[10rem] max-w-[80%]   shadow-md transition-all duration-200 ${
+            className={`relative p-2 sm:p-3 rounded-xl max-w-[90%] sm:max-w-[70%] lg:max-w-[50%] shadow-lg transition-all duration-200 break-words ${
               msg.user_id === userId
-                ? "bg-blue-500 text-white rounded-tr-none"
-                : "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-tl-none"
+                ? "bg-blue-500 text-white rounded-br-none"
+                : "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none"
             }`}
           >
-            {/* Reactions */}
+
                {hoveredMessageId === msg.id && (
-                    <ReactionPicker onSelect={(emoji) => handleReactionClick(msg.id, emoji)} />
+                    <ReactionPicker message={msg} onSelect={(emoji) => handleReactionClick(msg.id, emoji)} />
                   )}
-
-
-
-
              
               {replyTo && (
-                <div className=" border-l-3 mt-4 border-blue-400 pl-2 py-1 text-xs text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-r">
+                <div 
+                className="border-l-2 mt-1 sm:mt-2 border-blue-400 pl-1 sm:pl-2 py-0.5 sm:py-1 text-xs text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-600 rounded-r">
                   {replyTo.content || "Mesaj silindi"}
                 </div>
               )}
             {msg.location ? (
               <div
-                className="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md p-2 transition-colors"
+                className="flex items-center space-x-1 sm:space-x-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 rounded-md p-1 sm:p-2 transition-colors"
                 onClick={() =>
                   openGoogleMaps(msg.location!.lat, msg.location!.lng)
                 }
               >
-                <MapPinIcon className="w-5 h-5 text-red-500" />
+                <MapPinIcon className="w-4 sm:w-5 h-4 sm:h-5 text-red-500" />
                 <div>
                   <p className="font-medium text-sm">Konum Paylaşıldı</p>
                   <p className="text-xs text-gray-400">Haritada görüntülemek için tıkla</p>
@@ -243,30 +239,29 @@ ref={chatRef}
               <img
                 src={`https://kpdoboupcsggbkjhfacv.supabase.co/storage/v1/object/public/chat-images/${msg.image_url}`}
                 alt="Resim"
-               className="rounded-lg mt-4 w-48 h-48 max-w-full object-cover  shadow-sm border border-gray-200 dark:border-gray-700"              />
+               className="rounded-lg mt-1 sm:mt-2 w-full max-h-24 sm:max-h-40 object-cover shadow-md border border-gray-200 dark:border-gray-600" />
             ) : msg.file_url?.endsWith(".webm") ? (
                 <audio controls src={msg.file_url} />
              ) : msg.file_url ? (
             <a href={`https://kpdoboupcsggbkjhfacv.supabase.co/storage/v1/object/public/chat-files/${msg.file_url}`} target="_blank" rel="noopener noreferrer">
-              <DocumentIcon className="w-4 h-4 mr-1" />
-              {msg.content}
+              <DocumentIcon className="w-3 sm:w-4 h-3 sm:h-4 mr-0.5 sm:mr-1" />
+             <span className="text-sm break-words">{msg.content}</span>
             </a>
           ) : (
-              <p className="text-sm mt-2 leading-relaxed break-words">{msg.content}</p>
+              <p className="text-sm mt-1 sm:mt-2 leading-relaxed break-words">{msg.content}</p>
             )}
 
-        <div className="flex mb-2"> 
-            <p
-              className={`text-xs mt-1.5 ${
-                msg.user_id === userId ? "text-blue-100" : "text-gray-500 dark:text-gray-400"
-              }`}
-            >
-              {format(msg.created_at , "tr_TR")}
-            </p>
-          
+    <div className="flex justify-between space-x-1 sm:space-x-2 mt-0.5 sm:mt-1">
+        <p
+          className={`text-xs ${
+            msg.user_id === userId ? "text-blue-100" : "text-gray-500 dark:text-gray-400"
+          }`}
+        >
+          {format(msg.created_at, "tr_TR")}
+        </p>
             </div>
     {msg.reactions && msg.reactions.length > 0 && (
-          <div className="flex space-x-1 mt-1 justify-start">
+          <div className="flex space-x-0.5 sm:space-x-1">
             {Object.entries(
               msg.reactions.reduce((acc: Record<string, ReactionType[]>, r) => {
                 if (!acc[r.emoji]) acc[r.emoji] = [];
@@ -274,13 +269,17 @@ ref={chatRef}
                 return acc;
               }, {})
             ).map(([emoji, reactions]) => (
-              <div key={emoji} className={`relative inline-flex items-center rounded-full shadow-md ${ msg.user_id !== userId ? "bg-blue-500 dark:bg-blue-700 hover:bg-blue-200 dark:hover:bg-blue-600" : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"}`}>
-                <span className="text-sm   px-2 py-1  transition-colors">
-                  {emoji}
+              <div key={emoji} 
+                  className={`relative inline-flex items-center rounded-full shadow-md ${
+                    msg.user_id !== userId
+                      ? "bg-blue-500 dark:bg-blue-700 hover:bg-blue-200 dark:hover:bg-blue-600"
+                      : "bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500"
+                  }`}>
+              <span className="text-sm px-1 sm:px-1.5 py-0.5 sm:py-0.5 transition-colors">    
+                   {emoji}
                 </span>
                 {reactions.length > 1 && (
-                  <span className="absolute -right-1 -bottom-2 transform -translate-x-1/4 translate-y-1/4 bg-white dark:bg-gray-800 text-black dark:text-white text-xs rounded-full w-4 h-4 flex items-center justify-center shadow-lg">
-                    {reactions.length}
+        <span className="absolute -right-1 -bottom-1 transform -translate-x-1/4 translate-y-1/4 bg-white dark:bg-gray-800 text-black dark:text-white text-xs rounded-full w-4 h-4 flex items-center justify-center shadow-md">                    {reactions.length}
                   </span>
                 )}
               </div>
