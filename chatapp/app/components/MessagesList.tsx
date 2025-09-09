@@ -9,6 +9,7 @@ import ReactionPicker from "./ReactionPicker";
 import { realtimeClient, supabase } from "../lib/supabaseClient";
 import { RealtimeClient } from "@supabase/supabase-js";
 import { useUser } from "../context/UserContext";
+import { AudioPlayer } from "./AudioPlayer";
 interface MessagesListProps {
   messages: MessageType[];
   setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>;
@@ -57,6 +58,8 @@ useEffect(() => {
 
 
  useEffect(() => {
+      if (!session?.access_token) return; 
+
   async function fetchReactions() {
     try {
       const { data, error } = await supabase
@@ -242,7 +245,7 @@ ref={chatRef}
              
               {replyTo && (
                 <div 
-                className="border-l-2 mt-1 sm:mt-2 border-blue-400 pl-1 sm:pl-2 py-0.5 sm:py-1 text-xs text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-600 rounded-r">
+                className="border-l-2 mt-4 sm:mt-2 border-blue-400 pl-1 sm:pl-2 py-0.5 sm:py-1 text-xs text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-600 rounded-r">
                   {replyTo.content || "Mesaj silindi"}
                 </div>
               )}
@@ -263,16 +266,16 @@ ref={chatRef}
               <img
                 src={`https://kpdoboupcsggbkjhfacv.supabase.co/storage/v1/object/public/chat-images/${msg.image_url}`}
                 alt="Resim"
-               className="rounded-lg mt-1 sm:mt-2 w-full max-h-24 sm:max-h-40 object-cover shadow-md border border-gray-200 dark:border-gray-600" />
+               className="rounded-lg mt-4 sm:mt-2 w-full max-h-24 sm:max-h-40 object-cover shadow-md border border-gray-200 dark:border-gray-600" />
             ) : msg.file_url?.endsWith(".webm") ? (
-                <audio controls src={msg.file_url} />
+               <AudioPlayer msg={msg} userId={userId} />
              ) : msg.file_url ? (
             <a href={`https://kpdoboupcsggbkjhfacv.supabase.co/storage/v1/object/public/chat-files/${msg.file_url}`} target="_blank" rel="noopener noreferrer">
               <DocumentIcon className="w-3 sm:w-4 h-3 sm:h-4 mr-0.5 sm:mr-1" />
              <span className="text-sm break-words">{msg.content}</span>
             </a>
           ) : (
-              <p className="text-sm mt-1 sm:mt-2 leading-relaxed break-words">{msg.content}</p>
+              <p className="text-sm mt-2 sm:mt-2 leading-relaxed break-words">{msg.content}</p>
             )}
 
     <div className="flex justify-between space-x-1 sm:space-x-2 mt-0.5 sm:mt-1">
@@ -318,7 +321,7 @@ ref={chatRef}
               >
                  <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 text-gray-200 dark:text-gray-300"
+                    className={`"h-4 w-4 text-gray-200 ${msg.user_id !== userId ? "text-gray-600 dark:text-gray-400" : "dark:text-gray-300"} dark:text-gray-300"`}
                     viewBox="0 0 20 20"
                     fill="currentColor"
                   >
