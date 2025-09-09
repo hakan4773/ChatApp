@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { supabase } from "@/app/lib/supabaseClient";
+import { realtimeClient, supabase } from "@/app/lib/supabaseClient";
 import { MessageType } from "@/types/message";
 import { useUser } from "../context/UserContext"; 
 
@@ -51,7 +51,7 @@ export const useChatChannel = ({
         return;
       }
 
-      const channel = supabase
+      const channel = realtimeClient
         .channel(`chat-${chatId}-${Date.now()}`)
         .on(
           "postgres_changes",

@@ -2,11 +2,13 @@
 import { format } from "timeago.js";
 import Image from "next/image";
 import { DocumentIcon, MapPinIcon } from "@heroicons/react/24/outline";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import MessageContextMenu from "./MessageContextMenu";
 import {  MessageType, ReactionType } from "@/types/message";
 import ReactionPicker from "./ReactionPicker";
-import { supabase } from "../lib/supabaseClient";
+import { realtimeClient, supabase } from "../lib/supabaseClient";
+import { RealtimeClient } from "@supabase/supabase-js";
+import { useUser } from "../context/UserContext";
 interface MessagesListProps {
   messages: MessageType[];
   setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>;
@@ -25,6 +27,7 @@ const MessagesList: React.FC<MessagesListProps> = ({
   chatUsers,
   setReplyingTo
 }) => {
+  const {  session } = useUser();
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<MessageType | null>(null);
   const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
@@ -50,6 +53,27 @@ useEffect(() => {
   }
   prevMessageCount.current = messages.length;
 }, [messages]);
+useEffect(() => {
+  if (!session?.access_token) return; 
+
+  const reactionsChannel = realtimeClient
+    .channel("message_reactions")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "message_reactions" },
+      (payload) => {
+        console.log("reaction payload", payload);
+      }
+    )
+    .subscribe((status) => {
+      console.log("Reactions channel status:", status);
+    });
+
+  return () => {
+    supabase.removeChannel(reactionsChannel);
+  };
+}, [session?.access_token]);
+
 
  useEffect(() => {
   async function fetchReactions() {

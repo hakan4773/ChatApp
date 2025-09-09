@@ -112,6 +112,7 @@ onSubmit: async (values, { setSubmitting }) => {
                 value={formik.values.password}
                 onChange={formik.handleChange}
                 required
+                autoComplete="current-password"
                 className="mt-1 block w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 placeholder="••••••••"
               />

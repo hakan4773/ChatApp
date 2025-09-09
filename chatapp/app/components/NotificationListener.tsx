@@ -1,20 +1,22 @@
 "use client";
 import React, { useEffect, useRef } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { realtimeClient, supabase } from "../lib/supabaseClient";
 import { toast } from "react-toastify"; 
 import { Notification } from "@/types/notification";
 import { usePathname } from "next/navigation";
+import { useUser } from "../context/UserContext";
 
 
 const NotificationListener: React.FC<{ currentUserId: string }> = ({ currentUserId }) => {
+  const { session } = useUser();
   const channelRef = useRef<any>(null);
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!currentUserId) return;
+    if (!session?.access_token) return; 
     if (channelRef.current) return; 
 
-    channelRef.current = supabase
+    channelRef.current = realtimeClient
       .channel("notifications")
       .on(
         "postgres_changes",

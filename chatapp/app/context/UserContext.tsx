@@ -3,8 +3,6 @@ import { User, Session } from "@supabase/supabase-js";
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/app/lib/supabaseClient"; 
-
 type UserContextType = {
   user: User | null;
   loading: boolean;
@@ -23,7 +21,7 @@ export const UserProvider = ({
   children: ReactNode;
   serverSession?: Session | null;
 }) => {
-  const supabaseAuth = createClientComponentClient();
+  const supabase = createClientComponentClient();
   const router = useRouter(); 
   const [user, setUser] = useState<User | null>(serverSession?.user ?? null);
   const [session, setSession] = useState<Session | null>(serverSession);
@@ -32,11 +30,11 @@ export const UserProvider = ({
   const signOut = async () => {
     try {
       setLoading(true);
-      const { error } = await supabaseAuth.auth.signOut();
+      const { error } = await supabase.auth.signOut();
       if (error) throw error;
       setUser(null);
       setSession(null);
-      supabase.realtime.setAuth(null); 
+      //supabase.realtime.setAuth(null); 
       router.push("/login");
     } catch (error: any) {
       console.error('Error signing out:', error.message);
@@ -46,7 +44,7 @@ export const UserProvider = ({
   };
 
   const refreshUser = async () => {
-    const { data, error } = await supabaseAuth.auth.getUser();
+    const { data, error } = await supabase.auth.getUser();
     if (!error && data?.user) {
       setUser({ ...data.user });
     }
@@ -54,7 +52,7 @@ export const UserProvider = ({
 
   useEffect(() => {
     const initSession = async () => {
-      const { data: { session } } = await supabaseAuth.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
       setSession(session);
       setLoading(false);
@@ -66,7 +64,7 @@ export const UserProvider = ({
 
     initSession();
 
-    const { data: authListener } = supabaseAuth.auth.onAuthStateChange(
+    const { data: authListener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setUser(session?.user ?? null);
         setSession(session);
