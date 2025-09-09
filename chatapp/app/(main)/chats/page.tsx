@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { supabase } from "@/app/lib/supabaseClient";
+import { realtimeClient, supabase } from "@/app/lib/supabaseClient";
 import { useUser } from "@/app/context/UserContext";
 import { useRouter } from "next/navigation";
 import { FiMessageSquare, FiUsers } from "react-icons/fi";
@@ -147,7 +147,7 @@ const ChatList = () => {
 
     fetchChats();
 
-    const subscription = supabase
+    const subscription = realtimeClient
       .channel("chat_updates")
       .on(
         "postgres_changes",
@@ -161,7 +161,7 @@ const ChatList = () => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(subscription);
+      realtimeClient.removeChannel(subscription);
     };
   }, [user?.id]);
    

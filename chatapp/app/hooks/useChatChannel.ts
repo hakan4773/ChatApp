@@ -28,7 +28,7 @@ export const useChatChannel = ({
 
   const cleanupChannel = useCallback(() => {
     if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
+      realtimeClient.removeChannel(channelRef.current);
       channelRef.current = null;
     }
     if (reconnectTimeoutRef.current) {

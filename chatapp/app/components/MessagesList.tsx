@@ -53,26 +53,7 @@ useEffect(() => {
   }
   prevMessageCount.current = messages.length;
 }, [messages]);
-useEffect(() => {
-  if (!session?.access_token) return; 
 
-  const reactionsChannel = realtimeClient
-    .channel("message_reactions")
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "message_reactions" },
-      (payload) => {
-        console.log("reaction payload", payload);
-      }
-    )
-    .subscribe((status) => {
-      console.log("Reactions channel status:", status);
-    });
-
-  return () => {
-    supabase.removeChannel(reactionsChannel);
-  };
-}, [session?.access_token]);
 
 
  useEffect(() => {
@@ -105,6 +86,23 @@ useEffect(() => {
     }
   }
   fetchReactions();
+
+  const reactionsChannel = realtimeClient
+    .channel("message_reactions")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "message_reactions" },
+      () => fetchReactions()
+    )
+    .subscribe((status) => {
+      console.log("Reactions channel status:", status);
+    });
+
+  return () => {
+    realtimeClient.removeChannel(reactionsChannel);
+  };
+
+
 }, []);
 
   const handleReactionClick = async (messageId: string, emoji: string) => {

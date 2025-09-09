@@ -45,7 +45,7 @@ const NotificationListener: React.FC<{ currentUserId: string }> = ({ currentUser
 
     return () => {
       if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
+        realtimeClient.removeChannel(channelRef.current);
         channelRef.current = null;
       }
     };
