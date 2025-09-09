@@ -97,13 +97,14 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       className="bg-gradient-to-r from-blue-600 to-teal-500 dark:from-gray-800 dark:to-gray-700 text-white p-4 flex items-center justify-between shadow-md relative"
       onClick={handleOverlayClick}
     >
-   <button
+
+        <div className="flex items-center space-x-4">
+             <button
       onClick={() => router.back()}
       className="p-2 block  md:hidden rounded-full hover:bg-blue-500/30 dark:hover:bg-gray-700 transition"
     >
       <ArrowLeftIcon className="w-6 h-6 text-white dark:text-gray-200" />
     </button>
-        <div className="flex items-center space-x-4">
         <Image
           src={chatInfo?.users[0]?.avatar_url || "/5.jpg"}
           width={48}
