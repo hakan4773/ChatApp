@@ -7,24 +7,11 @@ import { supabase } from "../lib/supabaseClient";
 import { useUser } from "../context/UserContext";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { ChatInfoType, MembersType } from "@/types/message";
 
 interface ChatHeaderProps {
-  chatInfo: {
-    id: string;
-    name: string | null;
-    users: {
-      id: string;
-      name: string | null;
-      avatar_url: string | null;
-    }[];
-  } | null;
-  members: {
-    id: string;
-    name: string;
-    avatar_url: string;
-    email: string;  
-    created_at: string;
-  }[];
+  chatInfo: ChatInfoType;
+  members:MembersType[];
   openSettings: boolean;
   contacts:FriendsProps[];
   handleSettings: () => void;
@@ -37,7 +24,6 @@ interface ChatHeaderProps {
 const ChatHeader: React.FC<ChatHeaderProps> = ({
   chatInfo,
   members,
-  contacts,
   openSettings,
   setOpenSettings,
   handleSettings,
@@ -73,10 +59,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
  useEffect(() => {
   const fetchOnlineStatus = async () => {
     if (!user || !chatInfo) return;
-
     const otherUser = chatInfo.users.find(u => u.id !== user.id);
-
-
     if (!otherUser) return;
 
     const { data, error } = await supabase
@@ -89,11 +72,12 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     const lastSeen = new Date(data.last_seen + "Z"); 
     const now = new Date();
     const diffMs = now.getTime() - lastSeen.getTime();
-    console.log(diffMs)
     setIsOnline(diffMs < 60_000); 
-    console.log("Other user last seen:", lastSeen, "Diff ms:", diffMs);
-
     }
+    if (error) {
+      console.error("Online durumu alınamadı:", error.message);
+    }
+
   };
 
   fetchOnlineStatus();
@@ -102,7 +86,6 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   return () => clearInterval(interval);
 }, [chatInfo, user]);
 
-console.log(isOnline)
 
   const handleToggleMute = async () => {
     if (!chatInfo || !user) return;
@@ -157,9 +140,20 @@ console.log(isOnline)
                 </p>
               </>
             ) : (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {isOnline ? "Çevrimiçi" : "Çevrimdışı"}
-              </p>
+              <div className="flex items-center space-x-1">
+                <span
+                  className={`inline-block w-2.5 h-2.5 rounded-full ${
+                    isOnline ? "bg-green-500" : "bg-gray-400"
+                  }`}
+                ></span>
+                <p
+                  className={`text-sm ${
+                    isOnline ? "text-green-200" : "text-gray-500 dark:text-gray-400"
+                  }`}
+                >
+                  {isOnline ? "Çevrimiçi" : "Çevrimdışı"}
+                </p>
+            </div>
             )}
           </div>
         </div>
