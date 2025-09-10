@@ -31,10 +31,9 @@ export const UserProvider = ({
     try {
       setLoading(true);
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
       setUser(null);
       setSession(null);
-      //supabase.realtime.setAuth(null); 
+      supabase.realtime.setAuth(null); 
       router.push("/login");
     } catch (error: any) {
       console.error('Error signing out:', error.message);

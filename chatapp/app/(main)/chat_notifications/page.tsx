@@ -129,26 +129,31 @@ setUnreadNotifications((filteredNotifications ?? []).filter((n) => !n.is_read).l
             <div
               key={index}
               className="bg-white dark:bg-gray-700 p-4 rounded-md shadow mb-4 flex flex-col"
-            >
-              <div className="flex  justify-between items-start">
-                <div>
+            > 
+              <div className="flex  justify-between items-start gap-4">
+                <div className="flex-1 min-w-0">
                   <h2 className="text-lg font-semibold dark:text-white">
                     {notification.title}
                   </h2>
-                  <p className="text-gray-600 dark:text-gray-300">
+                  <p className="text-gray-600 dark:text-gray-300 break-words  leading-relaxed ">
                     {notification.message}
                   </p>
                 </div>
-                <div className="space-x-4">
-                  <button onClick={() => readNotification(notification.id)} 
-                  className="mt-2 ml-auto px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors">
-                  {notification.is_read ? "Okundu" : "Okundu olarak işaretle"}
-                  </button>
-                   <button onClick={() => deleteNotification(notification.id)}
-                  className="mt-2 ml-auto px-3 py-1 bg-red-500 text-white text-sm rounded-full hover:bg-red-600 transition-colors">
-                  Sil
-                  </button>
-                </div>
+                <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 mt-2">
+  <button
+    onClick={() => readNotification(notification.id)}
+    className="flex-1 min-w-[120px] px-3 py-1 bg-blue-500 text-white text-sm rounded-full hover:bg-blue-600 transition-colors"
+  >
+    {notification.is_read ? "Okundu" : "Okundu olarak işaretle"}
+  </button>
+  <button
+    onClick={() => deleteNotification(notification.id)}
+    className="flex-1 min-w-[120px] px-3 py-1 bg-red-500 text-white text-sm rounded-full hover:bg-red-600 transition-colors"
+  >
+    Sil
+  </button>
+</div>
+
               </div>
               <span className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                 {new Date(notification.created_at).toLocaleString()}

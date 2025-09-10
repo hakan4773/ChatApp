@@ -1,18 +1,15 @@
 "use client";
 import Link from "next/link";
-import React, { useState } from "react";
+import React from "react";
 import {
-  UserCircleIcon,
   CogIcon,
   UsersIcon,
-  QuestionMarkCircleIcon,
   BellIcon,
   ArrowLeftOnRectangleIcon,
   PuzzlePieceIcon,
   Bars3Icon,
 } from "@heroicons/react/24/outline";
 import { useUser } from "../context/UserContext";
-import { useRouter } from "next/navigation";
 
 type LeftBarProps = {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -20,12 +17,10 @@ type LeftBarProps = {
 };
 
 function LeftBar({ setIsOpen, isOpen }: LeftBarProps) {
-  const { user, signOut, loading } = useUser();
-  const router = useRouter();
+  const { user, signOut } = useUser();
 
   const handleSignOut = () => {
     signOut();
-    router.push("/login");
   };
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -37,32 +32,27 @@ function LeftBar({ setIsOpen, isOpen }: LeftBarProps) {
         isOpen ? "w-44" : "w-16"
       } bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-md transition-all duration-300 flex flex-col justify-between z-50`}
     >
-      {/* Üst Kısım */}
       <div>
-        {/* Toggle Butonu */}
         <div className="flex justify-end p-4">
           <button onClick={toggleMenu}>
             <Bars3Icon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
           </button>
         </div>
 
-        {/* Menü Elemanları */}
         <nav className="flex flex-col gap-2 px-2 ">
            <MenuLink
-  href="/"
-  icon={
-    <img
-      src={user?.user_metadata.avatar_url || "/5.jpg"} alt="Profile" className="w-6 h-6 rounded-full border-2 border-indigo-500 dark:border-indigo-600" />} label="Profil" isOpen={isOpen}
-/>
+              href="/"
+              icon={
+                <img
+                src={user?.user_metadata.avatar_url || "/5.jpg"} alt="Profile" className="w-6 h-6 rounded-full border-2 border-indigo-500 dark:border-indigo-600" />} label="Profil" isOpen={isOpen}
+                 />
           <MenuLink href="/chats" icon={<UsersIcon className="w-6 h-6" />} label="Sohbetler" isOpen={isOpen} />
           <MenuLink href="/games" icon={<PuzzlePieceIcon className="w-6 h-6" />} label="Oyunlar" isOpen={isOpen} />
           <MenuLink href="/settingsPage" icon={<CogIcon className="w-6 h-6" />} label="Ayarlar" isOpen={isOpen} />
-          {/* <MenuLink href="/help" icon={<QuestionMarkCircleIcon className="w-6 h-6" />} label="Yardım" isOpen={isOpen} /> */}
           <MenuLink href="/chat_notifications" icon={<BellIcon className="w-6 h-6" />} label="Bildirimler" isOpen={isOpen} />
         </nav>
       </div>
 
-      {/* Alt Çıkış Butonu */}
       <div className="px-2 mb-4 space-y-2">
     
         <button
@@ -77,7 +67,6 @@ function LeftBar({ setIsOpen, isOpen }: LeftBarProps) {
   );
 }
 
-// Menü Link Bileşeni
 type MenuLinkProps = {
   href: string;
   icon: React.ReactNode;

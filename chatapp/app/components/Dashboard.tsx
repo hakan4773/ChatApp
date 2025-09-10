@@ -21,18 +21,16 @@ const handleCreateChat=async(selectedUsers:string [])=>{
     console.error("Kullanıcı kimliği bulunamadı.");
       return;
   }
-const currentUserId = user.id; //mevcut kullanıcı id'si 
-const allUserIds = [currentUserId, ...selectedUsers];//eklenecek kullanıcıların listesi
+const currentUserId = user.id; 
+const allUserIds = [currentUserId, ...selectedUsers];
 
 try {
-      // Mevcut sohbet kontrolü
       const { data: chatMembers, error: fetchError } = await supabase
         .from("chat_members")
         .select("chat_id, user_id");
 
       if (fetchError) throw fetchError;
 
-      // Aynı üyelerden oluşan bir sohbet var mı kontrol et
       let chatId: string | undefined;
       if (chatMembers && chatMembers.length > 0) {
         const chatGroups: { [key: string]: string[] } = {};
@@ -43,7 +41,6 @@ try {
           chatGroups[member.chat_id].push(member.user_id);
         });
 
-        // Tüm kullanıcıları içeren sohbeti bul
         const foundChat = Object.entries(chatGroups).find(
           ([, members]) =>
             members.length === allUserIds.length &&
@@ -55,7 +52,6 @@ try {
       }
   
       if (!chatId) {
-        // Yeni sohbet oluştur
         
         const { data: newChat, error: insertChatError } = await supabase
           .from("chats")
@@ -69,7 +65,6 @@ try {
 
         chatId = newChat.id;
 
-        // chat_members'a kayıtlar ekle
         const membersToInsert = allUserIds.map((userId) => ({
           chat_id: chatId,
           user_id: userId,
@@ -83,7 +78,6 @@ try {
         if (insertMembersError) throw insertMembersError;
       }
 
-      // Sohbet sayfasına yönlendir
       if (chatId) {
         router.push(`/chats/${chatId}`);
       }
@@ -93,13 +87,11 @@ try {
     }
   };
   
-  //İstatistiksel verileri almak için gerekli fonksiyon
 useEffect(() => {
   const fetchChatStats = async () => {
     if (!user?.id) return;
 
     try {
-      // Aktif sohbet sayısını al
       const { data: activeChats, error: activeChatsError } = await supabase
         .from("chat_members")
         .select("chat_id")
@@ -108,19 +100,16 @@ useEffect(() => {
       if (activeChatsError) throw activeChatsError;
         setActiveChats(activeChats.length);
         
-      // Paylaşılan dosya ,image ve video sayısını al
 
       const { data: sharedFiles, error: sharedFilesError } = await supabase
         .from("messages")
         .select("id,file_url,image_url", { count: "exact" })
         .eq("user_id", user.id)
         .or("file_url.not.is.null,image_url.not.is.null");
-        console.log(sharedFiles)
 
       if (sharedFilesError) throw sharedFilesError;
          setSharedFiles(sharedFiles.length || 0);
 
-       // Yeni bildirim sayısını al
        const { data: notifications, error: notificationsError } = await supabase
          .from("notifications")
          .select("*")
@@ -146,10 +135,8 @@ const handleOpen=()=>{
     <div className="min-h-screen  flex relative bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
       <div className="flex-1 flex flex-col">
 
-        {/* Dashboard İçeriği */}
         <div className="flex-1 p-6  ">
           <div className="max-w-4xl mx-auto">
-            {/* Hoş Geldin Mesajı */}
             <div className="mb-8 text-center">
               <h2 className="text-3xl font-semibold ">Merhaba, {user?.user_metadata.name}!</h2>
               <p className="text-gray-500  mt-2">
@@ -157,9 +144,7 @@ const handleOpen=()=>{
               </p>
             </div>
 
-            {/* Hızlı Erişim Kartları */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 ">
-              {/* Kart 1: Yeni Sohbet */}
               <button
                 className="p-6  bg-white  dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl shadow-sm hover:shadow-md transition "
                 onClick={handleOpen}
@@ -176,7 +161,6 @@ const handleOpen=()=>{
                 <Users setOpenUsers={setOpenUsers} onCreateChat={handleCreateChat} name={name} setName={setName} />
 
                 }
-     {/* Kart 2: Notlarım */}
 
         <Link
           href="/notes"
@@ -189,7 +173,6 @@ const handleOpen=()=>{
           </p>
          </Link>
 
-              {/* Kart 3: Profili Görüntüle */}
               <Link
                 href="/profiles"
                 className="p-6 bg-white rounded-xl dark:bg-gray-800 dark:hover:bg-gray-700 shadow-sm hover:shadow-md transition "
@@ -202,7 +185,6 @@ const handleOpen=()=>{
               </Link>
             </div>
 
-            {/* Özet Alanı */}
             <div className="bg-white dark:bg-gray-800  rounded-xl shadow-sm p-6">
               <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">İstatistikler</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
