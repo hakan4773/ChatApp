@@ -134,8 +134,8 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           <div className="flex items-center">
             {isGroupChat ? (
               <>
-                <UserGroupIcon className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-1" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <UserGroupIcon className="w-4 h-4 text-gray-200 dark:text-gray-400 mr-1" />
+                <p className="text-sm text-gray-200 dark:text-gray-400">
                   {members.length} üye
                 </p>
               </>
@@ -148,7 +148,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                 ></span>
                 <p
                   className={`text-sm ${
-                    isOnline ? "text-green-200" : "text-gray-500 dark:text-gray-400"
+                    isOnline ? "text-green-200" : "text-gray-200 dark:text-gray-400"
                   }`}
                 >
                   {isOnline ? "Çevrimiçi" : "Çevrimdışı"}

@@ -4,9 +4,8 @@ interface ChatMembersType{
     userId:string
 }
 export  async function leaveChat({chatId,userId}:ChatMembersType) : Promise<boolean>{
-  //mesajları sil
 await supabase.from("messages").delete().eq("chat_id", chatId);
-//sohbeti sil
+await supabase.from("message_reactions").delete().eq("chat_id", chatId).eq("user_id", userId);
   const { error } = await supabase
     .from("chat_members")
     .delete()
