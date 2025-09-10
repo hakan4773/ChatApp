@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { ChatInfoType, MembersType } from "@/types/message";
 
 interface ChatHeaderProps {
-  chatInfo: ChatInfoType;
+  chatInfo: ChatInfoType | null;
   members:MembersType[];
   openSettings: boolean;
   contacts:FriendsProps[];

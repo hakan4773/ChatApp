@@ -43,11 +43,7 @@ const { messages, setMessages } = useChatChannel({
   const [hasFetched, setHasFetched] = useState(false);
 
   const blockedRef = useRef({ blockedByMe, blockedMe });
-  useEffect(() => {
-    if (!session?.access_token) {
-      console.warn("No auth token available");
-    }
-   }, [session]);
+
   useEffect(() => {
     blockedRef.current = { blockedByMe, blockedMe };
   }, [blockedByMe, blockedMe]);
@@ -135,7 +131,6 @@ useEffect(() => {
     return blockedByMe.some(c => c.contact_id === memberId) || blockedMe.some(c => c.owner_id === memberId);
   };
 
-  //mesaj gönderme
   const sendMessage = async () => {
      if (!newMessage.trim() || !user) return;
 
@@ -205,7 +200,7 @@ await notifyUsers({
 
 
   };
-  //resim
+
   const handleImageUpload = async (file: File) => {
     if (!user) return;
        if (isDirectChat && members.some(m => isBlockedBetween(m.id))) {
@@ -253,7 +248,7 @@ await notifyUsers({
       toast.error("Resim yüklenirken hata oluştu");
     }
   };
-  //dosya yükleme
+
   const handleFileUpload = async (file: File) => {
     if (!user) return;
        if (isDirectChat && members.some(m => isBlockedBetween(m.id))) {
@@ -297,7 +292,7 @@ await notifyUsers({
       toast.error("Dosya yüklenirken hata oluştu");
     }
   };
-  //konum gönderme
+
   const handleSendLocation = async(location: { lat: number; lng: number }) => {
     if (!user || !chatId) return;
        if (isDirectChat && members.some(m => isBlockedBetween(m.id))) {
@@ -333,11 +328,10 @@ await notifyUsers({
       });
   };
 
-  //Ayarları göster
   const handleSettings = () => {
     setOpenSettings(!openSettings);
   };
-  //Gruptan çık
+
   const handleLeaveGroup = async () => {
     if (!user || !chatId) return;
 
@@ -349,6 +343,7 @@ await notifyUsers({
       alert("Gruptan çıkılamadı, lütfen tekrar deneyin.");
     }
   };
+
   const sendVoiceMessage=async(audioURL:string)=>{
     const {data,error}=await supabase.from("messages").insert({
       chat_id: chatId,
@@ -392,14 +387,13 @@ await notifyUsers({
   return (
     <div className="h-screen flex flex-col bg-blue-100 dark:bg-blue-800  ">
     
-      {/* Bilgi Modalı */}
       <InformationModal
         isOpen={showInfoModal}
         onClose={() => setShowInfoModal(false)}
         chatName={chatInfo?.name || null}
         members={members}
       />
-      {/* Header */}
+
       <ChatHeader
         chatInfo={chatInfo}
         members={members}
@@ -412,7 +406,6 @@ await notifyUsers({
         setShowInfoModal={setShowInfoModal}
       />
 
-      {/* Mesaj listesi*/}
       <MessagesList
         messages={messages}
         userId={user?.id}
@@ -421,7 +414,6 @@ await notifyUsers({
         setMessages={setMessages}
       />
 
-      {/* Input Area */}
       <MessageInput
         onSendLocation={handleSendLocation}
         newMessage={newMessage}
