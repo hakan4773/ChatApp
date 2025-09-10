@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import  "./globals.css"
 import { ThemeProvider } from "./context/ThemaContext";
 import NotificationListener from "./components/NotificationListener";
+import OnlineUpdater from "./components/OnlineUpdater";
 
 function AppContent({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
@@ -21,10 +22,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" >
       <body>
        <ThemeProvider>    
-        <UserProvider>
+         <UserProvider>
+          <OnlineUpdater />
           <ToastContainer />
-       <AppContent>{children} </AppContent> 
-        </UserProvider>
+          <AppContent>
+          {children} 
+          </AppContent> 
+          </UserProvider>
        </ThemeProvider>
       </body>
     </html>

@@ -46,6 +46,7 @@ onSubmit: async (values, { setSubmitting }) => {
                   name: userData?.user?.user_metadata?.name || null,
                   created_at: new Date().toISOString(),
                   updated_at: new Date().toISOString(),
+                  last_seen: new Date().toISOString(),
                 });
 
           router.push("/"); 

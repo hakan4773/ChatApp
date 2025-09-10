@@ -70,6 +70,40 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     fetchMuteStatus();
   }, [chatInfo, user]);
 
+ useEffect(() => {
+  const fetchOnlineStatus = async () => {
+    if (!user || !chatInfo) return;
+
+    const otherUser = chatInfo.users.find(u => u.id !== user.id);
+
+
+    if (!otherUser) return;
+
+    const { data, error } = await supabase
+      .from("users")
+      .select("last_seen")
+      .eq("id", otherUser.id)
+      .single();
+
+    if (!error && data?.last_seen) {
+    const lastSeen = new Date(data.last_seen + "Z"); 
+    const now = new Date();
+    const diffMs = now.getTime() - lastSeen.getTime();
+    console.log(diffMs)
+    setIsOnline(diffMs < 60_000); 
+    console.log("Other user last seen:", lastSeen, "Diff ms:", diffMs);
+
+    }
+  };
+
+  fetchOnlineStatus();
+  const interval = setInterval(fetchOnlineStatus, 30_000);
+
+  return () => clearInterval(interval);
+}, [chatInfo, user]);
+
+console.log(isOnline)
+
   const handleToggleMute = async () => {
     if (!chatInfo || !user) return;
 
